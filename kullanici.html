@@ -1275,7 +1275,7 @@ function sendBericht() {
   // Mail link — opens Outlook app on phone
   const to = 'info@ideal-hannover.de';
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailtoUrl;
+  window.open(mailtoUrl, '_self');
   closeBericht();
 }
 
