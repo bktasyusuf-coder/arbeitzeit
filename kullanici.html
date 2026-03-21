@@ -137,7 +137,6 @@
   .diff-pos { color:var(--green); font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
   .diff-neg { color:var(--red); font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
 
-  /* JAHRESÜBERSICHT */
   .year-summary-view { padding:12px 16px 100px; }
   .ys-header { font-size:22px; font-weight:800; margin-bottom:16px; }
   .ys-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
@@ -325,7 +324,7 @@
   </div>
 </div>
 
-<!-- Daten Modal (Export + Import) -->
+<!-- Daten Modal -->
 <div class="modal-overlay" id="datenModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -345,18 +344,8 @@
         <span style="font-size:11px;color:var(--muted);font-family:'Syne',sans-serif">Daten laden</span>
       </button>
     </div>
-    <div style="margin-top:12px">
-      <button onclick="exportAndSave()" style="width:100%;background:rgba(124,106,247,0.1);border:1px solid var(--accent);border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px">
-        <span style="font-size:28px">📲</span>
-        <div style="text-align:left">
-          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent2)">Speichern</div>
-          <div style="font-size:11px;color:var(--muted);font-family:'Syne',sans-serif;margin-top:2px">Backup automatisch herunterladen</div>
-        </div>
-      </button>
-    </div>
   </div>
 </div>
-
 
 <!-- Notdienst Modal -->
 <div class="modal-overlay" id="notdienstModal">
@@ -416,9 +405,9 @@
       <textarea class="form-input" id="brErgebnis" rows="5" placeholder="Laut telefonischer Auskunft wurde...&#10;Nach der Reparatur trat erneut...&#10;Vor Ort wurde festgestellt..." style="resize:none;line-height:1.5;font-family:'Syne',sans-serif;font-size:13px"></textarea>
     </div>
     <button onclick="sendBericht()" style="width:100%;padding:16px;background:#ea4335;border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px">
-      <span style="font-size:20px">📧</span> Mit senden
+      <span style="font-size:20px">📧</span> Per Mail senden
     </button>
-    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">📎 Fotos bitte manuell in anhängen</div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">📎 Fotos bitte manuell anhängen</div>
     <button class="cancel-btn" onclick="closeBericht()">Abbrechen</button>
   </div>
 </div>
@@ -478,15 +467,13 @@ const SUPABASE_URL = 'https://yubefgtlicwwsjryqdrj.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1YmVmZ3RsaWN3d3NqcnlxZHJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMzc2MDUsImV4cCI6MjA4OTYxMzYwNX0.7cyRLQxR1hzZt6HAOpwsbwvYohwIkl60UuKc8I_5MyY';
 const SB_TABLE = 'arbeitszeit';
 
-// User ID from URL: ?user=yusuf → hash to number
 function getUserId() {
   const params = new URLSearchParams(window.location.search);
   const user = params.get('user') || 'default';
-  // Simple hash to number
   let hash = 0;
   for (let i = 0; i < user.length; i++) {
     hash = ((hash << 5) - hash) + user.charCodeAt(i);
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
   return Math.abs(hash) + 1;
 }
@@ -514,12 +501,7 @@ async function sbSave(data) {
     const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' };
     const resp = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, { method: 'POST', headers, body });
     console.log('SB: Response status:', resp.status);
-    if (!resp.ok) {
-      const err = await resp.text();
-      console.error('SB: Error response:', err);
-      showSync('error', '⚠️ Sync-Fehler');
-      return;
-    }
+    if (!resp.ok) { console.error('SB: Error'); showSync('error', '⚠️ Sync-Fehler'); return; }
     showSync('synced', '☁️ Synchronisiert ✓');
   } catch(e) { console.error('SB save:', e); showSync('error', '⚠️ Offline'); }
 }
@@ -531,12 +513,7 @@ function showSync(cls, text) {
 
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const DAYS_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-const STANDARD_MONTHLY_HOURS = 174 * 60; // 174 saat = dakika
 
-// Hannover 2026 Resmi Tatilleri
-
-
-// Yıl verilerini runtime'da üret
 function calcEaster(year) {
   const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4;
   const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
@@ -545,7 +522,6 @@ function calcEaster(year) {
   const month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
   return new Date(year,month-1,day);
 }
-
 function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function fmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
@@ -584,43 +560,29 @@ function buildYearData(year) {
   return {feiertage, days, times};
 }
 
-const YEAR_DATA = {
-  2026: buildYearData(2026),
-  2027: buildYearData(2027),
-  2028: buildYearData(2028),
-};
+const YEAR_DATA = { 2026: buildYearData(2026), 2027: buildYearData(2027), 2028: buildYearData(2028) };
 
-// Standart saatler
 const STANDARD_TIMES = {
-  1: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'}, // Montag
-  2: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'}, // Dienstag
-  3: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'}, // Mittwoch
-  4: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'}, // Donnerstag
-  5: {start:'07:45', pause:'00:30', end:'14:30', hours:'06:15'}, // Freitag
+  1: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
+  2: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
+  3: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
+  4: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
+  5: {start:'07:45', pause:'00:30', end:'14:30', hours:'06:15'},
 };
-
-// Urlaub / Krank saatleri
 const URLAUB_KRANK_TIMES = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'};
 
 function getStandardTimes(dateStr) {
-  const d = new Date(dateStr);
-  const dow = d.getDay();
+  const d = new Date(dateStr); const dow = d.getDay();
   const year = parseInt(dateStr.split('-')[0]);
   const yd = YEAR_DATA[year] || {};
   if (yd.feiertage && yd.feiertage[dateStr]) return URLAUB_KRANK_TIMES;
   return STANDARD_TIMES[dow] || null;
 }
-
 function getStatusDefaultTimes(status, dateStr) {
   if (status === 'Urlaub' || status === 'Krank' || status === 'Feiertag') return URLAUB_KRANK_TIMES;
   if (status === 'Notdienst') return {start:'', pause:'', end:'', hours:''};
   return getStandardTimes(dateStr);
 }
-
-
-
-
-
 
 const LS_PREFIX = 'az_' + CURRENT_USER + '_';
 let userData = JSON.parse(localStorage.getItem(LS_PREFIX + 'data')||'{}');
@@ -647,20 +609,15 @@ function getDayStatus(dateStr) {
   const yd = YEAR_DATA[year] || {};
   return userData[dateStr] || (yd.days && yd.days[dateStr]) || ((yd.feiertage && yd.feiertage[dateStr]) ? 'Feiertag' : null);
 }
-
 function getDayTimes(dateStr) {
   const year = parseInt(dateStr.split('-')[0]);
   const yd = YEAR_DATA[year] || {};
   return userTimes[dateStr] || (yd.times && yd.times[dateStr]) || getStandardTimes(dateStr) || null;
 }
-
 function getDaysInMonth(y, m) { return new Date(y, m+1, 0).getDate(); }
 function getDayOfWeek(y, m, d) { return new Date(y, m, d).getDay(); }
 function isWeekend(dow) { return dow === 0 || dow === 6; }
-function isToday(y, m, d) {
-  const t = new Date();
-  return t.getFullYear()===y && t.getMonth()===m && t.getDate()===d;
-}
+function isToday(y, m, d) { const t = new Date(); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===d; }
 
 function timeToMins(t) {
   if (!t || t === '--:--' || t === '') return 0;
@@ -669,12 +626,10 @@ function timeToMins(t) {
   const result = parts[0]*60 + parts[1];
   return t.startsWith('-') ? -result : result;
 }
-
 function minsToTime(m) {
   const h = Math.floor(Math.abs(m)/60), mm = Math.abs(m)%60;
   return `${m<0?'-':''}${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
-
 function calcWorkHours(start, pause, end) {
   if (!start || !end) return '';
   let mins = timeToMins(end) - timeToMins(start) - timeToMins(pause||'00:00');
@@ -682,20 +637,16 @@ function calcWorkHours(start, pause, end) {
   return minsToTime(mins);
 }
 
-// Ay istatistikleri hesapla
 function calcMonthStats(year, month) {
   const mk = `${year}-${String(month+1).padStart(2,'0')}`;
   const total = getDaysInMonth(year, month);
   let workedMins = 0, urlaub = 0, krank = 0, feiertage = 0, notdienst = 0, arbeitstage = 0;
-
   for (let d = 1; d <= total; d++) {
     const dateStr = `${mk}-${String(d).padStart(2,'0')}`;
     const dow = getDayOfWeek(year, month, d);
     const weekend = isWeekend(dow);
     const status = getDayStatus(dateStr);
     const times = getDayTimes(dateStr);
-
-    // Hafta sonu sadece Notdienst sayısını say, workedMins'e ekleme
     if (weekend) {
       if (userNotdienst[dateStr]) {
         const arr = Array.isArray(userNotdienst[dateStr]) ? userNotdienst[dateStr] : [userNotdienst[dateStr]];
@@ -703,39 +654,29 @@ function calcMonthStats(year, month) {
       }
       continue;
     }
-
     arbeitstage++;
-
     if (status === 'Urlaub') { urlaub++; workedMins += 8*60; }
     else if (status === 'Krank') { krank++; workedMins += 8*60; }
     else if (status === 'Feiertag') { feiertage++; workedMins += 8*60; }
     else if (status === 'Arbeiten') {
       if (times && times.hours) workedMins += timeToMins(times.hours);
-      else {
-        const std = STANDARD_TIMES[dow];
-        if (std) workedMins += timeToMins(std.hours);
-      }
+      else { const std = STANDARD_TIMES[dow]; if (std) workedMins += timeToMins(std.hours); }
     }
-    // Notdienst sayısını say ama workedMins'e ekleme — ayrı Überstunden olarak gösterilecek
     if (userNotdienst[dateStr]) {
       const arr = Array.isArray(userNotdienst[dateStr]) ? userNotdienst[dateStr] : [userNotdienst[dateStr]];
       notdienst += arr.length;
     }
   }
-
   const standardMins = 174 * 60;
   const diffMins = workedMins - standardMins;
   return { workedMins, diffMins, urlaub, krank, feiertage, notdienst, arbeitstage, standardMins };
 }
 
-// ─── RENDER ─────────────────────────────────────────────────────
-
 function setYear(year) {
   currentYear = year;
   document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active-year'));
   document.getElementById('ybtn'+year).classList.add('active-year');
-  currentMonth = 0;
-  render();
+  currentMonth = 0; render();
 }
 
 function calcNotdienstMins(year, month) {
@@ -754,19 +695,10 @@ function calcNotdienstMins(year, month) {
 function render() {
   document.getElementById('monthTitle').textContent = MONTHS[currentMonth];
   const stats = calcMonthStats(currentYear, currentMonth);
-  const isPos = stats.diffMins >= 0;
-
-  // Yıl genelinde toplam urlaub hesapla
   let urlaubGenommen = 0;
-  for (let m = 0; m < 12; m++) {
-    const s = calcMonthStats(currentYear, m);
-    urlaubGenommen += s.urlaub;
-  }
+  for (let m = 0; m < 12; m++) { urlaubGenommen += calcMonthStats(currentYear, m).urlaub; }
   const urlaubKalan = 30 - urlaubGenommen;
-
-  // Notdienst toplam saatleri = Überstunden
   const notdienstMins = calcNotdienstMins(currentYear, currentMonth);
-  // Differenz = stats.diffMins (Notdienst zaten dahil değil)
   const normalDiffMins = stats.diffMins;
   const normalPos = normalDiffMins >= 0;
 
@@ -817,7 +749,6 @@ function render() {
       </div>
     </div>
   `;
-
   renderDays();
   renderJahres();
 }
@@ -826,7 +757,6 @@ function renderDays() {
   const total = getDaysInMonth(currentYear, currentMonth);
   let html = '';
   const mk = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
-
   for (let d = 1; d <= total; d++) {
     const dow = getDayOfWeek(currentYear, currentMonth, d);
     const dateStr = `${mk}-${String(d).padStart(2,'0')}`;
@@ -835,7 +765,6 @@ function renderDays() {
     const weekend = isWeekend(dow);
     const today = isToday(currentYear, currentMonth, d);
     const yd = YEAR_DATA[currentYear] || {}; const holidayName = yd.feiertage && yd.feiertage[dateStr];
-
     let cls = 'day-entry';
     if (today) cls += ' today';
     if (weekend && !status) cls += ' weekend';
@@ -843,7 +772,6 @@ function renderDays() {
     if (status === 'Krank') cls += ' krank';
     if (status === 'Feiertag') cls += ' feiertag';
     if (status === 'Notdienst') cls += ' notdienst';
-
     let statusLabel = '—', statusCls = 'status-frei';
     if (status === 'Arbeiten') { statusLabel = '✓ Arbeiten'; statusCls = 'status-arbeiten'; }
     else if (status === 'Urlaub') { statusLabel = '🏖 Urlaub'; statusCls = 'status-urlaub'; }
@@ -851,9 +779,7 @@ function renderDays() {
     else if (status === 'Feiertag') { statusLabel = '🎉 Feiertag'; statusCls = 'status-feiertag'; }
     else if (status === 'Notdienst') { statusLabel = '🚨 Notdienst'; statusCls = 'status-notdienst'; }
     else if (weekend) { statusLabel = 'Wochenende'; statusCls = 'status-frei'; }
-
     const hoursStr = times && times.hours ? times.hours : '';
-
     html += `<div class="${cls}" onclick="onDayClick('${dateStr}',${d})">
       <div class="day-header">
         <div class="day-num">${d}${today?'<span class="today-indicator"></span>':''}</div>
@@ -864,7 +790,6 @@ function renderDays() {
         </div>
         <div class="day-hours">${hoursStr?`<span style="color:var(--green)">${hoursStr}</span>`:''}</div>
       </div>`;
-
     const hasRealTimes = times && (times.start || times.end);
     if (hasRealTimes && (status === 'Arbeiten' || status === 'Urlaub' || status === 'Krank' || status === 'Feiertag' || status === 'Notdienst' || userTimes[dateStr])) {
       html += `<div class="time-strip">
@@ -875,11 +800,8 @@ function renderDays() {
       </div>`;
     }
     if (userNotes[dateStr]) {
-      html += `<div style="padding:0 14px 10px;font-size:12px;color:var(--accent2);display:flex;gap:6px;align-items:flex-start">
-        <span>📝</span><span style="line-height:1.4">${userNotes[dateStr]}</span>
-      </div>`;
+      html += `<div style="padding:0 14px 10px;font-size:12px;color:var(--accent2);display:flex;gap:6px;align-items:flex-start"><span>📝</span><span style="line-height:1.4">${userNotes[dateStr]}</span></div>`;
     }
-    // Notdienst ayrı satırlar (max 6)
     const ndList = userNotdienst[dateStr] || [];
     const ndArr = Array.isArray(ndList) ? ndList : [ndList];
     ndArr.forEach((nd, idx) => {
@@ -894,9 +816,7 @@ function renderDays() {
       </div>`;
     });
     if (ndArr.length < 6 && (status === 'Arbeiten' || weekend || status === 'Feiertag')) {
-      html += `<div style="padding:4px 14px 10px">
-        <button onclick="event.stopPropagation();openNotdienst('${dateStr}',-1)" style="background:transparent;border:1px dashed var(--orange);color:var(--orange);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%">+ Notdienst hinzufügen</button>
-      </div>`;
+      html += `<div style="padding:4px 14px 10px"><button onclick="event.stopPropagation();openNotdienst('${dateStr}',-1)" style="background:transparent;border:1px dashed var(--orange);color:var(--orange);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%">+ Notdienst hinzufügen</button></div>`;
     }
     html += '</div>';
   }
@@ -906,23 +826,16 @@ function renderDays() {
 function renderJahres() {
   let totalWorked = 0, totalUrlaub = 0, totalKrank = 0, totalFeiertage = 0, totalNotdienst = 0, totalStandard = 0, totalNotdienstMins = 0;
   const monthData = [];
-
   for (let m = 0; m < 12; m++) {
     const stats = calcMonthStats(currentYear, m);
-    totalWorked += stats.workedMins;
-    totalUrlaub += stats.urlaub;
-    totalKrank += stats.krank;
-    totalFeiertage += stats.feiertage;
-    totalNotdienst += stats.notdienst;
+    totalWorked += stats.workedMins; totalUrlaub += stats.urlaub; totalKrank += stats.krank;
+    totalFeiertage += stats.feiertage; totalNotdienst += stats.notdienst;
     totalNotdienstMins += calcNotdienstMins(currentYear, m);
-    totalStandard += stats.standardMins;
-    monthData.push({...stats, month: m});
+    totalStandard += stats.standardMins; monthData.push({...stats, month: m});
   }
-
   const totalDiff = totalWorked - totalStandard;
   const isPos = totalDiff >= 0;
   const maxAbs = Math.max(...monthData.map(s => Math.abs(s.diffMins)), 1);
-
   const barsHtml = monthData.map((s) => {
     const pct = Math.min(100, Math.abs(s.diffMins) / maxAbs * 100);
     const pos = s.diffMins >= 0;
@@ -940,67 +853,30 @@ function renderJahres() {
       <div style="font-size:10px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace">${minsToTime(s.workedMins)} / ${minsToTime(s.standardMins)} Std</div>
     </div>`;
   }).join('');
-
   document.getElementById('jahresTab').innerHTML = `
     <div class="ys-header">📊 Jahresübersicht ${currentYear}</div>
     <div class="ys-grid">
-      <div class="ys-card ${isPos?'green':'red'}">
-        <div class="ys-label">Gesamtdifferenz</div>
-        <div class="ys-value ${isPos?'green':'red'}">${isPos?'+':''}${minsToTime(totalDiff)}</div>
-        <div class="ys-sub">Jahresstunden</div>
-      </div>
-      <div class="ys-card blue">
-        <div class="ys-label">Gearbeitet</div>
-        <div class="ys-value blue">${minsToTime(totalWorked)}</div>
-        <div class="ys-sub">von ${minsToTime(totalStandard)}</div>
-      </div>
-      <div class="ys-card" style="border-top:3px solid var(--orange)">
-        <div class="ys-label">Notdienst</div>
-        <div class="ys-value" style="color:var(--orange)">${totalNotdienst} Mal</div>
-        <div class="ys-sub">${minsToTime(totalNotdienstMins)} Std</div>
-      </div>
-      <div class="ys-card" style="border-top:3px solid var(--accent2)">
-        <div class="ys-label">📈 Überstunden</div>
-        <div class="ys-value" style="color:var(--accent2)">+${minsToTime(totalNotdienstMins)}</div>
-        <div class="ys-sub">aus Notdienst</div>
-      </div>
+      <div class="ys-card ${isPos?'green':'red'}"><div class="ys-label">Gesamtdifferenz</div><div class="ys-value ${isPos?'green':'red'}">${isPos?'+':''}${minsToTime(totalDiff)}</div><div class="ys-sub">Jahresstunden</div></div>
+      <div class="ys-card blue"><div class="ys-label">Gearbeitet</div><div class="ys-value blue">${minsToTime(totalWorked)}</div><div class="ys-sub">von ${minsToTime(totalStandard)}</div></div>
+      <div class="ys-card" style="border-top:3px solid var(--orange)"><div class="ys-label">Notdienst</div><div class="ys-value" style="color:var(--orange)">${totalNotdienst} Mal</div><div class="ys-sub">${minsToTime(totalNotdienstMins)} Std</div></div>
+      <div class="ys-card" style="border-top:3px solid var(--accent2)"><div class="ys-label">📈 Überstunden</div><div class="ys-value" style="color:var(--accent2)">+${minsToTime(totalNotdienstMins)}</div><div class="ys-sub">aus Notdienst</div></div>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:12px;padding:0 4px">Zeile anklicken um zum Monat zu springen 👇</div>
     <div class="month-bar-list">${barsHtml}</div>
   `;
 }
 
-function goToMonthJahres(m) {
-  currentMonth = m;
-  switchTab('days', document.querySelectorAll('.tab')[0]);
-  render();
-}
-
-// ─── NAVIGATION ─────────────────────────────────────────────────
-function prevMonth() {
-  currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } render();
-}
-function nextMonth() {
-  currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } render();
-}
-function goToMonth(m) {
-  currentMonth = m;
-  switchTab('days', document.querySelectorAll('.tab')[0]);
-  render();
-}
+function goToMonthJahres(m) { currentMonth = m; switchTab('days', document.querySelectorAll('.tab')[0]); render(); }
+function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } render(); }
+function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } render(); }
 function goToToday() {
   const t = new Date();
   currentYear = t.getFullYear() >= 2026 && t.getFullYear() <= 2028 ? t.getFullYear() : 2026;
   currentMonth = t.getMonth();
   document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active-year'));
-  const yb = document.getElementById('ybtn'+currentYear);
-  if(yb) yb.classList.add('active-year');
-  switchTab('days', document.querySelectorAll('.tab')[0]);
-  render();
-  setTimeout(() => {
-    const todayEl = document.querySelector('.day-entry.today');
-    if (todayEl) todayEl.scrollIntoView({behavior:'smooth', block:'center'});
-  }, 100);
+  const yb = document.getElementById('ybtn'+currentYear); if(yb) yb.classList.add('active-year');
+  switchTab('days', document.querySelectorAll('.tab')[0]); render();
+  setTimeout(() => { const el = document.querySelector('.day-entry.today'); if (el) el.scrollIntoView({behavior:'smooth', block:'center'}); }, 100);
 }
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1008,29 +884,20 @@ function switchTab(tab, el) {
   document.getElementById('daysTab').style.display = tab==='days'?'block':'none';
   document.getElementById('jahresTab').style.display = tab==='jahres'?'block':'none';
 }
-function setView(v, el) {
-  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
+function setView(v, el) { document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
 
 // ─── ENTRY MODAL ────────────────────────────────────────────────
 function onDayClick(dateStr, day) {
   editingDate = dateStr;
-  const status = getDayStatus(dateStr);
-  const times = getDayTimes(dateStr);
+  const status = getDayStatus(dateStr); const times = getDayTimes(dateStr);
   document.getElementById('modalTitle').textContent = `${day}. ${MONTHS[currentMonth]}`;
   document.getElementById('entryDate').value = dateStr;
-  selectedStatus = status || 'Arbeiten';
-  updateStatusBtns();
+  selectedStatus = status || 'Arbeiten'; updateStatusBtns();
   const isNotdienst = selectedStatus === 'Notdienst';
   const locked = selectedStatus === 'Urlaub' || selectedStatus === 'Krank' || selectedStatus === 'Feiertag';
-
   let t = {};
-  if (times && times.start) {
-    t = times;
-  } else if (!isNotdienst) {
-    t = getStatusDefaultTimes(selectedStatus, dateStr) || getStandardTimes(dateStr) || {};
-  }
+  if (times && times.start) { t = times; }
+  else if (!isNotdienst) { t = getStatusDefaultTimes(selectedStatus, dateStr) || getStandardTimes(dateStr) || {}; }
   const _s = t.start || (isNotdienst ? '' : '07:45');
   const _p = t.pause || (isNotdienst ? '' : '01:00');
   const _e = t.end || (isNotdienst ? '' : '17:00');
@@ -1040,47 +907,21 @@ function onDayClick(dateStr, day) {
     document.getElementById('entryStart').value = _s;
     document.getElementById('entryPause').value = _p;
     document.getElementById('entryEnd').value = _e;
-    setTimeFieldsLocked(locked);
-    updateCalc();
+    setTimeFieldsLocked(locked); updateCalc();
   }, 50);
 }
-
-function openNewEntry() {
-  editingDate = null;
-  const today = new Date();
-  const ds = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  document.getElementById('modalTitle').textContent = 'Neuer Eintrag';
-  document.getElementById('entryDate').value = ds;
-  selectedStatus = 'Arbeiten';
-  updateStatusBtns();
-  const std = getStandardTimes(ds) || {};
-  document.getElementById('entryStart').value = std.start || '07:45';
-  document.getElementById('entryPause').value = std.pause || '01:00';
-  document.getElementById('entryEnd').value = std.end || '17:00';
-  updateCalc();
-  document.getElementById('entryModal').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('entryModal').classList.remove('open');
-  editingDate = null;
-}
-
+function closeModal() { document.getElementById('entryModal').classList.remove('open'); editingDate = null; }
 function selectStatus(s) {
-  selectedStatus = s;
-  updateStatusBtns();
+  selectedStatus = s; updateStatusBtns();
   const dateStr = document.getElementById('entryDate').value;
   const locked = s === 'Urlaub' || s === 'Krank' || s === 'Feiertag';
-
   const t = getStatusDefaultTimes(s, dateStr) || {};
   document.getElementById('entryStart').value = t.start || '07:45';
   document.getElementById('entryPause').value = t.pause || '01:00';
   document.getElementById('entryEnd').value = t.end || '17:00';
-  setTimeFieldsLocked(locked);
-  updateCalc();
+  setTimeFieldsLocked(locked); updateCalc();
   document.getElementById('timeFields').style.display = s==='Frei' ? 'none' : 'grid';
 }
-
 function setTimeFieldsLocked(locked) {
   ['entryStart','entryPause','entryEnd'].forEach(id => {
     const el = document.getElementById(id);
@@ -1089,7 +930,6 @@ function setTimeFieldsLocked(locked) {
     el.readOnly = locked;
   });
 }
-
 function updateStatusBtns() {
   document.querySelectorAll('.status-btn').forEach(b => {
     b.className = 'status-btn';
@@ -1098,54 +938,35 @@ function updateStatusBtns() {
   });
   document.getElementById('timeFields').style.display = selectedStatus==='Frei' ? 'none' : 'grid';
 }
-
 function updateCalc() {
   const s = document.getElementById('entryStart').value;
   const p = document.getElementById('entryPause').value;
   const e = document.getElementById('entryEnd').value;
   document.getElementById('entryCalc').value = calcWorkHours(s,p,e) || '--:--';
 }
-
 function saveEntry() {
   const dateStr = document.getElementById('entryDate').value;
   if (!dateStr) return;
   userData[dateStr] = selectedStatus;
   if (selectedStatus !== 'Frei') {
     const locked = selectedStatus === 'Urlaub' || selectedStatus === 'Krank' || selectedStatus === 'Feiertag';
-    if (locked) {
-      userTimes[dateStr] = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'};
-    } else {
-      userTimes[dateStr] = {
-        start: document.getElementById('entryStart').value,
-        pause: document.getElementById('entryPause').value,
-        end: document.getElementById('entryEnd').value,
-        hours: document.getElementById('entryCalc').value,
-      };
-    }
-  } else {
-    delete userTimes[dateStr];
-  }
+    if (locked) { userTimes[dateStr] = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'}; }
+    else { userTimes[dateStr] = { start: document.getElementById('entryStart').value, pause: document.getElementById('entryPause').value, end: document.getElementById('entryEnd').value, hours: document.getElementById('entryCalc').value }; }
+  } else { delete userTimes[dateStr]; }
   const note = document.getElementById('entryNote').value.trim();
-  if (note) userNotes[dateStr] = note;
-  else delete userNotes[dateStr];
-  saveData();
-  closeModal();
-  const parts = dateStr.split('-');
-  currentYear = parseInt(parts[0]);
-  currentMonth = parseInt(parts[1]) - 1;
+  if (note) userNotes[dateStr] = note; else delete userNotes[dateStr];
+  saveData(); closeModal();
+  const parts = dateStr.split('-'); currentYear = parseInt(parts[0]); currentMonth = parseInt(parts[1]) - 1;
   render();
 }
-
 
 // ─── NOTDIENST MODAL ────────────────────────────────────────────
 let currentNdDate = null;
 let currentNdIndex = -1;
 
 function openNotdienst(dateStr, index) {
-  currentNdDate = dateStr;
-  currentNdIndex = index; // -1 = yeni ekle, >= 0 = düzenle
-  const parts = dateStr.split('-');
-  const d = new Date(dateStr);
+  currentNdDate = dateStr; currentNdIndex = index;
+  const parts = dateStr.split('-'); const d = new Date(dateStr);
   const DAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
   const ndArr = userNotdienst[dateStr] || [];
   const arr = Array.isArray(ndArr) ? ndArr : [ndArr];
@@ -1159,19 +980,12 @@ function openNotdienst(dateStr, index) {
   document.getElementById('ndDeleteBtn').style.display = index >= 0 ? 'block' : 'none';
   document.getElementById('notdienstModal').classList.add('open');
 }
-
-function closeNotdienst() {
-  document.getElementById('notdienstModal').classList.remove('open');
-  currentNdDate = null;
-  currentNdIndex = -1;
-}
-
+function closeNotdienst() { document.getElementById('notdienstModal').classList.remove('open'); currentNdDate = null; currentNdIndex = -1; }
 function updateNdCalc() {
   const s = document.getElementById('ndStart').value;
   const e = document.getElementById('ndEnd').value;
   document.getElementById('ndCalc').value = calcWorkHours(s,'00:00',e) || '--:--';
 }
-
 function saveNotdienst() {
   if (!currentNdDate) return;
   const start = document.getElementById('ndStart').value;
@@ -1181,38 +995,22 @@ function saveNotdienst() {
   const hours = calcWorkHours(start, '00:00', end) || '00:00';
   let arr = userNotdienst[currentNdDate] || [];
   if (!Array.isArray(arr)) arr = [arr];
-  if (currentNdIndex >= 0) {
-    arr[currentNdIndex] = {start, end, hours, note};
-  } else {
-    arr.push({start, end, hours, note});
-  }
+  if (currentNdIndex >= 0) { arr[currentNdIndex] = {start, end, hours, note}; }
+  else { arr.push({start, end, hours, note}); }
   userNotdienst[currentNdDate] = arr;
   const savedDate = currentNdDate;
-  saveData();
-  closeNotdienst();
-  render();
-  // Ask to send report
+  saveData(); closeNotdienst(); render();
   setTimeout(() => {
-    if (confirm('📧 Notdienst-Bericht per Mail senden?')) {
-      openBericht(savedDate);
-    }
+    if (confirm('📧 Notdienst-Bericht per Mail senden?')) { openBericht(savedDate); }
   }, 300);
 }
-
 function deleteNotdienst() {
   if (!currentNdDate) return;
   let arr = userNotdienst[currentNdDate] || [];
   if (!Array.isArray(arr)) arr = [arr];
-  if (currentNdIndex >= 0) {
-    arr.splice(currentNdIndex, 1);
-    if (arr.length === 0) delete userNotdienst[currentNdDate];
-    else userNotdienst[currentNdDate] = arr;
-  } else {
-    delete userNotdienst[currentNdDate];
-  }
-  saveData();
-  closeNotdienst();
-  render();
+  if (currentNdIndex >= 0) { arr.splice(currentNdIndex, 1); if (arr.length === 0) delete userNotdienst[currentNdDate]; else userNotdienst[currentNdDate] = arr; }
+  else { delete userNotdienst[currentNdDate]; }
+  saveData(); closeNotdienst(); render();
 }
 
 // ─── BERICHT (REPORT) ──────────────────────────────────────────
@@ -1225,90 +1023,63 @@ function openBericht(dateStr) {
   const d = new Date(berichtDate);
   const TAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
   document.getElementById('berichtDateLabel').textContent = `${TAGE[d.getDay()]}, ${parts[2]}.${parts[1]}.${parts[0]}`;
-  // Clear form
-  document.getElementById('brKunde').value = '';
+  // Auto-fill Kunde from last Notdienst note
+  const ndArr = userNotdienst[berichtDate] || [];
+  const bArr = Array.isArray(ndArr) ? ndArr : [ndArr];
+  const lastNd = bArr[bArr.length - 1];
+  document.getElementById('brKunde').value = (lastNd && lastNd.note) ? lastNd.note : '';
   document.getElementById('brAdresse').value = '';
   document.getElementById('brProblem').value = '';
   document.getElementById('brErgebnis').value = '';
   document.getElementById('berichtModal').classList.add('open');
 }
 
-function closeBericht() {
-  document.getElementById('berichtModal').classList.remove('open');
-  berichtDate = null;
-}
+function closeBericht() { document.getElementById('berichtModal').classList.remove('open'); berichtDate = null; }
 
 function sendBericht() {
   const kunde = document.getElementById('brKunde').value.trim();
   const adresse = document.getElementById('brAdresse').value.trim();
   const problem = document.getElementById('brProblem').value.trim();
   const ergebnis = document.getElementById('brErgebnis').value.trim();
-  if (!kunde || !problem) {
-    alert('Bitte mindestens Kunde und Problem ausfüllen!');
-    return;
-  }
+  if (!kunde || !problem) { alert('Bitte mindestens Kunde und Problem ausfüllen!'); return; }
   const heute = new Date();
   const datumStr = `${String(heute.getDate()).padStart(2,'0')}.${String(heute.getMonth()+1).padStart(2,'0')}.${heute.getFullYear()}`;
-  // Build subject
   const kurzProblem = problem.length > 60 ? problem.substring(0, 60) + '...' : problem;
   const betreff = `${datumStr} – ${kunde}, ${adresse} / ${kurzProblem}`;
-  // Build body
   let body = `Sehr geehrte Damen und Herren,\n\n`;
   body += `Kunde:\n${kunde}\n\n`;
   body += `Adresse:\n${adresse}\n\n`;
   body += `Problem:\n${problem}\n\n`;
   body += `Ergebnis / Feststellungen:\n\n`;
   const zeilen = ergebnis.split('\n').filter(z => z.trim());
-  zeilen.forEach(z => {
-    body += `* ${z.trim()}\n`;
-  });
+  zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
   body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
-  // Notdienst times
-  const ndArr = userNotdienst[berichtDate] || [];
-  const arr = Array.isArray(ndArr) ? ndArr : [ndArr];
-  if (arr.length > 0) {
-    body += `\nNotdienst-Zeiten:\n`;
-    arr.forEach((nd, i) => {
-      body += `• ${nd.start || '--:--'} – ${nd.end || '--:--'} (${nd.hours || '--:--'} Std)`;
-      if (nd.note) body += ` — ${nd.note}`;
-      body += '\n';
-    });
+  // Save Kunde + Adresse to Notdienst Bemerkung
+  if (berichtDate && userNotdienst[berichtDate]) {
+    const ndList = userNotdienst[berichtDate];
+    const ndItems = Array.isArray(ndList) ? ndList : [ndList];
+    const lastItem = ndItems[ndItems.length - 1];
+    if (lastItem) {
+      lastItem.note = `${kunde} — ${adresse}`;
+      userNotdienst[berichtDate] = ndItems;
+      saveData();
+      render();
+    }
   }
-  // Mail link — opens Outlook app on phone
   const to = 'info@ideal-hannover.de';
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
- // Save Kunde + Adresse to day note
-  const notizText = `${kunde} — ${adresse}`;
-  if (berichtDate) {
-    userNotes[berichtDate] = notizText;
-    saveData();
-    render();
-  }
+  window.open(mailtoUrl, '_self');
+  closeBericht();
+}
 
 // ─── PHOTO SCAN ─────────────────────────────────────────────────
 let scannedEntries = [];
-
-function openPhotoScan() {
-  document.getElementById('photoModal').classList.add('open');
-  document.getElementById('photoPreviewArea').style.display = 'none';
-  document.getElementById('scanResult').style.display = 'none';
-  document.getElementById('scanLoading').style.display = 'none';
-  document.getElementById('photoCamera').value = '';
-  document.getElementById('photoGallery').value = '';
-  scannedEntries = [];
-}
-
-function closePhotoModal() {
-  document.getElementById('photoModal').classList.remove('open');
-}
-
-function closeDatenModal() {
-  document.getElementById('datenModal').classList.remove('open');
-}
+function openPhotoScan() { document.getElementById('photoModal').classList.add('open'); document.getElementById('photoPreviewArea').style.display = 'none'; document.getElementById('scanResult').style.display = 'none'; document.getElementById('scanLoading').style.display = 'none'; scannedEntries = []; }
+function closePhotoModal() { document.getElementById('photoModal').classList.remove('open'); }
+function closeDatenModal() { document.getElementById('datenModal').classList.remove('open'); }
 
 async function onPhotoSelected(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = async (e) => {
     document.getElementById('photoPreview').src = e.target.result;
@@ -1319,17 +1090,13 @@ async function onPhotoSelected(event) {
     const mediaType = file.type || 'image/jpeg';
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514', max_tokens: 1500,
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500,
           messages: [{role:'user', content:[
             {type:'image', source:{type:'base64', media_type:mediaType, data:base64}},
             {type:'text', text:`Dies ist eine Arbeitszeiterfassung. Gib nur ein JSON-Array zurück, nichts anderes:
 [{"date":"YYYY-MM-DD","status":"Arbeiten","start":"HH:MM","pause":"HH:MM","end":"HH:MM","hours":"HH:MM"}]
-Status: Arbeiten/Urlaub/Krank/Feiertag/Notdienst/Frei.
-Notdienst: Falls "Nd" oder "Nd insgesamt" steht, Status=Notdienst. Stunden aus der Abwesenheitsspalte als hours verwenden.
-Wochenend-Notdienst einbeziehen. Leere Zeilen überspringen. Jahr aus der Tabelle entnehmen.`}
+Status: Arbeiten/Urlaub/Krank/Feiertag/Notdienst/Frei.`}
           ]}]
         })
       });
@@ -1340,61 +1107,38 @@ Wochenend-Notdienst einbeziehen. Leere Zeilen überspringen. Jahr aus der Tabell
         scannedEntries = JSON.parse(text.replace(/```json|```/g,'').trim());
         document.getElementById('scanResultText').textContent = scannedEntries.map(e=>`${e.date}  ${e.status}${e.start?`  ${e.start}→${e.end}`:''}`).join('\n');
         document.getElementById('applyBtn').style.display = scannedEntries.length>0?'block':'none';
-      } catch {
-        document.getElementById('scanResultText').textContent = text || 'Okunamadı.';
-        document.getElementById('applyBtn').style.display = 'none';
-      }
+      } catch { document.getElementById('scanResultText').textContent = text || 'Fehler.'; document.getElementById('applyBtn').style.display = 'none'; }
       document.getElementById('scanResult').style.display = 'block';
     } catch(err) {
       document.getElementById('scanLoading').style.display = 'none';
-      document.getElementById('scanResultText').textContent = 'Hata: '+err.message;
+      document.getElementById('scanResultText').textContent = 'Fehler: '+err.message;
       document.getElementById('applyBtn').style.display = 'none';
       document.getElementById('scanResult').style.display = 'block';
     }
   };
   reader.readAsDataURL(file);
 }
-
 function applyScanResult() {
   let count = 0;
-  scannedEntries.forEach(e => {
-    if (!e.date) return;
-    userData[e.date] = e.status;
-    if (e.status !== 'Frei' && e.start) userTimes[e.date] = {start:e.start, pause:e.pause||'01:00', end:e.end, hours:e.hours};
-    count++;
-  });
+  scannedEntries.forEach(e => { if (!e.date) return; userData[e.date] = e.status; if (e.status !== 'Frei' && e.start) userTimes[e.date] = {start:e.start, pause:e.pause||'01:00', end:e.end, hours:e.hours}; count++; });
   saveData(); closePhotoModal(); render();
   setTimeout(()=>alert(`✅ ${count} Tage übertragen!`), 200);
 }
 
+function exportAndSave() { saveData(); alert('💾 Daten gespeichert ✓'); }
 
-function exportAndSave() {
-  saveData();
-  alert('💾 Daten gespeichert ✓');
-}
-
-// ─── EXPORT / IMPORT ────────────────────────────────────────────
 function exportData() {
-  const data = {
-    userData: userData,
-    userTimes: userTimes,
-    userNotes: userNotes,
-    userNotdienst: userNotdienst,
-    exportDate: new Date().toISOString()
-  };
+  const data = { userData, userTimes, userNotes, userNotdienst, exportDate: new Date().toISOString() };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
+  const a = document.createElement('a'); a.href = url;
   a.download = `arbeitszeit_backup_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.click(); URL.revokeObjectURL(url);
 }
 
 function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
@@ -1403,12 +1147,8 @@ function importData(event) {
       if (data.userTimes) userTimes = data.userTimes;
       if (data.userNotes) userNotes = data.userNotes;
       if (data.userNotdienst) userNotdienst = data.userNotdienst;
-      saveData();
-      render();
-      alert('✅ Daten erfolgreich geladen!');
-    } catch {
-      alert('❌ Datei konnte nicht gelesen werden!');
-    }
+      saveData(); render(); alert('✅ Daten erfolgreich geladen!');
+    } catch { alert('❌ Datei konnte nicht gelesen werden!'); }
     event.target.value = '';
   };
   reader.readAsText(file);
@@ -1426,7 +1166,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('entryPause').addEventListener('change', updateCalc);
   document.getElementById('entryEnd').addEventListener('change', updateCalc);
   render();
-  // Show username
   if (CURRENT_USER !== 'default') {
     document.getElementById('logoText').textContent = '⏱ ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
   }
@@ -1447,7 +1186,6 @@ document.addEventListener('DOMContentLoaded', function() {
         render();
         showSync('synced', '☁️ Synchronisiert ✓');
       } else {
-        // No cloud data yet, push local
         const hasLocal = Object.keys(userData).length > 0 || Object.keys(userTimes).length > 0;
         if (hasLocal) sbSave({ userData, userTimes, userNotes, userNotdienst });
         showSync('synced', '☁️ Verbunden ✓');
