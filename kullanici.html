@@ -416,9 +416,9 @@
       <textarea class="form-input" id="brErgebnis" rows="5" placeholder="Laut telefonischer Auskunft wurde...&#10;Nach der Reparatur trat erneut...&#10;Vor Ort wurde festgestellt..." style="resize:none;line-height:1.5;font-family:'Syne',sans-serif;font-size:13px"></textarea>
     </div>
     <button onclick="sendBericht()" style="width:100%;padding:16px;background:#ea4335;border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px">
-      <span style="font-size:20px">📧</span> Mit Outlook senden
+      <span style="font-size:20px">📧</span> Mit senden
     </button>
-    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">📎 Fotos bitte manuell in Outlook anhängen</div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">📎 Fotos bitte manuell in anhängen</div>
     <button class="cancel-btn" onclick="closeBericht()">Abbrechen</button>
   </div>
 </div>
@@ -1272,10 +1272,10 @@ function sendBericht() {
       body += '\n';
     });
   }
-  // Outlook URL
+  // Mail link — opens Outlook app on phone
   const to = 'info@ideal-hannover.de';
-  const outlookUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
-  window.open(outlookUrl, '_blank');
+  const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoUrl;
   closeBericht();
 }
 
