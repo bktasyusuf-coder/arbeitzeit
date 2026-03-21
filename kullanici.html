@@ -1277,6 +1277,13 @@ function sendBericht() {
   // Mail link — opens Outlook app on phone
   const to = 'info@ideal-hannover.de';
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
+  // Save Kunde + Adresse to day note
+  const notizText = `${kunde} — ${adresse}`;
+  if (berichtDate) {
+    userNotes[berichtDate] = notizText;
+    saveData();
+    render();
+  }
   window.open(mailtoUrl, '_self');
   closeBericht();
 }
