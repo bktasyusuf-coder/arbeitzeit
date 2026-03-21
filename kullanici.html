@@ -1247,20 +1247,22 @@ function sendBericht() {
     alert('Bitte mindestens Kunde und Problem ausfüllen!');
     return;
   }
-  const parts = berichtDate.split('-');
-  const datumStr = `${parts[2]}.${parts[1]}.${parts[0]}`;
+  const heute = new Date();
+  const datumStr = `${String(heute.getDate()).padStart(2,'0')}.${String(heute.getMonth()+1).padStart(2,'0')}.${heute.getFullYear()}`;
   // Build subject
   const kurzProblem = problem.length > 60 ? problem.substring(0, 60) + '...' : problem;
   const betreff = `${datumStr} – ${kunde}, ${adresse} / ${kurzProblem}`;
   // Build body
-  let body = `Kunde: ${kunde}\n`;
-  body += `Adresse: ${adresse}\n\n`;
-  body += `Problem: ${problem}\n\n`;
-  body += `Ergebnis / Feststellungen:\n`;
+  let body = `Sehr geehrte Damen und Herren,\n\n`;
+  body += `Kunde:\n${kunde}\n\n`;
+  body += `Adresse:\n${adresse}\n\n`;
+  body += `Problem:\n${problem}\n\n`;
+  body += `Ergebnis / Feststellungen:\n\n`;
   const zeilen = ergebnis.split('\n').filter(z => z.trim());
   zeilen.forEach(z => {
-    body += `• ${z.trim()}\n`;
+    body += `* ${z.trim()}\n`;
   });
+  body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
   // Notdienst times
   const ndArr = userNotdienst[berichtDate] || [];
   const arr = Array.isArray(ndArr) ? ndArr : [ndArr];
