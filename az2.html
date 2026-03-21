@@ -1310,24 +1310,29 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('entryPause').addEventListener('change', updateCalc);
   document.getElementById('entryEnd').addEventListener('change', updateCalc);
   render();
-  // Cloud sync
+  // Cloud sync — cloud always wins
   (async () => {
     try {
       const cloud = await sbLoad();
-      const hasLocal = Object.keys(userData).length > 0 || Object.keys(userTimes).length > 0;
-      if (cloud && !hasLocal) {
-        if (cloud.userData) userData = cloud.userData;
-        if (cloud.userTimes) userTimes = cloud.userTimes;
-        if (cloud.userNotes) userNotes = cloud.userNotes;
-        if (cloud.userNotdienst) userNotdienst = cloud.userNotdienst;
-        saveData(); render();
-        showSync('synced', '☁️ Aus Cloud geladen ✓');
-      } else if (hasLocal && !cloud) {
-        sbSave({ userData, userTimes, userNotes, userNotdienst });
+      if (cloud && (cloud.userData || cloud.userTimes)) {
+        console.log('Cloud data found, applying...');
+        userData = cloud.userData || {};
+        userTimes = cloud.userTimes || {};
+        userNotes = cloud.userNotes || {};
+        userNotdienst = cloud.userNotdienst || {};
+        localStorage.setItem('az_user_data', JSON.stringify(userData));
+        localStorage.setItem('az_user_times', JSON.stringify(userTimes));
+        localStorage.setItem('az_user_notes', JSON.stringify(userNotes));
+        localStorage.setItem('az_user_notdienst', JSON.stringify(userNotdienst));
+        render();
+        showSync('synced', '☁️ Synchronisiert ✓');
       } else {
+        // No cloud data yet, push local
+        const hasLocal = Object.keys(userData).length > 0 || Object.keys(userTimes).length > 0;
+        if (hasLocal) sbSave({ userData, userTimes, userNotes, userNotdienst });
         showSync('synced', '☁️ Verbunden ✓');
       }
-    } catch(e) { showSync('error', '⚠️ Offline'); }
+    } catch(e) { console.error('Sync error:', e); showSync('error', '⚠️ Offline'); }
   })();
 });
 </script>
