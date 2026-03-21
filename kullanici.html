@@ -1277,16 +1277,18 @@ function sendBericht() {
   // Mail link — opens Outlook app on phone
   const to = 'info@ideal-hannover.de';
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
-  // Save Kunde + Adresse to day note
-  const notizText = `${kunde} — ${adresse}`;
-  if (berichtDate) {
-    userNotes[berichtDate] = notizText;
-    saveData();
-    render();
+ // Save Kunde + Adresse to Notdienst Bemerkung
+  if (berichtDate && userNotdienst[berichtDate]) {
+    const ndArr = userNotdienst[berichtDate];
+    const arr = Array.isArray(ndArr) ? ndArr : [ndArr];
+    const lastNd = arr[arr.length - 1];
+    if (lastNd) {
+      lastNd.note = `${kunde} — ${adresse}`;
+      userNotdienst[berichtDate] = arr;
+      saveData();
+      render();
+    }
   }
-  window.open(mailtoUrl, '_self');
-  closeBericht();
-}
 
 // ─── PHOTO SCAN ─────────────────────────────────────────────────
 let scannedEntries = [];
