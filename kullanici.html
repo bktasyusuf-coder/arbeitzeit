@@ -1218,17 +1218,7 @@ if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
   printWindow.document.write('</body></html>');
   printWindow.document.close();
   setTimeout(() => { printWindow.print(); }, 500);
-  const saveDate = new Date(vonDate);
-  while (saveDate <= bisDate) {
-    const dow = saveDate.getDay();
-    if (dow > 0 && dow < 6) {
-      const ds = fmt(saveDate);
-      userData[ds] = 'Urlaub';
-      userTimes[ds] = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'};
-    }
-    saveDate.setDate(saveDate.getDate() + 1);
-  }
-  saveData();
+saveData();
   render();
   closeUrlaubModal();
 }
