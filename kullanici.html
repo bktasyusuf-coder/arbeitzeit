@@ -1013,7 +1013,16 @@ function deleteNotdienst() {
   else { delete userNotdienst[currentNdDate]; }
   saveData(); closeNotdienst(); render();
 }
-
+function toggleNdStatus(dateStr, idx) {
+  let arr = userNotdienst[dateStr] || [];
+  if (!Array.isArray(arr)) arr = [arr];
+  if (arr[idx]) {
+    arr[idx].erledigt = !arr[idx].erledigt;
+    userNotdienst[dateStr] = arr;
+    saveData();
+    render();
+  }
+}
 // ─── BERICHT (REPORT) ──────────────────────────────────────────
 let berichtDate = null;
 
