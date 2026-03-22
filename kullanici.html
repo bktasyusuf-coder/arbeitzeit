@@ -1150,7 +1150,7 @@ function printUrlaub() {
   const bis = document.getElementById('urlaubBis').value;
   const art = document.getElementById('urlaubArt').value || 'Erholungsurlaub';
   const bemerkung = document.getElementById('urlaubBemerkung').value;
-  if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
+if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
   const vonDate = new Date(von);
   const bisDate = new Date(bis);
   let tage = 0;
@@ -1158,6 +1158,18 @@ function printUrlaub() {
   while (d <= bisDate) { const dow = d.getDay(); if (dow > 0 && dow < 6) tage++; d.setDate(d.getDate() + 1); }
   const vonStr = von.split('-').reverse().join('.');
   const bisStr = bis.split('-').reverse().join('.');
+  // Önce günleri kaydet
+  const saveDate2 = new Date(vonDate);
+  while (saveDate2 <= bisDate) {
+    const dow2 = saveDate2.getDay();
+    if (dow2 > 0 && dow2 < 6) {
+      const ds2 = fmt(saveDate2);
+      userData[ds2] = 'Urlaub';
+      userTimes[ds2] = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'};
+    }
+    saveDate2.setDate(saveDate2.getDate() + 1);
+  }
+  // Sonra Resturlaub hesapla
   let urlaubGenommen = 0;
   for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubGenommen++; }
   const resturlaub = 30 - urlaubGenommen;
