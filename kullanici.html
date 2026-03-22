@@ -1127,21 +1127,31 @@ function openUrlaubModal() {
 function closeUrlaubModal() { document.getElementById('urlaubModal').classList.remove('open'); }
 
 function resetUrlaub() {
-  const von = document.getElementById('urlaubVon').value;
-  const bis = document.getElementById('urlaubBis').value;
-  if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
-  if (!confirm('Urlaub von ' + von.split('-').reverse().join('.') + ' bis ' + bis.split('-').reverse().join('.') + ' wirklich löschen?')) return;
-  const vonDate = new Date(von);
-  const bisDate = new Date(bis);
-  const d = new Date(vonDate);
-  let count = 0;
-  while (d <= bisDate) {
-    const ds = fmt(d);
-    if (userData[ds] === 'Urlaub') { delete userData[ds]; delete userTimes[ds]; count++; }
-    d.setDate(d.getDate() + 1);
+  const urlaubDays = [];
+  for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubDays.push(ds); }
+  urlaubDays.sort();
+  if (urlaubDays.length === 0) { alert('Keine Urlaubstage vorhanden!'); return; }
+  let msg = 'Welche Urlaubstage löschen?\n\n';
+  urlaubDays.forEach((ds, i) => {
+    const p = ds.split('-');
+    const d = new Date(ds);
+    const TAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+    msg += (i+1) + '. ' + TAGE[d.getDay()] + ' ' + p[2] + '.' + p[1] + '.' + p[0] + '\n';
+  });
+  msg += '\nNummern eingeben (z.B. 1,2,3 oder "alle"):';
+  const input = prompt(msg);
+  if (!input) return;
+  let toDelete = [];
+  if (input.trim().toLowerCase() === 'alle') {
+    toDelete = urlaubDays;
+  } else {
+    const nums = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    nums.forEach(n => { if (n >= 1 && n <= urlaubDays.length) toDelete.push(urlaubDays[n-1]); });
   }
+  if (toDelete.length === 0) { alert('Keine gültige Auswahl!'); return; }
+  toDelete.forEach(ds => { delete userData[ds]; delete userTimes[ds]; });
   saveData(); render();
-  alert(count + ' Urlaubstage gelöscht!');
+  alert(toDelete.length + ' Urlaubstage gelöscht!');
   openUrlaubModal();
 }
 
