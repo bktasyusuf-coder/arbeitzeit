@@ -277,12 +277,8 @@
   <button class="bnav-btn" onclick="openPhotoScan()">
     <span class="bnav-icon">📷</span>Scannen
   </button>
-  <button class="bnav-btn" onclick="openUrlaubModal()">
-    <span class="bnav-icon">🏖</span>Urlaub
-  </button>
  <button class="bnav-btn" onclick="openUrlaubModal()">
     <span class="bnav-icon">🏖</span>Urlaub
-  </button>
   </button>
   <button class="bnav-btn" onclick="document.getElementById('importInput').click()">
     <span class="bnav-icon">📥</span>Import
@@ -407,7 +403,8 @@
       <input type="text" class="form-input" id="urlaubBemerkung" placeholder="Optional...">
     </div>
     <div id="urlaubGirilen" style="margin-bottom:16px"></div>
-    <button class="save-btn" onclick="printUrlaub()" style="background:var(--blue)">🖨 Drucken / PDF</button>
+  <button class="save-btn" onclick="printUrlaub()" style="background:var(--blue)">🖨 Drucken / PDF</button>
+    <button class="cancel-btn" onclick="resetUrlaub()" style="color:var(--red)">🗑 Urlaub zurücksetzen (Von–Bis)</button>
   </div>
 </div>
 <!-- Bericht Modal -->
@@ -1128,6 +1125,25 @@ function openUrlaubModal() {
   document.getElementById('urlaubModal').classList.add('open');
 }
 function closeUrlaubModal() { document.getElementById('urlaubModal').classList.remove('open'); }
+
+function resetUrlaub() {
+  const von = document.getElementById('urlaubVon').value;
+  const bis = document.getElementById('urlaubBis').value;
+  if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
+  if (!confirm('Urlaub von ' + von.split('-').reverse().join('.') + ' bis ' + bis.split('-').reverse().join('.') + ' wirklich löschen?')) return;
+  const vonDate = new Date(von);
+  const bisDate = new Date(bis);
+  const d = new Date(vonDate);
+  let count = 0;
+  while (d <= bisDate) {
+    const ds = fmt(d);
+    if (userData[ds] === 'Urlaub') { delete userData[ds]; delete userTimes[ds]; count++; }
+    d.setDate(d.getDate() + 1);
+  }
+  saveData(); render();
+  alert(count + ' Urlaubstage gelöscht!');
+  openUrlaubModal();
+}
 
 function printUrlaub() {
   const von = document.getElementById('urlaubVon').value;
