@@ -277,6 +277,9 @@
   <button class="bnav-btn" onclick="openPhotoScan()">
     <span class="bnav-icon">📷</span>Scannen
   </button>
+  <button class="bnav-btn" onclick="openUrlaubModal()">
+    <span class="bnav-icon">🏖</span>Urlaub
+  </button>
   <button class="bnav-btn" onclick="exportAndSave()">
     <span class="bnav-icon">💾</span>Speichern
   </button>
@@ -378,7 +381,34 @@
     <button id="ndDeleteBtn" class="cancel-btn" onclick="deleteNotdienst()" style="color:var(--red);margin-top:8px;display:none">🗑 Eintrag löschen</button>
   </div>
 </div>
-
+<!-- Urlaub Modal -->
+<div class="modal-overlay" id="urlaubModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px">
+      <div style="font-size:20px;font-weight:800">🏖 Urlaubsantrag</div>
+      <button onclick="closeUrlaubModal()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Von (Datum)</label>
+      <input type="date" class="form-input" id="urlaubVon">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Bis (Datum)</label>
+      <input type="date" class="form-input" id="urlaubBis">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Urlaubsart</label>
+      <input type="text" class="form-input" id="urlaubArt" value="Erholungsurlaub">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Bemerkungen</label>
+      <input type="text" class="form-input" id="urlaubBemerkung" placeholder="Optional...">
+    </div>
+    <div id="urlaubGirilen" style="margin-bottom:16px"></div>
+    <button class="save-btn" onclick="printUrlaub()" style="background:var(--blue)">🖨 Drucken / PDF</button>
+  </div>
+</div>
 <!-- Bericht Modal -->
 <div class="modal-overlay" id="berichtModal">
   <div class="modal">
@@ -1081,7 +1111,98 @@ function sendBericht() {
   window.open(mailtoUrl, '_self');
   closeBericht();
 }
+// ─── URLAUB ANTRAG ──────────────────────────────────────────
+function openUrlaubModal() {
+  const urlaubDays = [];
+  for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubDays.push(ds); }
+  urlaubDays.sort();
+  let html = '';
+  if (urlaubDays.length > 0) {
+    html = '<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">Eingetragene Urlaubstage (' + urlaubDays.length + ')</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
+    urlaubDays.forEach(ds => { const p = ds.split('-'); html += '<span style="background:var(--surface2);border:1px solid var(--blue);color:var(--blue);padding:4px 8px;border-radius:6px;font-size:11px;font-family:DM Mono,monospace">' + p[2] + '.' + p[1] + '.' + p[0] + '</span>'; });
+    html += '</div>';
+  }
+  document.getElementById('urlaubGirilen').innerHTML = html;
+  document.getElementById('urlaubModal').classList.add('open');
+}
+function closeUrlaubModal() { document.getElementById('urlaubModal').classList.remove('open'); }
 
+function printUrlaub() {
+  const von = document.getElementById('urlaubVon').value;
+  const bis = document.getElementById('urlaubBis').value;
+  const art = document.getElementById('urlaubArt').value || 'Erholungsurlaub';
+  const bemerkung = document.getElementById('urlaubBemerkung').value;
+  if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
+  const vonDate = new Date(von);
+  const bisDate = new Date(bis);
+  let tage = 0;
+  const d = new Date(vonDate);
+  while (d <= bisDate) { const dow = d.getDay(); if (dow > 0 && dow < 6) tage++; d.setDate(d.getDate() + 1); }
+  const vonStr = von.split('-').reverse().join('.');
+  const bisStr = bis.split('-').reverse().join('.');
+  let urlaubGenommen = 0;
+  for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubGenommen++; }
+  const resturlaub = 30 - urlaubGenommen;
+  const heute = new Date();
+  const heuteStr = String(heute.getDate()).padStart(2,'0') + '.' + String(heute.getMonth()+1).padStart(2,'0') + '.' + heute.getFullYear();
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write('<html><head><title>Urlaubsantrag</title><style>');
+  printWindow.document.write('body{font-family:Arial,sans-serif;padding:40px;color:#333;font-size:13px;max-width:700px;margin:0 auto}');
+  printWindow.document.write('.header{text-align:center;margin-bottom:30px;border-bottom:2px solid #333;padding-bottom:15px}');
+  printWindow.document.write('.header h2{margin:0;font-size:16px;letter-spacing:1px}');
+  printWindow.document.write('.header p{margin:4px 0;font-size:12px;color:#666}');
+  printWindow.document.write('.title{text-align:center;font-size:20px;font-weight:bold;margin:20px 0;letter-spacing:2px}');
+  printWindow.document.write('.section{margin-bottom:20px}');
+  printWindow.document.write('.section-title{font-weight:bold;font-size:13px;background:#f0f0f0;padding:6px 10px;margin-bottom:8px;border-left:3px solid #333}');
+  printWindow.document.write('table{width:100%;border-collapse:collapse;margin-bottom:10px}');
+  printWindow.document.write('td{padding:6px 10px;border-bottom:1px solid #ddd;font-size:12px}');
+  printWindow.document.write('td:first-child{font-weight:bold;width:160px;color:#555}');
+  printWindow.document.write('.urlaub-table{border:1px solid #333}');
+  printWindow.document.write('.urlaub-table th{background:#333;color:white;padding:8px;font-size:11px;text-align:left}');
+  printWindow.document.write('.urlaub-table td{border:1px solid #ccc;padding:8px;font-size:12px}');
+  printWindow.document.write('.sign-area{margin-top:50px;display:flex;justify-content:space-between}');
+  printWindow.document.write('.sign-box{width:45%;border-top:1px solid #333;padding-top:6px;font-size:11px;text-align:center}');
+  printWindow.document.write('@media print{body{padding:20px}}');
+  printWindow.document.write('</style></head><body>');
+  printWindow.document.write('<div class="header"><h2>Ideal Sanit\u00e4r und Heizung</h2><p>Voltmerstra\u00dfe 27a \u00b7 30165 Hannover</p><p>Tel. 0511 1627870 \u00b7 info@ideal-hannover.de</p></div>');
+  printWindow.document.write('<div class="title">URLAUBSANTRAG</div>');
+  printWindow.document.write('<div class="section"><div class="section-title">MITARBEITER</div><table>');
+  printWindow.document.write('<tr><td>Name:</td><td>Bektas</td></tr>');
+  printWindow.document.write('<tr><td>Vorname:</td><td>Yusuf</td></tr>');
+  printWindow.document.write('<tr><td>Personal-Nr.:</td><td>0034</td></tr>');
+  printWindow.document.write('<tr><td>Eintrittsdatum:</td><td>19.10.2022</td></tr>');
+  printWindow.document.write('<tr><td>Abteilung:</td><td>Montageteil</td></tr>');
+  printWindow.document.write('<tr><td>Vorgesetzte/r:</td><td>Aydin Bektas</td></tr>');
+  printWindow.document.write('</table></div>');
+  printWindow.document.write('<div class="section"><div class="section-title">URLAUBSÜBERSICHT</div><table>');
+  printWindow.document.write('<tr><td>Jahresurlaub:</td><td>30 Tage</td></tr>');
+  printWindow.document.write('<tr><td>Resturlaub:</td><td>' + resturlaub + ' Tage</td></tr>');
+  printWindow.document.write('</table></div>');
+  printWindow.document.write('<div class="section"><div class="section-title">URLAUBSZEITRÄUME</div>');
+  printWindow.document.write('<table class="urlaub-table"><tr><th>Von</th><th>Bis</th><th>Anz. Tage</th><th>Urlaubsart</th></tr>');
+  printWindow.document.write('<tr><td>' + vonStr + '</td><td>' + bisStr + '</td><td>' + tage + '</td><td>' + art + '</td></tr>');
+  printWindow.document.write('<tr><td colspan="2" style="text-align:right;font-weight:bold">Gesamt:</td><td style="font-weight:bold">' + tage + '</td><td></td></tr>');
+  printWindow.document.write('</table></div>');
+  if (bemerkung) { printWindow.document.write('<div class="section"><div class="section-title">BEMERKUNGEN</div><p style="padding:6px 10px">' + bemerkung + '</p></div>'); }
+  printWindow.document.write('<div class="sign-area"><div class="sign-box">Arbeitnehmer/in \u00b7 ' + heuteStr + '</div><div class="sign-box">Vorgesetzte/r \u00b7 Datum</div></div>');
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  setTimeout(() => { printWindow.print(); }, 500);
+  const saveDate = new Date(vonDate);
+  while (saveDate <= bisDate) {
+    const dow = saveDate.getDay();
+    if (dow > 0 && dow < 6) {
+      const ds = fmt(saveDate);
+      userData[ds] = 'Urlaub';
+      userTimes[ds] = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'};
+    }
+    saveDate.setDate(saveDate.getDate() + 1);
+  }
+  saveData();
+  render();
+  closeUrlaubModal();
+}
 // ─── PHOTO SCAN ─────────────────────────────────────────────────
 let scannedEntries = [];
 function openPhotoScan() { document.getElementById('photoModal').classList.add('open'); document.getElementById('photoPreviewArea').style.display = 'none'; document.getElementById('scanResult').style.display = 'none'; document.getElementById('scanLoading').style.display = 'none'; scannedEntries = []; }
@@ -1167,6 +1288,7 @@ function importData(event) {
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('datenModal').addEventListener('click', function(e){if(e.target===this)closeDatenModal();});
   document.getElementById('berichtModal').addEventListener('click', function(e){if(e.target===this)closeBericht();});
+  document.getElementById('urlaubModal').addEventListener('click', function(e){if(e.target===this)closeUrlaubModal();});
   document.getElementById('photoModal').addEventListener('click', function(e){if(e.target===this)closePhotoModal();});
   document.getElementById('entryModal').addEventListener('click', function(e){if(e.target===this)closeModal();});
   document.getElementById('ndStart').addEventListener('change', updateNdCalc);
