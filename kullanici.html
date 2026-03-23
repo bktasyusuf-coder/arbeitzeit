@@ -386,6 +386,22 @@
       <div style="font-size:20px;font-weight:800">🏖 Urlaubsantrag</div>
       <button onclick="closeUrlaubModal()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
     </div>
+    <div id="mitarbeiterSection">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">Mitarbeiter</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="maName" placeholder="Bektas"></div>
+        <div class="form-group"><label class="form-label">Vorname</label><input type="text" class="form-input" id="maVorname" placeholder="Yusuf"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Personal-Nr.</label><input type="text" class="form-input" id="maPersonalNr" placeholder="0034"></div>
+        <div class="form-group"><label class="form-label">Eintrittsdatum</label><input type="text" class="form-input" id="maEintritt" placeholder="19.10.2022"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Abteilung</label><input type="text" class="form-input" id="maAbteilung" placeholder="Montageteil"></div>
+        <div class="form-group"><label class="form-label">Vorgesetzte/r</label><input type="text" class="form-input" id="maVorgesetzter" placeholder="Aydin Bektas"></div>
+      </div>
+      <button onclick="saveMitarbeiter()" style="width:100%;padding:10px;background:var(--green);border:none;border-radius:8px;color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px">💾 Mitarbeiter speichern</button>
+    </div>
     <div class="form-group">
       <label class="form-label">Von (Datum)</label>
       <input type="date" class="form-input" id="urlaubVon">
@@ -402,8 +418,10 @@
       <label class="form-label">Bemerkungen</label>
       <input type="text" class="form-input" id="urlaubBemerkung" placeholder="Optional...">
     </div>
+    
     <div id="urlaubGirilen" style="margin-bottom:16px"></div>
  <button class="save-btn" onclick="printUrlaub()" style="background:var(--blue)">📄 Als PDF speichern</button>
+    <button class="cancel-btn" onclick="document.getElementById('mitarbeiterSection').style.display='block'" style="color:var(--accent2)">✏️ Mitarbeiter bearbeiten</button>
     <button class="cancel-btn" onclick="resetUrlaub()" style="color:var(--red)">🗑 Urlaub zurücksetzen (Von–Bis)</button>
   </div>
 </div>
@@ -1111,6 +1129,16 @@ function sendBericht() {
 }
 // ─── URLAUB ANTRAG ──────────────────────────────────────────
 function openUrlaubModal() {
+ function openUrlaubModal() {
+  // Load saved Mitarbeiter data
+  const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
+  document.getElementById('maName').value = ma.name || '';
+  document.getElementById('maVorname').value = ma.vorname || '';
+  document.getElementById('maPersonalNr').value = ma.personalNr || '';
+  document.getElementById('maEintritt').value = ma.eintritt || '';
+  document.getElementById('maAbteilung').value = ma.abteilung || '';
+  document.getElementById('maVorgesetzter').value = ma.vorgesetzter || '';
+  // Show saved Urlaub days
   const urlaubDays = [];
   for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubDays.push(ds); }
   urlaubDays.sort();
@@ -1122,7 +1150,23 @@ function openUrlaubModal() {
     html += '</div>';
   }
   document.getElementById('urlaubGirilen').innerHTML = html;
+  // Hide form if already saved
+  if (ma.name) { document.getElementById('mitarbeiterSection').style.display = 'none'; }
+  else { document.getElementById('mitarbeiterSection').style.display = 'block'; }
   document.getElementById('urlaubModal').classList.add('open');
+}
+function saveMitarbeiter() {
+  const ma = {
+    name: document.getElementById('maName').value.trim(),
+    vorname: document.getElementById('maVorname').value.trim(),
+    personalNr: document.getElementById('maPersonalNr').value.trim(),
+    eintritt: document.getElementById('maEintritt').value.trim(),
+    abteilung: document.getElementById('maAbteilung').value.trim(),
+    vorgesetzter: document.getElementById('maVorgesetzter').value.trim()
+  };
+  localStorage.setItem(LS_PREFIX + 'mitarbeiter', JSON.stringify(ma));
+  alert('✅ Mitarbeiter gespeichert!');
+  document.getElementById('mitarbeiterSection').style.display = 'none';
 }
 function closeUrlaubModal() { document.getElementById('urlaubModal').classList.remove('open'); }
 
@@ -1207,12 +1251,13 @@ if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
   printWindow.document.write('<div class="header"><img src="https://bktasyusuf-coder.github.io/arbeitzeit/logo.png" style="width:60px;height:60px;margin-bottom:8px"><h2>Ideal Sanit\u00e4r und Heizung</h2><p>Voltmerstra\u00dfe 27a \u00b7 30165 Hannover</p><p>Tel. 0511 1627870 \u00b7 info@ideal-hannover.de</p></div>');
   printWindow.document.write('<div class="title">URLAUBSANTRAG</div>');
   printWindow.document.write('<div class="section"><div class="section-title">MITARBEITER</div><table>');
-  printWindow.document.write('<tr><td>Name:</td><td>Bektas</td></tr>');
-  printWindow.document.write('<tr><td>Vorname:</td><td>Yusuf</td></tr>');
-  printWindow.document.write('<tr><td>Personal-Nr.:</td><td>0034</td></tr>');
-  printWindow.document.write('<tr><td>Eintrittsdatum:</td><td>19.10.2022</td></tr>');
-  printWindow.document.write('<tr><td>Abteilung:</td><td>Montageteil</td></tr>');
-  printWindow.document.write('<tr><td>Vorgesetzte/r:</td><td>Aydin Bektas</td></tr>');
+const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
+  printWindow.document.write('<tr><td>Name:</td><td>' + (ma.name || '') + '</td></tr>');
+  printWindow.document.write('<tr><td>Vorname:</td><td>' + (ma.vorname || '') + '</td></tr>');
+  printWindow.document.write('<tr><td>Personal-Nr.:</td><td>' + (ma.personalNr || '') + '</td></tr>');
+  printWindow.document.write('<tr><td>Eintrittsdatum:</td><td>' + (ma.eintritt || '') + '</td></tr>');
+  printWindow.document.write('<tr><td>Abteilung:</td><td>' + (ma.abteilung || '') + '</td></tr>');
+  printWindow.document.write('<tr><td>Vorgesetzte/r:</td><td>' + (ma.vorgesetzter || '') + '</td></tr>');
   printWindow.document.write('</table></div>');
   printWindow.document.write('<div class="section"><div class="section-title">URLAUBSÜBERSICHT</div><table>');
   printWindow.document.write('<tr><td>Jahresurlaub:</td><td>30 Tage</td></tr>');
