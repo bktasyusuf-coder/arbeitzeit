@@ -1129,7 +1129,6 @@ function sendBericht() {
 }
 // ─── URLAUB ANTRAG ──────────────────────────────────────────
 function openUrlaubModal() {
- function openUrlaubModal() {
   // Load saved Mitarbeiter data
   const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
   document.getElementById('maName').value = ma.name || '';
