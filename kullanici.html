@@ -1230,6 +1230,7 @@ if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
   const heute = new Date();
   const heuteStr = String(heute.getDate()).padStart(2,'0') + '.' + String(heute.getMonth()+1).padStart(2,'0') + '.' + heute.getFullYear();
   const printWindow = window.open('', '_blank');
+  if (!printWindow) { alert('Pop-up blockiert! Bitte Pop-ups erlauben.'); return; }
   printWindow.document.write('<html><head><title>Urlaubsantrag</title><style>');
   printWindow.document.write('body{font-family:Arial,sans-serif;padding:40px;color:#333;font-size:13px;max-width:700px;margin:0 auto}');
   printWindow.document.write('.header{text-align:center;margin-bottom:30px;border-bottom:2px solid #333;padding-bottom:15px}');
@@ -1248,6 +1249,7 @@ if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
   printWindow.document.write('.sign-box{width:45%;border-top:1px solid #333;padding-top:6px;font-size:11px;text-align:center}');
   printWindow.document.write('@media print{body{padding:20px}}');
   printWindow.document.write('</style></head><body>');
+  printWindow.document.write('<div style="text-align:right;margin-bottom:10px"><button onclick="window.close()" style="padding:8px 20px;background:#333;color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer">✕ Schließen</button></div>');
   printWindow.document.write('<div class="header"><img src="https://bktasyusuf-coder.github.io/arbeitzeit/logo.png" style="width:60px;height:60px;margin-bottom:8px"><h2>Ideal Sanit\u00e4r und Heizung</h2><p>Voltmerstra\u00dfe 27a \u00b7 30165 Hannover</p><p>Tel. 0511 1627870 \u00b7 info@ideal-hannover.de</p></div>');
   printWindow.document.write('<div class="title">URLAUBSANTRAG</div>');
   printWindow.document.write('<div class="section"><div class="section-title">MITARBEITER</div><table>');
