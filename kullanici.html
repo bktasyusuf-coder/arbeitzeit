@@ -1130,13 +1130,14 @@ function sendBericht() {
 // ─── URLAUB ANTRAG ──────────────────────────────────────────
 function openUrlaubModal() {
   // Load saved Mitarbeiter data
-  const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
+    const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
   document.getElementById('maName').value = ma.name || '';
   document.getElementById('maVorname').value = ma.vorname || '';
   document.getElementById('maPersonalNr').value = ma.personalNr || '';
   document.getElementById('maEintritt').value = ma.eintritt || '';
   document.getElementById('maAbteilung').value = ma.abteilung || '';
   document.getElementById('maVorgesetzter').value = ma.vorgesetzter || '';
+
   // Show saved Urlaub days
   const urlaubDays = [];
   for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubDays.push(ds); }
