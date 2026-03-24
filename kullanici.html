@@ -1077,62 +1077,120 @@ let currentNdDate = null;
 let currentNdIndex = -1;
 
 function openNotdienst(dateStr, index) {
-  currentNdDate = dateStr; currentNdIndex = index;
-  const parts = dateStr.split('-'); const d = new Date(dateStr);
+  currentNdDate = dateStr;
+  currentNdIndex = index;
+  const parts = dateStr.split('-');
+  const d = new Date(dateStr);
   const DAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
   const ndArr = userNotdienst[dateStr] || [];
   const arr = Array.isArray(ndArr) ? ndArr : [ndArr];
-  const nd = index >= 0 ? (arr[index] || {}) : {};
+  const nd = (index >= 0 && arr[index]) ? arr[index] : {};
   const count = arr.length;
-  document.getElementById('ndDateLabel').textContent = `${DAYS[d.getDay()]}, ${parts[2]}.${parts[1]}.${parts[0]}${index>=0 ? ` — Eintrag ${index+1}` : ` — Neu (${count+1}. Eintrag)`}`;
+
+  document.getElementById('ndDateLabel').textContent = `${DAYS[d.getDay()]}, ${parts[2]}.${parts[1]}.${parts[0]}${index >= 0 ? ' — Eintrag ' + (index+1) : ' — Neu (' + (count+1) + '. Eintrag)'}`;
+
+  // Fill time fields
   document.getElementById('ndStart').value = nd.start || '';
   document.getElementById('ndEnd').value = nd.end || '';
   document.getElementById('ndCalc').value = nd.hours || '';
-  document.getElementById('ndDeleteBtn').style.display = index >= 0 ? 'block' : 'none';
-  // Pre-fill mail section from existing note
+
+  // Fill Kunde/Adresse from saved note
   const noteStr = nd.note || '';
-  const noteParts = noteStr.split(' — ');
-  document.getElementById('ndBrKunde').value = noteParts[0] || '';
-  document.getElementById('ndBrAdresse').value = noteParts[1] || '';
-  document.getElementById('ndBrProblem').value = '';
-  document.getElementById('ndBrErgebnis').value = '';
+  const dashIdx = noteStr.indexOf(' — ');
+  if (dashIdx >= 0) {
+    document.getElementById('ndBrKunde').value = noteStr.substring(0, dashIdx);
+    document.getElementById('ndBrAdresse').value = noteStr.substring(dashIdx + 3);
+  } else {
+    document.getElementById('ndBrKunde').value = noteStr;
+    document.getElementById('ndBrAdresse').value = '';
+  }
+
+  // Fill Problem/Ergebnis from saved data
+  document.getElementById('ndBrProblem').value = nd.problem || '';
+  document.getElementById('ndBrErgebnis').value = nd.ergebnis || '';
+
+  // Show delete button only for existing entries
+  document.getElementById('ndDeleteBtn').style.display = index >= 0 ? 'block' : 'none';
+
   document.getElementById('notdienstModal').classList.add('open');
 }
-function closeNotdienst() { document.getElementById('notdienstModal').classList.remove('open'); currentNdDate = null; currentNdIndex = -1; }
+
+function closeNotdienst() {
+  document.getElementById('notdienstModal').classList.remove('open');
+  currentNdDate = null;
+  currentNdIndex = -1;
+}
+
 function updateNdCalc() {
   const s = document.getElementById('ndStart').value;
   const e = document.getElementById('ndEnd').value;
-  document.getElementById('ndCalc').value = calcWorkHours(s,'00:00',e) || '--:--';
+  document.getElementById('ndCalc').value = calcWorkHours(s, '00:00', e) || '--:--';
 }
+
+function buildNdEntry() {
+  const start = document.getElementById('ndStart').value;
+  const end = document.getElementById('ndEnd').value;
+  const hours = calcWorkHours(start, '00:00', end) || '00:00';
+  const kunde = document.getElementById('ndBrKunde').value.trim();
+  const adresse = document.getElementById('ndBrAdresse').value.trim();
+  const problem = document.getElementById('ndBrProblem').value.trim();
+  const ergebnis = document.getElementById('ndBrErgebnis').value.trim();
+  let note = '';
+  if (kunde) note = kunde + (adresse ? ' — ' + adresse : '');
+  return { start, end, hours, note, problem, ergebnis };
+}
+
 function saveNotdienst() {
   if (!currentNdDate) return;
   const start = document.getElementById('ndStart').value;
   const end = document.getElementById('ndEnd').value;
   if (!start || !end) { alert('Bitte Start und Ende eingeben!'); return; }
-  const hours = calcWorkHours(start, '00:00', end) || '00:00';
+
+  const entry = buildNdEntry();
   let arr = userNotdienst[currentNdDate] || [];
   if (!Array.isArray(arr)) arr = [arr];
-  // Build note from Kunde + Adresse if filled
-  const kunde = document.getElementById('ndBrKunde').value.trim();
-  const adresse = document.getElementById('ndBrAdresse').value.trim();
-  let note = '';
-  if (kunde || adresse) { note = kunde + (adresse ? ' — ' + adresse : ''); }
-  else if (currentNdIndex >= 0 && arr[currentNdIndex]) { note = arr[currentNdIndex].note || ''; }
+
+  // Preserve erledigt status
   const erledigt = (currentNdIndex >= 0 && arr[currentNdIndex]) ? !!arr[currentNdIndex].erledigt : false;
-  if (currentNdIndex >= 0) { arr[currentNdIndex] = {start, end, hours, note, erledigt}; }
-  else { arr.push({start, end, hours, note, erledigt: false}); }
+  entry.erledigt = erledigt;
+
+  if (currentNdIndex >= 0) {
+    arr[currentNdIndex] = entry;
+  } else {
+    entry.erledigt = false;
+    arr.push(entry);
+    // Update index to point to newly created entry
+    currentNdIndex = arr.length - 1;
+  }
   userNotdienst[currentNdDate] = arr;
   saveData();
   render();
+  // Visual feedback
+  const saveBtn = document.querySelector('#notdienstModal .save-btn');
+  if (saveBtn) {
+    const orig = saveBtn.textContent;
+    saveBtn.textContent = '✅ Gespeichert!';
+    saveBtn.style.background = 'var(--green)';
+    setTimeout(() => { saveBtn.textContent = orig; saveBtn.style.background = 'var(--orange)'; }, 1500);
+  }
 }
+
 function deleteNotdienst() {
   if (!currentNdDate) return;
   let arr = userNotdienst[currentNdDate] || [];
   if (!Array.isArray(arr)) arr = [arr];
-  if (currentNdIndex >= 0) { arr.splice(currentNdIndex, 1); if (arr.length === 0) delete userNotdienst[currentNdDate]; else userNotdienst[currentNdDate] = arr; }
-  else { delete userNotdienst[currentNdDate]; }
-  saveData(); closeNotdienst(); render();
+  if (currentNdIndex >= 0) {
+    arr.splice(currentNdIndex, 1);
+    if (arr.length === 0) delete userNotdienst[currentNdDate];
+    else userNotdienst[currentNdDate] = arr;
+  } else {
+    delete userNotdienst[currentNdDate];
+  }
+  saveData();
+  closeNotdienst();
+  render();
 }
+
 function toggleNdStatus(dateStr, idx) {
   let arr = userNotdienst[dateStr] || [];
   if (!Array.isArray(arr)) arr = [arr];
@@ -1223,6 +1281,30 @@ function sendBerichtFromNd() {
   const problem = document.getElementById('ndBrProblem').value.trim();
   const ergebnis = document.getElementById('ndBrErgebnis').value.trim();
   if (!kunde || !problem) { alert('Bitte mindestens Kunde und Problem ausfüllen!'); return; }
+
+  // Save all fields to notdienst entry first
+  if (currentNdDate) {
+    const start = document.getElementById('ndStart').value;
+    const end = document.getElementById('ndEnd').value;
+    if (start && end) {
+      const entry = buildNdEntry();
+      let arr = userNotdienst[currentNdDate] || [];
+      if (!Array.isArray(arr)) arr = [arr];
+      const idx = currentNdIndex >= 0 ? currentNdIndex : arr.length - 1;
+      if (idx >= 0 && arr[idx]) {
+        entry.erledigt = !!arr[idx].erledigt;
+        arr[idx] = entry;
+      } else if (currentNdIndex < 0) {
+        entry.erledigt = false;
+        arr.push(entry);
+      }
+      userNotdienst[currentNdDate] = arr;
+      saveData();
+      render();
+    }
+  }
+
+  // Build and send mail
   const heute = new Date();
   const datumStr = `${String(heute.getDate()).padStart(2,'0')}.${String(heute.getMonth()+1).padStart(2,'0')}.${heute.getFullYear()}`;
   const kurzProblem = problem.length > 60 ? problem.substring(0, 60) + '...' : problem;
@@ -1235,18 +1317,7 @@ function sendBerichtFromNd() {
   const zeilen = ergebnis.split('\n').filter(z => z.trim());
   zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
   body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
-  // Save Kunde + Adresse to notdienst note
-  if (currentNdDate && userNotdienst[currentNdDate]) {
-    let ndItems = userNotdienst[currentNdDate];
-    if (!Array.isArray(ndItems)) ndItems = [ndItems];
-    const idx = currentNdIndex >= 0 ? currentNdIndex : ndItems.length - 1;
-    if (ndItems[idx]) {
-      ndItems[idx].note = `${kunde}${adresse ? ' — ' + adresse : ''}`;
-      userNotdienst[currentNdDate] = ndItems;
-      saveData();
-      render();
-    }
-  }
+
   const to = 'info@ideal-hannover.de';
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
   window.open(mailtoUrl, '_self');
