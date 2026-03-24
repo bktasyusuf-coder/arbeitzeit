@@ -915,15 +915,16 @@ function renderDays() {
     const ndList = userNotdienst[dateStr] || [];
     const ndArr = Array.isArray(ndList) ? ndList : [ndList];
     ndArr.forEach((nd, idx) => {
-      html += `<div style="padding:4px 14px 6px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)">
+      html += `<div style="padding:4px 14px 6px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);flex-wrap:wrap">
         <span style="font-size:11px;font-weight:700;color:var(--orange)">🚨 Nd ${ndArr.length>1?idx+1:''}</span>
         <div class="time-chip"><span class="chip-label">Start</span><span class="chip-val" style="color:var(--orange)">${nd.start||'--:--'}</span></div>
         <div class="time-chip"><span class="chip-label">Ende</span><span class="chip-val" style="color:var(--orange)">${nd.end||'--:--'}</span></div>
         <div class="time-chip"><span class="chip-label">Std</span><span class="chip-val" style="color:var(--orange)">${nd.hours||'--:--'}</span></div>
         ${nd.note?`<div class="time-chip"><span class="chip-val" style="color:var(--muted);font-size:10px">📝 ${nd.note}</span></div>`:''}
-        <button onclick="event.stopPropagation();toggleNdStatus('${dateStr}',${idx})" style="margin-left:auto;font-size:14px;background:none;border:none;cursor:pointer">${nd.erledigt ? '✅' : '❌'}</button>
-        <button onclick="event.stopPropagation();openNotdienst('${dateStr}',${idx})" style="background:var(--surface2);border:1px solid var(--orange);color:var(--orange);padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">✏️</button>
-        <button onclick="event.stopPropagation();openBericht('${dateStr}')" style="background:var(--surface2);border:1px solid #ea4335;color:#ea4335;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">📧</button>
+        <div style="margin-left:auto;display:flex;gap:4px;align-items:center">
+          <button onclick="event.stopPropagation();toggleNdStatus('${dateStr}',${idx})" style="font-size:14px;background:none;border:none;cursor:pointer">${nd.erledigt ? '✅' : '❌'}</button>
+          <button onclick="event.stopPropagation();openNotdienst('${dateStr}',${idx})" style="background:var(--surface2);border:1px solid var(--orange);color:var(--orange);padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">✏️</button>
+        </div>
       </div>`;
     });
     if (ndArr.length < 6 && (status === 'Arbeiten' || weekend || status === 'Feiertag')) {
@@ -1111,12 +1112,18 @@ function saveNotdienst() {
   const hours = calcWorkHours(start, '00:00', end) || '00:00';
   let arr = userNotdienst[currentNdDate] || [];
   if (!Array.isArray(arr)) arr = [arr];
-  const existingNote = (currentNdIndex >= 0 && arr[currentNdIndex]) ? arr[currentNdIndex].note || '' : '';
-  if (currentNdIndex >= 0) { arr[currentNdIndex] = {start, end, hours, note: existingNote, erledigt: arr[currentNdIndex] ? arr[currentNdIndex].erledigt : false}; }
-  else { arr.push({start, end, hours, note: ''}); }
+  // Build note from Kunde + Adresse if filled
+  const kunde = document.getElementById('ndBrKunde').value.trim();
+  const adresse = document.getElementById('ndBrAdresse').value.trim();
+  let note = '';
+  if (kunde || adresse) { note = kunde + (adresse ? ' — ' + adresse : ''); }
+  else if (currentNdIndex >= 0 && arr[currentNdIndex]) { note = arr[currentNdIndex].note || ''; }
+  const erledigt = (currentNdIndex >= 0 && arr[currentNdIndex]) ? !!arr[currentNdIndex].erledigt : false;
+  if (currentNdIndex >= 0) { arr[currentNdIndex] = {start, end, hours, note, erledigt}; }
+  else { arr.push({start, end, hours, note, erledigt: false}); }
   userNotdienst[currentNdDate] = arr;
-  saveData(); render();
-  alert('✅ Notdienst gespeichert!');
+  saveData();
+  render();
 }
 function deleteNotdienst() {
   if (!currentNdDate) return;
@@ -1228,13 +1235,13 @@ function sendBerichtFromNd() {
   const zeilen = ergebnis.split('\n').filter(z => z.trim());
   zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
   body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
-  // Save to notdienst note
+  // Save Kunde + Adresse to notdienst note
   if (currentNdDate && userNotdienst[currentNdDate]) {
-    const ndList = userNotdienst[currentNdDate];
-    const ndItems = Array.isArray(ndList) ? ndList : [ndList];
-    const lastItem = ndItems[ndItems.length - 1];
-    if (lastItem) {
-      lastItem.note = `${kunde} — ${adresse}`;
+    let ndItems = userNotdienst[currentNdDate];
+    if (!Array.isArray(ndItems)) ndItems = [ndItems];
+    const idx = currentNdIndex >= 0 ? currentNdIndex : ndItems.length - 1;
+    if (ndItems[idx]) {
+      ndItems[idx].note = `${kunde}${adresse ? ' — ' + adresse : ''}`;
       userNotdienst[currentNdDate] = ndItems;
       saveData();
       render();
