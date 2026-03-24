@@ -237,6 +237,12 @@
   .sync-status { transition:color 0.3s; }
   .sync-status.synced { color:var(--green)!important; }
   .sync-status.error { color:var(--red)!important; }
+  .nd-preset-btn {
+    background:var(--surface2); border:1px solid var(--orange); color:var(--orange);
+    padding:8px 12px; border-radius:8px; font-family:'DM Mono',monospace; font-size:12px;
+    font-weight:500; cursor:pointer; transition:all 0.2s;
+  }
+  .nd-preset-btn:active, .nd-preset-btn.active { background:rgba(251,146,60,0.2); transform:scale(0.95); }
 </style>
 </head>
 <body>
@@ -356,6 +362,22 @@
       <button onclick="closeNotdienst()" style="background:var(--orange);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
     </div>
     <div id="ndDateLabel" style="font-size:13px;color:var(--muted);margin-bottom:16px"></div>
+
+    <!-- Quick time presets -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">⏰ Schnellauswahl</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button onclick="setNdPreset('16:30','17:30')" class="nd-preset-btn">16:30–17:30</button>
+        <button onclick="setNdPreset('17:00','18:00')" class="nd-preset-btn">17:00–18:00</button>
+        <button onclick="setNdPreset('17:00','19:00')" class="nd-preset-btn">17:00–19:00</button>
+        <button onclick="setNdPreset('18:00','20:00')" class="nd-preset-btn">18:00–20:00</button>
+        <button onclick="setNdPreset('20:00','22:00')" class="nd-preset-btn">20:00–22:00</button>
+        <button onclick="setNdPreset('06:00','08:00')" class="nd-preset-btn">06:00–08:00</button>
+        <button onclick="setNdPreset('08:00','12:00')" class="nd-preset-btn">Sa 08–12</button>
+        <button onclick="setNdPreset('08:00','16:00')" class="nd-preset-btn">Sa/So 08–16</button>
+      </div>
+    </div>
+
     <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
       <div class="form-group">
         <label class="form-label">Start</label>
@@ -376,6 +398,34 @@
     </div>
     <button class="save-btn" onclick="saveNotdienst()" style="background:var(--orange)">💾 Speichern</button>
     <button id="ndDeleteBtn" class="cancel-btn" onclick="deleteNotdienst()" style="color:var(--red);margin-top:8px;display:none">🗑 Eintrag löschen</button>
+
+    <!-- Perma-Mail Bericht Section (moved here) -->
+    <div id="ndBerichtSection" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:20px">
+      <div style="font-size:16px;font-weight:800;margin-bottom:14px;color:#ea4335">📧 Notdienst-Bericht per Mail</div>
+      <div class="form-group">
+        <label class="form-label">Kunde (Name, Stockwerk)</label>
+        <input type="text" class="form-input" id="ndBrKunde" placeholder="z.B. Frau Ermakov/Kraft, 2. OG rechts">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adresse</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" class="form-input" id="ndBrAdresse" placeholder="z.B. Kniestraße 22, 30519 Hannover" style="flex:1">
+          <button onclick="openGoogleMaps('ndBrAdresse')" style="background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:16px;flex-shrink:0" title="In Google Maps öffnen">📍</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Problem</label>
+        <textarea class="form-input" id="ndBrProblem" rows="2" placeholder="z.B. Die WC-Spülung ist undicht..." style="resize:none;line-height:1.5;font-family:'Syne',sans-serif;font-size:13px"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ergebnis / Feststellungen (jede Zeile = ein Punkt)</label>
+        <textarea class="form-input" id="ndBrErgebnis" rows="4" placeholder="Laut telefonischer Auskunft wurde...&#10;Nach der Reparatur trat erneut...&#10;Vor Ort wurde festgestellt..." style="resize:none;line-height:1.5;font-family:'Syne',sans-serif;font-size:13px"></textarea>
+      </div>
+      <button onclick="sendBerichtFromNd()" style="width:100%;padding:16px;background:#ea4335;border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        <span style="font-size:20px">📧</span> Per Mail senden
+      </button>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">📎 Fotos bitte manuell anhängen</div>
+    </div>
   </div>
 </div>
 <!-- Urlaub Modal -->
@@ -386,7 +436,20 @@
       <div style="font-size:20px;font-weight:800">🏖 Urlaubsantrag</div>
       <button onclick="closeUrlaubModal()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
     </div>
-    <div id="mitarbeiterSection">
+
+    <!-- Saved info preview -->
+    <div id="mitarbeiterPreview" style="display:none;margin-bottom:16px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Mitarbeiter</div>
+          <div id="maPreviewText" style="font-size:14px;font-weight:700;color:var(--text)"></div>
+        </div>
+        <button onclick="toggleMitarbeiterEdit()" style="background:var(--surface);border:1px solid var(--accent);color:var(--accent2);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0">✏️ Ändern</button>
+      </div>
+    </div>
+
+    <!-- Editable fields (hidden by default if saved) -->
+    <div id="mitarbeiterSection" style="display:none">
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">Mitarbeiter</div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="maName" placeholder="Bektas"></div>
@@ -402,6 +465,7 @@
       </div>
       <button onclick="saveMitarbeiter()" style="width:100%;padding:10px;background:var(--green);border:none;border-radius:8px;color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px">💾 Mitarbeiter speichern</button>
     </div>
+
     <div class="form-group">
       <label class="form-label">Von (Datum)</label>
       <input type="date" class="form-input" id="urlaubVon">
@@ -421,7 +485,6 @@
     
     <div id="urlaubGirilen" style="margin-bottom:16px"></div>
  <button class="save-btn" onclick="printUrlaub()" style="background:var(--blue)">📄 Als PDF speichern</button>
-    <button class="cancel-btn" onclick="document.getElementById('mitarbeiterSection').style.display='block'" style="color:var(--accent2)">✏️ Mitarbeiter bearbeiten</button>
     <button class="cancel-btn" onclick="resetUrlaub()" style="color:var(--red)">🗑 Urlaub zurücksetzen (Von–Bis)</button>
   </div>
 </div>
@@ -440,7 +503,10 @@
     </div>
     <div class="form-group">
       <label class="form-label">Adresse</label>
-      <input type="text" class="form-input" id="brAdresse" placeholder="z.B. Kniestraße 22, 30519 Hannover">
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" class="form-input" id="brAdresse" placeholder="z.B. Kniestraße 22, 30519 Hannover" style="flex:1">
+        <button onclick="openGoogleMaps('brAdresse')" style="background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:16px;flex-shrink:0" title="In Google Maps öffnen">📍</button>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Problem</label>
@@ -1027,7 +1093,7 @@ function openNotdienst(dateStr, index) {
   document.getElementById('ndDeleteBtn').style.display = index >= 0 ? 'block' : 'none';
   document.getElementById('notdienstModal').classList.add('open');
 }
-function closeNotdienst() { document.getElementById('notdienstModal').classList.remove('open'); currentNdDate = null; currentNdIndex = -1; }
+function closeNotdienst() { document.getElementById('notdienstModal').classList.remove('open'); document.getElementById('ndBerichtSection').style.display = 'none'; currentNdDate = null; currentNdIndex = -1; }
 function updateNdCalc() {
   const s = document.getElementById('ndStart').value;
   const e = document.getElementById('ndEnd').value;
@@ -1045,11 +1111,16 @@ function saveNotdienst() {
   if (currentNdIndex >= 0) { arr[currentNdIndex] = {start, end, hours, note}; }
   else { arr.push({start, end, hours, note}); }
   userNotdienst[currentNdDate] = arr;
-  const savedDate = currentNdDate;
-  saveData(); closeNotdienst(); render();
-  setTimeout(() => {
-    if (confirm('📧 Notdienst-Bericht per Mail senden?')) { openBericht(savedDate); }
-  }, 300);
+  saveData(); render();
+  // Show inline bericht section
+  const berichtSection = document.getElementById('ndBerichtSection');
+  berichtSection.style.display = 'block';
+  // Auto-fill from note
+  document.getElementById('ndBrKunde').value = note || '';
+  document.getElementById('ndBrAdresse').value = '';
+  document.getElementById('ndBrProblem').value = '';
+  document.getElementById('ndBrErgebnis').value = '';
+  berichtSection.scrollIntoView({behavior:'smooth'});
 }
 function deleteNotdienst() {
   if (!currentNdDate) return;
@@ -1110,7 +1181,6 @@ function sendBericht() {
   const zeilen = ergebnis.split('\n').filter(z => z.trim());
   zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
   body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
-  // Save Kunde + Adresse to Notdienst Bemerkung
   if (berichtDate && userNotdienst[berichtDate]) {
     const ndList = userNotdienst[berichtDate];
     const ndItems = Array.isArray(ndList) ? ndList : [ndList];
@@ -1127,16 +1197,76 @@ function sendBericht() {
   window.open(mailtoUrl, '_self');
   closeBericht();
 }
+
+// ─── GOOGLE MAPS ────────────────────────────────────────────────
+function openGoogleMaps(inputId) {
+  const adresse = document.getElementById(inputId).value.trim();
+  if (!adresse) { alert('Bitte zuerst eine Adresse eingeben!'); return; }
+  const url = 'https://www.google.com/maps/search/' + encodeURIComponent(adresse);
+  window.open(url, '_blank');
+}
+
+// ─── NOTDIENST PRESETS ─────────────────────────────────────────
+function setNdPreset(start, end) {
+  document.getElementById('ndStart').value = start;
+  document.getElementById('ndEnd').value = end;
+  updateNdCalc();
+}
+
+// ─── SEND BERICHT FROM NOTDIENST MODAL ─────────────────────────
+function sendBerichtFromNd() {
+  const kunde = document.getElementById('ndBrKunde').value.trim();
+  const adresse = document.getElementById('ndBrAdresse').value.trim();
+  const problem = document.getElementById('ndBrProblem').value.trim();
+  const ergebnis = document.getElementById('ndBrErgebnis').value.trim();
+  if (!kunde || !problem) { alert('Bitte mindestens Kunde und Problem ausfüllen!'); return; }
+  const heute = new Date();
+  const datumStr = `${String(heute.getDate()).padStart(2,'0')}.${String(heute.getMonth()+1).padStart(2,'0')}.${heute.getFullYear()}`;
+  const kurzProblem = problem.length > 60 ? problem.substring(0, 60) + '...' : problem;
+  const betreff = `${datumStr} – ${kunde}, ${adresse} / ${kurzProblem}`;
+  let body = `Sehr geehrte Damen und Herren,\n\n`;
+  body += `Kunde:\n${kunde}\n\n`;
+  body += `Adresse:\n${adresse}\n\n`;
+  body += `Problem:\n${problem}\n\n`;
+  body += `Ergebnis / Feststellungen:\n\n`;
+  const zeilen = ergebnis.split('\n').filter(z => z.trim());
+  zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
+  body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
+  // Save to notdienst note
+  if (currentNdDate && userNotdienst[currentNdDate]) {
+    const ndList = userNotdienst[currentNdDate];
+    const ndItems = Array.isArray(ndList) ? ndList : [ndList];
+    const lastItem = ndItems[ndItems.length - 1];
+    if (lastItem) {
+      lastItem.note = `${kunde} — ${adresse}`;
+      userNotdienst[currentNdDate] = ndItems;
+      saveData();
+      render();
+    }
+  }
+  const to = 'info@ideal-hannover.de';
+  const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
+  window.open(mailtoUrl, '_self');
+}
 // ─── URLAUB ANTRAG ──────────────────────────────────────────
 function openUrlaubModal() {
-  // Load saved Mitarbeiter data
-    const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
+  const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
   document.getElementById('maName').value = ma.name || '';
   document.getElementById('maVorname').value = ma.vorname || '';
   document.getElementById('maPersonalNr').value = ma.personalNr || '';
   document.getElementById('maEintritt').value = ma.eintritt || '';
   document.getElementById('maAbteilung').value = ma.abteilung || '';
   document.getElementById('maVorgesetzter').value = ma.vorgesetzter || '';
+
+  // Show preview or edit form
+  if (ma.name) {
+    document.getElementById('mitarbeiterSection').style.display = 'none';
+    document.getElementById('mitarbeiterPreview').style.display = 'block';
+    document.getElementById('maPreviewText').textContent = (ma.vorname || '') + ' ' + (ma.name || '') + (ma.personalNr ? ' · Nr. ' + ma.personalNr : '') + (ma.abteilung ? ' · ' + ma.abteilung : '');
+  } else {
+    document.getElementById('mitarbeiterSection').style.display = 'block';
+    document.getElementById('mitarbeiterPreview').style.display = 'none';
+  }
 
   // Show saved Urlaub days
   const urlaubDays = [];
@@ -1150,10 +1280,19 @@ function openUrlaubModal() {
     html += '</div>';
   }
   document.getElementById('urlaubGirilen').innerHTML = html;
-  // Hide form if already saved
-  if (ma.name) { document.getElementById('mitarbeiterSection').style.display = 'none'; }
-  else { document.getElementById('mitarbeiterSection').style.display = 'block'; }
   document.getElementById('urlaubModal').classList.add('open');
+}
+
+function toggleMitarbeiterEdit() {
+  const section = document.getElementById('mitarbeiterSection');
+  const preview = document.getElementById('mitarbeiterPreview');
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    preview.style.display = 'none';
+  } else {
+    section.style.display = 'none';
+    preview.style.display = 'block';
+  }
 }
 function saveMitarbeiter() {
   const ma = {
@@ -1167,6 +1306,8 @@ function saveMitarbeiter() {
   localStorage.setItem(LS_PREFIX + 'mitarbeiter', JSON.stringify(ma));
   alert('✅ Mitarbeiter gespeichert!');
   document.getElementById('mitarbeiterSection').style.display = 'none';
+  document.getElementById('mitarbeiterPreview').style.display = 'block';
+  document.getElementById('maPreviewText').textContent = (ma.vorname || '') + ' ' + (ma.name || '') + (ma.personalNr ? ' · Nr. ' + ma.personalNr : '') + (ma.abteilung ? ' · ' + ma.abteilung : '');
 }
 function closeUrlaubModal() { document.getElementById('urlaubModal').classList.remove('open'); }
 
