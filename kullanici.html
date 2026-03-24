@@ -392,15 +392,12 @@
         <input type="text" class="form-input" id="ndCalc" readonly placeholder="--:--">
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">📝 Bemerkung</label>
-      <input type="text" class="form-input" id="ndNote" placeholder="z.B. Einsatz, Bereitschaft...">
-    </div>
+
     <button class="save-btn" onclick="saveNotdienst()" style="background:var(--orange)">💾 Speichern</button>
     <button id="ndDeleteBtn" class="cancel-btn" onclick="deleteNotdienst()" style="color:var(--red);margin-top:8px;display:none">🗑 Eintrag löschen</button>
 
-    <!-- Perma-Mail Bericht Section (moved here) -->
-    <div id="ndBerichtSection" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:20px">
+    <!-- Per Mail Section - always below save -->
+    <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:20px">
       <div style="font-size:16px;font-weight:800;margin-bottom:14px;color:#ea4335">📧 Notdienst-Bericht per Mail</div>
       <div class="form-group">
         <label class="form-label">Kunde (Name, Stockwerk)</label>
@@ -1089,11 +1086,17 @@ function openNotdienst(dateStr, index) {
   document.getElementById('ndStart').value = nd.start || '';
   document.getElementById('ndEnd').value = nd.end || '';
   document.getElementById('ndCalc').value = nd.hours || '';
-  document.getElementById('ndNote').value = nd.note || '';
   document.getElementById('ndDeleteBtn').style.display = index >= 0 ? 'block' : 'none';
+  // Pre-fill mail section from existing note
+  const noteStr = nd.note || '';
+  const noteParts = noteStr.split(' — ');
+  document.getElementById('ndBrKunde').value = noteParts[0] || '';
+  document.getElementById('ndBrAdresse').value = noteParts[1] || '';
+  document.getElementById('ndBrProblem').value = '';
+  document.getElementById('ndBrErgebnis').value = '';
   document.getElementById('notdienstModal').classList.add('open');
 }
-function closeNotdienst() { document.getElementById('notdienstModal').classList.remove('open'); document.getElementById('ndBerichtSection').style.display = 'none'; currentNdDate = null; currentNdIndex = -1; }
+function closeNotdienst() { document.getElementById('notdienstModal').classList.remove('open'); currentNdDate = null; currentNdIndex = -1; }
 function updateNdCalc() {
   const s = document.getElementById('ndStart').value;
   const e = document.getElementById('ndEnd').value;
@@ -1103,24 +1106,16 @@ function saveNotdienst() {
   if (!currentNdDate) return;
   const start = document.getElementById('ndStart').value;
   const end = document.getElementById('ndEnd').value;
-  const note = document.getElementById('ndNote').value.trim();
   if (!start || !end) { alert('Bitte Start und Ende eingeben!'); return; }
   const hours = calcWorkHours(start, '00:00', end) || '00:00';
   let arr = userNotdienst[currentNdDate] || [];
   if (!Array.isArray(arr)) arr = [arr];
-  if (currentNdIndex >= 0) { arr[currentNdIndex] = {start, end, hours, note}; }
-  else { arr.push({start, end, hours, note}); }
+  const existingNote = (currentNdIndex >= 0 && arr[currentNdIndex]) ? arr[currentNdIndex].note || '' : '';
+  if (currentNdIndex >= 0) { arr[currentNdIndex] = {start, end, hours, note: existingNote, erledigt: arr[currentNdIndex] ? arr[currentNdIndex].erledigt : false}; }
+  else { arr.push({start, end, hours, note: ''}); }
   userNotdienst[currentNdDate] = arr;
   saveData(); render();
-  // Show inline bericht section
-  const berichtSection = document.getElementById('ndBerichtSection');
-  berichtSection.style.display = 'block';
-  // Auto-fill from note
-  document.getElementById('ndBrKunde').value = note || '';
-  document.getElementById('ndBrAdresse').value = '';
-  document.getElementById('ndBrProblem').value = '';
-  document.getElementById('ndBrErgebnis').value = '';
-  berichtSection.scrollIntoView({behavior:'smooth'});
+  alert('✅ Notdienst gespeichert!');
 }
 function deleteNotdienst() {
   if (!currentNdDate) return;
