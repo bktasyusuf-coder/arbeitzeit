@@ -244,7 +244,6 @@
   }
   .nd-preset-btn:active, .nd-preset-btn.active { background:rgba(251,146,60,0.2); transform:scale(0.95); }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1541,19 +1540,13 @@ function switchSigTab(tab) {
   }
 }
 
-// ─── PDF GENERATION ────────────────────────────────────────────
+// ─── PDF GENERATION (Native Print) ─────────────────────────────
 function generateUrlaubPDF(mode) {
   const von = document.getElementById('urlaubVon').value;
   const bis = document.getElementById('urlaubBis').value;
   const art = document.getElementById('urlaubArt').value || 'Erholungsurlaub';
   const bemerkung = document.getElementById('urlaubBemerkung').value;
   if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
-
-  // Check jsPDF loaded
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert('PDF-Bibliothek konnte nicht geladen werden. Bitte Internetverbindung pruefen und Seite neu laden.');
-    return;
-  }
 
   const vonDate = new Date(von);
   const bisDate = new Date(bis);
@@ -1580,145 +1573,112 @@ function generateUrlaubPDF(mode) {
   const heuteStr = String(heute.getDate()).padStart(2,'0') + '.' + String(heute.getMonth()+1).padStart(2,'0') + '.' + heute.getFullYear();
   const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
 
-  try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const pw = 210, lm = 20, rm = 190;
-    let y = 20;
+  // Build print HTML
+  const sigHtml = savedSignatureData ? '<img src="' + savedSignatureData + '" style="max-width:180px;max-height:60px;display:block;margin:0 auto 4px">' : '';
 
-    // Helper: sanitize text for jsPDF (replace special chars)
-    const s = (txt) => String(txt || '')
-      .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
-      .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue')
-      .replace(/ß/g,'ss').replace(/·/g,'-').replace(/€/g,'EUR');
-
-    // Header
-    doc.setFontSize(14); doc.setFont('helvetica','bold');
-    doc.text('Ideal Sanitaer und Heizung', pw/2, y, {align:'center'}); y += 6;
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text('Voltmerstrasse 27a - 30165 Hannover', pw/2, y, {align:'center'}); y += 4;
-    doc.text('Tel. 0511 1627870 - info@ideal-hannover.de', pw/2, y, {align:'center'}); y += 3;
-    doc.setDrawColor(50); doc.setLineWidth(0.5); doc.line(lm, y, rm, y); y += 10;
-
-    // Title
-    doc.setFontSize(18); doc.setFont('helvetica','bold');
-    doc.text('URLAUBSANTRAG', pw/2, y, {align:'center'}); y += 14;
-
-    // Mitarbeiter section
-    doc.setFillColor(240,240,240); doc.rect(lm, y-4, rm-lm, 7, 'F');
-    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.text('MITARBEITER', lm+4, y+1); y += 10;
-
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    const maFields = [
-      ['Name:', s(ma.name)], ['Vorname:', s(ma.vorname)], ['Personal-Nr.:', s(ma.personalNr)],
-      ['Eintrittsdatum:', s(ma.eintritt)], ['Abteilung:', s(ma.abteilung)], ['Vorgesetzte/r:', s(ma.vorgesetzter)]
-    ];
-    maFields.forEach(function(f) {
-      doc.setFont('helvetica','bold'); doc.text(f[0], lm+2, y);
-      doc.setFont('helvetica','normal'); doc.text(f[1], lm+42, y);
-      doc.setDrawColor(200); doc.line(lm, y+2, rm, y+2); y += 6;
-    });
-    y += 4;
-
-    // Urlaubsuebersicht
-    doc.setFillColor(240,240,240); doc.rect(lm, y-4, rm-lm, 7, 'F');
-    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.text('URLAUBSUEBERSICHT', lm+4, y+1); y += 10;
-    doc.setFontSize(9);
-    doc.setFont('helvetica','bold'); doc.text('Jahresurlaub:', lm+2, y);
-    doc.setFont('helvetica','normal'); doc.text('30 Tage', lm+42, y); y += 6;
-    doc.setFont('helvetica','bold'); doc.text('Resturlaub:', lm+2, y);
-    doc.setFont('helvetica','normal'); doc.text(String(resturlaub) + ' Tage', lm+42, y); y += 10;
-
-    // Urlaubszeitraeume table
-    doc.setFillColor(240,240,240); doc.rect(lm, y-4, rm-lm, 7, 'F');
-    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.text('URLAUBSZEITRAEUME', lm+4, y+1); y += 10;
-
-    // Table header
-    doc.setFillColor(50,50,50); doc.rect(lm, y-4, rm-lm, 8, 'F');
-    doc.setTextColor(255); doc.setFontSize(8); doc.setFont('helvetica','bold');
-    doc.text('Von', lm+3, y+1); doc.text('Bis', lm+38, y+1);
-    doc.text('Anz. Tage', lm+73, y+1); doc.text('Urlaubsart', lm+108, y+1);
-    doc.setTextColor(0); y += 8;
-
-    // Table row
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text(vonStr, lm+3, y+1); doc.text(bisStr, lm+38, y+1);
-    doc.text(String(tage), lm+73, y+1); doc.text(s(art), lm+108, y+1);
-    doc.setDrawColor(200); doc.rect(lm, y-4, rm-lm, 8); y += 8;
-
-    // Gesamt
-    doc.setFont('helvetica','bold');
-    doc.text('Gesamt:', lm+58, y+1); doc.text(String(tage), lm+73, y+1);
-    doc.rect(lm, y-4, rm-lm, 8); y += 12;
-
-    // Bemerkungen
-    if (bemerkung) {
-      doc.setFillColor(240,240,240); doc.rect(lm, y-4, rm-lm, 7, 'F');
-      doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.text('BEMERKUNGEN', lm+4, y+1); y += 10;
-      doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.text(s(bemerkung), lm+2, y); y += 8;
-    }
-
-    // Signature area
-    y = Math.max(y + 10, 220);
-    doc.setDrawColor(50);
-
-    // Left: Arbeitnehmer
-    doc.line(lm, y, lm+75, y);
-    if (savedSignatureData) {
-      try { doc.addImage(savedSignatureData, 'PNG', lm+5, y-25, 65, 22); } catch(e) { console.warn('Sig error:', e); }
-    }
-    doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.text('Arbeitnehmer/in - ' + heuteStr, lm + 37.5, y+5, {align:'center'});
-
-    // Right: Vorgesetzte
-    doc.line(rm-75, y, rm, y);
-    doc.text('Vorgesetzte/r - Datum', rm - 37.5, y+5, {align:'center'});
-
-    saveData(); render();
-
-    if (mode === 'download') {
-      doc.save('Urlaubsantrag_' + vonStr.replace(/\./g,'-') + '.pdf');
-      closeUrlaubModal();
-    } else if (mode === 'mail') {
-      sendUrlaubMail(doc, vonStr, bisStr, tage, ma);
-    }
-  } catch(err) {
-    console.error('PDF Error:', err);
-    alert('PDF-Fehler: ' + err.message + '\n\nBitte Seite neu laden und erneut versuchen.');
-  }
-}
-
-// ─── MAIL SEND ─────────────────────────────────────────────────
-function sendUrlaubMail(doc, vonStr, bisStr, tage, ma) {
   const mailTo = document.getElementById('urlaubMailTo').value.trim() || 'info@ideal-hannover.de';
-  const pdfBase64 = doc.output('datauristring');
 
-  // Try Gmail API first (if connected)
-  const gmailUrl = 'https://gmail.mcp.claude.com/mcp';
+  let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Urlaubsantrag</title><style>';
+  html += 'body{font-family:Arial,sans-serif;padding:30px 40px;color:#333;font-size:13px;max-width:700px;margin:0 auto}';
+  html += '.header{text-align:center;margin-bottom:25px;border-bottom:2px solid #333;padding-bottom:12px}';
+  html += '.header h2{margin:0;font-size:16px;letter-spacing:1px}';
+  html += '.header p{margin:4px 0;font-size:12px;color:#666}';
+  html += '.title{text-align:center;font-size:20px;font-weight:bold;margin:18px 0;letter-spacing:2px}';
+  html += '.section{margin-bottom:18px}';
+  html += '.section-title{font-weight:bold;font-size:13px;background:#f0f0f0;padding:6px 10px;margin-bottom:8px;border-left:3px solid #333}';
+  html += 'table{width:100%;border-collapse:collapse;margin-bottom:8px}';
+  html += 'td{padding:5px 10px;border-bottom:1px solid #ddd;font-size:12px}';
+  html += 'td:first-child{font-weight:bold;width:160px;color:#555}';
+  html += '.urlaub-table{border:1px solid #333}';
+  html += '.urlaub-table th{background:#333;color:white;padding:8px;font-size:11px;text-align:left}';
+  html += '.urlaub-table td{border:1px solid #ccc;padding:8px;font-size:12px}';
+  html += '.sign-area{margin-top:40px;display:flex;justify-content:space-between;page-break-inside:avoid}';
+  html += '.sign-box{width:45%;text-align:center}';
+  html += '.sign-line{border-top:1px solid #333;padding-top:6px;font-size:11px;margin-top:8px}';
+  html += '.no-print{margin-bottom:15px;text-align:center}';
+  html += '@media print{.no-print{display:none!important}body{padding:20px 30px}}';
+  html += '</style></head><body>';
 
-  // Fallback: open mailto with instructions
-  const betreff = `Urlaubsantrag – ${ma.vorname || ''} ${ma.name || ''} – ${vonStr} bis ${bisStr}`;
-  let body = `Sehr geehrte Damen und Herren,\n\n`;
-  body += `hiermit beantrage ich Urlaub vom ${vonStr} bis ${bisStr} (${tage} Arbeitstage).\n\n`;
-  body += `Den unterschriebenen Urlaubsantrag finden Sie im Anhang als PDF.\n\n`;
-  body += `Mit freundlichen Grüßen\n${ma.vorname || ''} ${ma.name || ''}`;
+  // Action buttons (hidden in print)
+  html += '<div class="no-print">';
+  if (mode === 'mail') {
+    html += '<button onclick="window.print()" style="padding:10px 24px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">🖨 Als PDF drucken/speichern</button>';
+    html += '<button onclick="sendMail()" style="padding:10px 24px;background:#ea4335;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">📧 Per Mail senden</button>';
+  } else {
+    html += '<button onclick="window.print()" style="padding:10px 24px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">🖨 Als PDF speichern</button>';
+  }
+  html += '<button onclick="window.close()" style="padding:10px 24px;background:#555;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">✕ Schließen</button>';
+  html += '<p style="font-size:11px;color:#999;margin-top:8px">Tipp: Im Druckdialog "Als PDF speichern" wählen</p>';
+  html += '</div>';
 
-  // Save PDF as downloadable blob first
-  const pdfBlob = doc.output('blob');
-  const pdfUrl = URL.createObjectURL(pdfBlob);
+  // Document content
+  html += '<div class="header">';
+  html += '<img src="https://bktasyusuf-coder.github.io/arbeitzeit/logo.png" style="width:55px;height:55px;margin-bottom:6px" onerror="this.style.display=\'none\'">';
+  html += '<h2>Ideal Sanitär und Heizung</h2>';
+  html += '<p>Voltmerstraße 27a · 30165 Hannover</p>';
+  html += '<p>Tel. 0511 1627870 · info@ideal-hannover.de</p>';
+  html += '</div>';
 
-  // Download PDF
-  const a = document.createElement('a');
-  a.href = pdfUrl;
-  a.download = 'Urlaubsantrag_' + vonStr.replace(/\./g,'-') + '.pdf';
-  a.click();
+  html += '<div class="title">URLAUBSANTRAG</div>';
 
-  // Open mail client
-  setTimeout(() => {
-    const mailtoUrl = `mailto:${mailTo}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body + '\n\n⚠️ Bitte die heruntergeladene PDF-Datei manuell anhängen.')}`;
-    window.location.href = mailtoUrl;
-  }, 500);
+  // Mitarbeiter
+  html += '<div class="section"><div class="section-title">MITARBEITER</div><table>';
+  html += '<tr><td>Name:</td><td>' + (ma.name || '') + '</td></tr>';
+  html += '<tr><td>Vorname:</td><td>' + (ma.vorname || '') + '</td></tr>';
+  html += '<tr><td>Personal-Nr.:</td><td>' + (ma.personalNr || '') + '</td></tr>';
+  html += '<tr><td>Eintrittsdatum:</td><td>' + (ma.eintritt || '') + '</td></tr>';
+  html += '<tr><td>Abteilung:</td><td>' + (ma.abteilung || '') + '</td></tr>';
+  html += '<tr><td>Vorgesetzte/r:</td><td>' + (ma.vorgesetzter || '') + '</td></tr>';
+  html += '</table></div>';
 
+  // Urlaubsübersicht
+  html += '<div class="section"><div class="section-title">URLAUBSÜBERSICHT</div><table>';
+  html += '<tr><td>Jahresurlaub:</td><td>30 Tage</td></tr>';
+  html += '<tr><td>Resturlaub:</td><td>' + resturlaub + ' Tage</td></tr>';
+  html += '</table></div>';
+
+  // Urlaubszeiträume
+  html += '<div class="section"><div class="section-title">URLAUBSZEITRÄUME</div>';
+  html += '<table class="urlaub-table"><tr><th>Von</th><th>Bis</th><th>Anz. Tage</th><th>Urlaubsart</th></tr>';
+  html += '<tr><td>' + vonStr + '</td><td>' + bisStr + '</td><td>' + tage + '</td><td>' + art + '</td></tr>';
+  html += '<tr><td colspan="2" style="text-align:right;font-weight:bold">Gesamt:</td><td style="font-weight:bold">' + tage + '</td><td></td></tr>';
+  html += '</table></div>';
+
+  // Bemerkungen
+  if (bemerkung) {
+    html += '<div class="section"><div class="section-title">BEMERKUNGEN</div><p style="padding:6px 10px">' + bemerkung + '</p></div>';
+  }
+
+  // Signature area
+  html += '<div class="sign-area">';
+  html += '<div class="sign-box">' + sigHtml + '<div class="sign-line">Arbeitnehmer/in · ' + heuteStr + '</div></div>';
+  html += '<div class="sign-box"><div style="height:' + (savedSignatureData ? '68' : '8') + 'px"></div><div class="sign-line">Vorgesetzte/r · Datum</div></div>';
+  html += '</div>';
+
+  // Mail script (only for mail mode)
+  if (mode === 'mail') {
+    const betreff = 'Urlaubsantrag – ' + (ma.vorname||'') + ' ' + (ma.name||'') + ' – ' + vonStr + ' bis ' + bisStr;
+    let mailBody = 'Sehr geehrte Damen und Herren,\\n\\n';
+    mailBody += 'hiermit beantrage ich Urlaub vom ' + vonStr + ' bis ' + bisStr + ' (' + tage + ' Arbeitstage).\\n\\n';
+    mailBody += 'Den unterschriebenen Urlaubsantrag finden Sie im Anhang als PDF.\\n\\n';
+    mailBody += 'Mit freundlichen Grüßen\\n' + (ma.vorname||'') + ' ' + (ma.name||'');
+    html += '<script>function sendMail(){';
+    html += 'var subject=encodeURIComponent("' + betreff.replace(/"/g,'\\"') + '");';
+    html += 'var body=encodeURIComponent("' + mailBody + '\\n\\n--- Bitte die gespeicherte PDF-Datei als Anhang anfügen ---");';
+    html += 'window.location.href="mailto:' + mailTo + '?subject="+subject+"&body="+body;';
+    html += '}<\/script>';
+  }
+
+  html += '</body></html>';
+
+  // Open print window
+  const w = window.open('', '_blank');
+  if (!w) { alert('Pop-up blockiert! Bitte Pop-ups erlauben.'); return; }
+  w.document.write(html);
+  w.document.close();
+
+  saveData();
+  render();
   closeUrlaubModal();
 }
 // ─── PHOTO SCAN ─────────────────────────────────────────────────
