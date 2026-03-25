@@ -1578,6 +1578,8 @@ function generateUrlaubPDF(mode) {
   // Build standalone HTML document
   let h = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Urlaubsantrag</title><style>';
   h += '@page{size:A4;margin:15mm 20mm}';
+  h += '@page{margin-top:10mm;margin-bottom:10mm}';
+  h += '@media print{@page{margin:10mm 15mm}}';
   h += 'body{font-family:Arial,sans-serif;padding:0;color:#333;font-size:13px;max-width:700px;margin:0 auto}';
   h += '.hdr{text-align:center;margin-bottom:25px;border-bottom:2px solid #333;padding-bottom:12px}';
   h += '.hdr h2{margin:0;font-size:16px;letter-spacing:1px}';
@@ -1655,7 +1657,7 @@ function generateUrlaubPDF(mode) {
     wHtml += '.toolbar button{padding:12px 20px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;display:flex;align-items:center;gap:6px}';
     wHtml += '.btn-print{background:#2563eb;color:white}.btn-mail{background:#ea4335;color:white}.btn-close{background:#555;color:white}';
     wHtml += '.doc{padding:30px 20px;max-width:700px;margin:0 auto}';
-    wHtml += '@media print{.toolbar{display:none!important}.doc{padding:0}}';
+    wHtml += '@media print{.toolbar{display:none!important}.doc{padding:0}}@page{margin:10mm 15mm}';
     wHtml += '</style></head><body>';
     wHtml += '<div class="toolbar">';
     wHtml += '<button class="btn-print" onclick="window.print()">🖨 PDF speichern</button>';
@@ -1701,7 +1703,7 @@ function generateUrlaubPDF(mode) {
     wHtml2 += '.toolbar button{padding:12px 20px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;display:flex;align-items:center;gap:6px}';
     wHtml2 += '.btn-print{background:#2563eb;color:white}.btn-dl{background:#34d399;color:white}.btn-close{background:#555;color:white}';
     wHtml2 += '.doc{padding:30px 20px;max-width:700px;margin:0 auto}';
-    wHtml2 += '@media print{.toolbar{display:none!important}.doc{padding:0}}';
+    wHtml2 += '@media print{.toolbar{display:none!important}.doc{padding:0}}@page{margin:10mm 15mm}';
     wHtml2 += '</style></head><body>';
     wHtml2 += '<div class="toolbar">';
     wHtml2 += '<button class="btn-print" onclick="window.print()">🖨 Als PDF drucken</button>';
