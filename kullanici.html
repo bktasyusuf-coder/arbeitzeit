@@ -1540,7 +1540,7 @@ function switchSigTab(tab) {
   }
 }
 
-// ─── PDF GENERATION (Native Print) ─────────────────────────────
+// ─── PDF GENERATION (Native HTML Download) ─────────────────────
 function generateUrlaubPDF(mode) {
   const von = document.getElementById('urlaubVon').value;
   const bis = document.getElementById('urlaubBis').value;
@@ -1572,114 +1572,164 @@ function generateUrlaubPDF(mode) {
   const heute = new Date();
   const heuteStr = String(heute.getDate()).padStart(2,'0') + '.' + String(heute.getMonth()+1).padStart(2,'0') + '.' + heute.getFullYear();
   const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
-
-  // Build print HTML
   const sigHtml = savedSignatureData ? '<img src="' + savedSignatureData + '" style="max-width:180px;max-height:60px;display:block;margin:0 auto 4px">' : '';
-
   const mailTo = document.getElementById('urlaubMailTo').value.trim() || 'info@ideal-hannover.de';
 
-  let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Urlaubsantrag</title><style>';
-  html += 'body{font-family:Arial,sans-serif;padding:30px 40px;color:#333;font-size:13px;max-width:700px;margin:0 auto}';
-  html += '.header{text-align:center;margin-bottom:25px;border-bottom:2px solid #333;padding-bottom:12px}';
-  html += '.header h2{margin:0;font-size:16px;letter-spacing:1px}';
-  html += '.header p{margin:4px 0;font-size:12px;color:#666}';
-  html += '.title{text-align:center;font-size:20px;font-weight:bold;margin:18px 0;letter-spacing:2px}';
-  html += '.section{margin-bottom:18px}';
-  html += '.section-title{font-weight:bold;font-size:13px;background:#f0f0f0;padding:6px 10px;margin-bottom:8px;border-left:3px solid #333}';
-  html += 'table{width:100%;border-collapse:collapse;margin-bottom:8px}';
-  html += 'td{padding:5px 10px;border-bottom:1px solid #ddd;font-size:12px}';
-  html += 'td:first-child{font-weight:bold;width:160px;color:#555}';
-  html += '.urlaub-table{border:1px solid #333}';
-  html += '.urlaub-table th{background:#333;color:white;padding:8px;font-size:11px;text-align:left}';
-  html += '.urlaub-table td{border:1px solid #ccc;padding:8px;font-size:12px}';
-  html += '.sign-area{margin-top:40px;display:flex;justify-content:space-between;page-break-inside:avoid}';
-  html += '.sign-box{width:45%;text-align:center}';
-  html += '.sign-line{border-top:1px solid #333;padding-top:6px;font-size:11px;margin-top:8px}';
-  html += '.no-print{margin-bottom:15px;text-align:center}';
-  html += '@media print{.no-print{display:none!important}body{padding:20px 30px}}';
-  html += '</style></head><body>';
+  // Build standalone HTML document
+  let h = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Urlaubsantrag</title><style>';
+  h += '@page{size:A4;margin:15mm 20mm}';
+  h += 'body{font-family:Arial,sans-serif;padding:0;color:#333;font-size:13px;max-width:700px;margin:0 auto}';
+  h += '.hdr{text-align:center;margin-bottom:25px;border-bottom:2px solid #333;padding-bottom:12px}';
+  h += '.hdr h2{margin:0;font-size:16px;letter-spacing:1px}';
+  h += '.hdr p{margin:4px 0;font-size:12px;color:#666}';
+  h += '.ttl{text-align:center;font-size:20px;font-weight:bold;margin:18px 0;letter-spacing:2px}';
+  h += '.sec{margin-bottom:18px}';
+  h += '.st{font-weight:bold;font-size:13px;background:#f0f0f0;padding:6px 10px;margin-bottom:8px;border-left:3px solid #333}';
+  h += 'table{width:100%;border-collapse:collapse;margin-bottom:8px}';
+  h += 'td{padding:5px 10px;border-bottom:1px solid #ddd;font-size:12px}';
+  h += 'td:first-child{font-weight:bold;width:160px;color:#555}';
+  h += '.ut{border:1px solid #333}';
+  h += '.ut th{background:#333;color:white;padding:8px;font-size:11px;text-align:left}';
+  h += '.ut td{border:1px solid #ccc;padding:8px;font-size:12px}';
+  h += '.sa{margin-top:40px;display:flex;justify-content:space-between}';
+  h += '.sb{width:45%;text-align:center}';
+  h += '.sl{border-top:1px solid #333;padding-top:6px;font-size:11px;margin-top:8px}';
+  h += '</style></head><body>';
 
-  // Action buttons (hidden in print)
-  html += '<div class="no-print">';
-  if (mode === 'mail') {
-    html += '<button onclick="window.print()" style="padding:10px 24px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">🖨 Als PDF drucken/speichern</button>';
-    html += '<button onclick="sendMail()" style="padding:10px 24px;background:#ea4335;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">📧 Per Mail senden</button>';
-  } else {
-    html += '<button onclick="window.print()" style="padding:10px 24px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">🖨 Als PDF speichern</button>';
-  }
-  html += '<button onclick="window.close()" style="padding:10px 24px;background:#555;color:white;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:0 6px">✕ Schließen</button>';
-  html += '<p style="font-size:11px;color:#999;margin-top:8px">Tipp: Im Druckdialog "Als PDF speichern" wählen</p>';
-  html += '</div>';
+  h += '<div class="hdr">';
+  h += '<img src="https://bktasyusuf-coder.github.io/arbeitzeit/logo.png" style="width:55px;height:55px;margin-bottom:6px" onerror="this.style.display=\'none\'">';
+  h += '<h2>Ideal Sanitär und Heizung</h2>';
+  h += '<p>Voltmerstraße 27a · 30165 Hannover</p>';
+  h += '<p>Tel. 0511 1627870 · info@ideal-hannover.de</p></div>';
 
-  // Document content
-  html += '<div class="header">';
-  html += '<img src="https://bktasyusuf-coder.github.io/arbeitzeit/logo.png" style="width:55px;height:55px;margin-bottom:6px" onerror="this.style.display=\'none\'">';
-  html += '<h2>Ideal Sanitär und Heizung</h2>';
-  html += '<p>Voltmerstraße 27a · 30165 Hannover</p>';
-  html += '<p>Tel. 0511 1627870 · info@ideal-hannover.de</p>';
-  html += '</div>';
+  h += '<div class="ttl">URLAUBSANTRAG</div>';
 
-  html += '<div class="title">URLAUBSANTRAG</div>';
+  h += '<div class="sec"><div class="st">MITARBEITER</div><table>';
+  h += '<tr><td>Name:</td><td>' + (ma.name||'') + '</td></tr>';
+  h += '<tr><td>Vorname:</td><td>' + (ma.vorname||'') + '</td></tr>';
+  h += '<tr><td>Personal-Nr.:</td><td>' + (ma.personalNr||'') + '</td></tr>';
+  h += '<tr><td>Eintrittsdatum:</td><td>' + (ma.eintritt||'') + '</td></tr>';
+  h += '<tr><td>Abteilung:</td><td>' + (ma.abteilung||'') + '</td></tr>';
+  h += '<tr><td>Vorgesetzte/r:</td><td>' + (ma.vorgesetzter||'') + '</td></tr>';
+  h += '</table></div>';
 
-  // Mitarbeiter
-  html += '<div class="section"><div class="section-title">MITARBEITER</div><table>';
-  html += '<tr><td>Name:</td><td>' + (ma.name || '') + '</td></tr>';
-  html += '<tr><td>Vorname:</td><td>' + (ma.vorname || '') + '</td></tr>';
-  html += '<tr><td>Personal-Nr.:</td><td>' + (ma.personalNr || '') + '</td></tr>';
-  html += '<tr><td>Eintrittsdatum:</td><td>' + (ma.eintritt || '') + '</td></tr>';
-  html += '<tr><td>Abteilung:</td><td>' + (ma.abteilung || '') + '</td></tr>';
-  html += '<tr><td>Vorgesetzte/r:</td><td>' + (ma.vorgesetzter || '') + '</td></tr>';
-  html += '</table></div>';
+  h += '<div class="sec"><div class="st">URLAUBSÜBERSICHT</div><table>';
+  h += '<tr><td>Jahresurlaub:</td><td>30 Tage</td></tr>';
+  h += '<tr><td>Resturlaub:</td><td>' + resturlaub + ' Tage</td></tr>';
+  h += '</table></div>';
 
-  // Urlaubsübersicht
-  html += '<div class="section"><div class="section-title">URLAUBSÜBERSICHT</div><table>';
-  html += '<tr><td>Jahresurlaub:</td><td>30 Tage</td></tr>';
-  html += '<tr><td>Resturlaub:</td><td>' + resturlaub + ' Tage</td></tr>';
-  html += '</table></div>';
+  h += '<div class="sec"><div class="st">URLAUBSZEITRÄUME</div>';
+  h += '<table class="ut"><tr><th>Von</th><th>Bis</th><th>Anz. Tage</th><th>Urlaubsart</th></tr>';
+  h += '<tr><td>' + vonStr + '</td><td>' + bisStr + '</td><td>' + tage + '</td><td>' + art + '</td></tr>';
+  h += '<tr><td colspan="2" style="text-align:right;font-weight:bold">Gesamt:</td><td style="font-weight:bold">' + tage + '</td><td></td></tr>';
+  h += '</table></div>';
 
-  // Urlaubszeiträume
-  html += '<div class="section"><div class="section-title">URLAUBSZEITRÄUME</div>';
-  html += '<table class="urlaub-table"><tr><th>Von</th><th>Bis</th><th>Anz. Tage</th><th>Urlaubsart</th></tr>';
-  html += '<tr><td>' + vonStr + '</td><td>' + bisStr + '</td><td>' + tage + '</td><td>' + art + '</td></tr>';
-  html += '<tr><td colspan="2" style="text-align:right;font-weight:bold">Gesamt:</td><td style="font-weight:bold">' + tage + '</td><td></td></tr>';
-  html += '</table></div>';
-
-  // Bemerkungen
   if (bemerkung) {
-    html += '<div class="section"><div class="section-title">BEMERKUNGEN</div><p style="padding:6px 10px">' + bemerkung + '</p></div>';
+    h += '<div class="sec"><div class="st">BEMERKUNGEN</div><p style="padding:6px 10px">' + bemerkung + '</p></div>';
   }
 
-  // Signature area
-  html += '<div class="sign-area">';
-  html += '<div class="sign-box">' + sigHtml + '<div class="sign-line">Arbeitnehmer/in · ' + heuteStr + '</div></div>';
-  html += '<div class="sign-box"><div style="height:' + (savedSignatureData ? '68' : '8') + 'px"></div><div class="sign-line">Vorgesetzte/r · Datum</div></div>';
-  html += '</div>';
-
-  // Mail script (only for mail mode)
-  if (mode === 'mail') {
-    const betreff = 'Urlaubsantrag – ' + (ma.vorname||'') + ' ' + (ma.name||'') + ' – ' + vonStr + ' bis ' + bisStr;
-    let mailBody = 'Sehr geehrte Damen und Herren,\\n\\n';
-    mailBody += 'hiermit beantrage ich Urlaub vom ' + vonStr + ' bis ' + bisStr + ' (' + tage + ' Arbeitstage).\\n\\n';
-    mailBody += 'Den unterschriebenen Urlaubsantrag finden Sie im Anhang als PDF.\\n\\n';
-    mailBody += 'Mit freundlichen Grüßen\\n' + (ma.vorname||'') + ' ' + (ma.name||'');
-    html += '<script>function sendMail(){';
-    html += 'var subject=encodeURIComponent("' + betreff.replace(/"/g,'\\"') + '");';
-    html += 'var body=encodeURIComponent("' + mailBody + '\\n\\n--- Bitte die gespeicherte PDF-Datei als Anhang anfügen ---");';
-    html += 'window.location.href="mailto:' + mailTo + '?subject="+subject+"&body="+body;';
-    html += '}<\/script>';
-  }
-
-  html += '</body></html>';
-
-  // Open print window
-  const w = window.open('', '_blank');
-  if (!w) { alert('Pop-up blockiert! Bitte Pop-ups erlauben.'); return; }
-  w.document.write(html);
-  w.document.close();
+  h += '<div class="sa">';
+  h += '<div class="sb">' + sigHtml + '<div class="sl">Arbeitnehmer/in · ' + heuteStr + '</div></div>';
+  h += '<div class="sb"><div style="height:' + (savedSignatureData ? '68' : '8') + 'px"></div><div class="sl">Vorgesetzte/r · Datum</div></div>';
+  h += '</div></body></html>';
 
   saveData();
   render();
-  closeUrlaubModal();
+
+  const fileName = 'Urlaubsantrag_' + vonStr.replace(/\./g, '-');
+
+  if (mode === 'mail') {
+    // Open document in new window with print + mail buttons
+    const w = window.open('', '_blank');
+    if (!w) { alert('Pop-up blockiert! Bitte Pop-ups erlauben.'); return; }
+    const betreff = 'Urlaubsantrag - ' + (ma.vorname||'') + ' ' + (ma.name||'') + ' - ' + vonStr + ' bis ' + bisStr;
+    let mailBody = 'Sehr geehrte Damen und Herren,%0A%0A';
+    mailBody += 'hiermit beantrage ich Urlaub vom ' + vonStr + ' bis ' + bisStr + ' (' + tage + ' Arbeitstage).%0A%0A';
+    mailBody += 'Den unterschriebenen Urlaubsantrag finden Sie im Anhang als PDF.%0A%0A';
+    mailBody += 'Mit freundlichen Grüßen%0A' + (ma.vorname||'') + ' ' + (ma.name||'');
+    mailBody += '%0A%0A--- Bitte die gespeicherte PDF-Datei als Anhang anfügen ---';
+    const mailLink = 'mailto:' + mailTo + '?subject=' + encodeURIComponent(betreff) + '&body=' + mailBody;
+
+    let wHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Urlaubsantrag</title><style>';
+    wHtml += 'body{margin:0;font-family:Arial,sans-serif}.toolbar{position:sticky;top:0;z-index:100;background:#1a1a2e;padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.3)}';
+    wHtml += '.toolbar button{padding:12px 20px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;display:flex;align-items:center;gap:6px}';
+    wHtml += '.btn-print{background:#2563eb;color:white}.btn-mail{background:#ea4335;color:white}.btn-close{background:#555;color:white}';
+    wHtml += '.doc{padding:30px 20px;max-width:700px;margin:0 auto}';
+    wHtml += '@media print{.toolbar{display:none!important}.doc{padding:0}}';
+    wHtml += '</style></head><body>';
+    wHtml += '<div class="toolbar">';
+    wHtml += '<button class="btn-print" onclick="window.print()">🖨 PDF speichern</button>';
+    wHtml += '<button class="btn-mail" onclick="window.location.href=\'' + mailLink + '\'">📧 Mail öffnen</button>';
+    wHtml += '<button class="btn-close" onclick="window.close()">✕ Schließen</button>';
+    wHtml += '</div>';
+    wHtml += '<div class="doc">' + h.replace(/<!DOCTYPE html>|<html>|<\/html>|<head>[\s\S]*?<\/head>|<body>|<\/body>/g, '') + '</div>';
+    wHtml += '<div style="text-align:center;padding:20px;color:#999;font-size:12px">';
+    wHtml += '💡 Tipp: "PDF speichern" klicken → im Dialog "Als PDF speichern" / "Save as PDF" wählen → dann "Mail öffnen" klicken und PDF anhängen';
+    wHtml += '</div></body></html>';
+
+    w.document.write(wHtml);
+    w.document.close();
+    closeUrlaubModal();
+  } else {
+    // Download mode: create blob and download as HTML file
+    const blob = new Blob([h], {type: 'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+
+    // Try native share API first (mobile)
+    if (navigator.share && navigator.canShare) {
+      const file = new File([blob], fileName + '.html', {type: 'text/html'});
+      if (navigator.canShare({files: [file]})) {
+        navigator.share({
+          title: 'Urlaubsantrag',
+          text: 'Urlaubsantrag ' + vonStr + ' - ' + bisStr,
+          files: [file]
+        }).catch(function() {
+          // Fallback to download
+          downloadFile(url, fileName + '.html');
+        });
+        closeUrlaubModal();
+        return;
+      }
+    }
+
+    // Fallback: open in new window for print-to-PDF
+    const w = window.open('', '_blank');
+    if (!w) { alert('Pop-up blockiert!'); return; }
+
+    let wHtml2 = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Urlaubsantrag</title><style>';
+    wHtml2 += 'body{margin:0;font-family:Arial,sans-serif}.toolbar{position:sticky;top:0;z-index:100;background:#1a1a2e;padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.3)}';
+    wHtml2 += '.toolbar button{padding:12px 20px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;display:flex;align-items:center;gap:6px}';
+    wHtml2 += '.btn-print{background:#2563eb;color:white}.btn-dl{background:#34d399;color:white}.btn-close{background:#555;color:white}';
+    wHtml2 += '.doc{padding:30px 20px;max-width:700px;margin:0 auto}';
+    wHtml2 += '@media print{.toolbar{display:none!important}.doc{padding:0}}';
+    wHtml2 += '</style></head><body>';
+    wHtml2 += '<div class="toolbar">';
+    wHtml2 += '<button class="btn-print" onclick="window.print()">🖨 Als PDF drucken</button>';
+    wHtml2 += '<button class="btn-dl" onclick="dlFile()">📥 Datei speichern</button>';
+    wHtml2 += '<button class="btn-close" onclick="window.close()">✕ Schließen</button>';
+    wHtml2 += '</div>';
+    wHtml2 += '<div class="doc">' + h.replace(/<!DOCTYPE html>|<html>|<\/html>|<head>[\s\S]*?<\/head>|<body>|<\/body>/g, '') + '</div>';
+    wHtml2 += '<div style="text-align:center;padding:20px;color:#999;font-size:12px">';
+    wHtml2 += '💡 Android/iPhone: "Als PDF drucken" → Drucker: "Als PDF speichern" / "Save as PDF" wählen<br>';
+    wHtml2 += '💡 Oder "Datei speichern" klicken um als HTML herunterzuladen';
+    wHtml2 += '</div>';
+    wHtml2 += '<script>function dlFile(){var b=new Blob([document.querySelector(".doc").innerHTML],{type:"text/html"});var u=URL.createObjectURL(b);var a=document.createElement("a");a.href=u;a.download="' + fileName + '.html";a.click();URL.revokeObjectURL(u);}<\/script>';
+    wHtml2 += '</body></html>';
+
+    w.document.write(wHtml2);
+    w.document.close();
+    closeUrlaubModal();
+  }
+}
+
+function downloadFile(url, name) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 // ─── PHOTO SCAN ─────────────────────────────────────────────────
 let scannedEntries = [];
