@@ -1681,20 +1681,22 @@ function generateUrlaubPDF() {
     doc.line(R-72, sigY, R, sigY);
     doc.text('Vorgesetzte/r  -  Datum', R-36, sigY+4, {align:'center'});
 
+    // SAVE DATA FIRST (before PDF download and mail)
+    saveData();
+    render();
+
     // DOWNLOAD PDF (no print dialog, no window.open)
     var fileName = 'Urlaubsantrag_' + vonStr.replace(/\./g, '-') + '.pdf';
     doc.save(fileName);
 
-    saveData();
-    render();
     closeUrlaubModal();
 
-    // OPEN MAIL after short delay
+    // OPEN MAIL after short delay (window.open keeps page alive, no fetch abort)
     setTimeout(function() {
       var subject = 'Urlaubsantrag - ' + (ma.vorname||'') + ' ' + (ma.name||'') + ' - ' + vonStr + ' bis ' + bisStr;
       var mailBody = 'Sehr geehrte Damen und Herren,\n\nhiermit beantrage ich Urlaub vom ' + vonStr + ' bis ' + bisStr + ' (' + tage + ' Arbeitstage).\n\nDen unterschriebenen Urlaubsantrag finden Sie im Anhang als PDF.\n\nMit freundlichen Grüßen\n' + (ma.vorname||'') + ' ' + (ma.name||'');
-      window.location.href = 'mailto:' + mailTo + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(mailBody);
-    }, 800);
+      window.open('mailto:' + mailTo + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(mailBody), '_self');
+    }, 1500);
 
   } catch(err) {
     console.error('PDF Error:', err);
