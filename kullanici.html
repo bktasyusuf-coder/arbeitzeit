@@ -650,9 +650,10 @@ async function sbSave(data) {
     const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' };
     const resp = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, { method: 'POST', headers, body });
     console.log('SB: Response status:', resp.status);
-    if (!resp.ok) { console.error('SB: Error'); showSync('error', '⚠️ Sync-Fehler'); return; }
+    if (!resp.ok) { console.error('SB: Error'); showSync('error', '⚠️ Sync-Fehler'); localStorage.setItem(LS_PREFIX + 'pendingSync', '1'); return; }
+    localStorage.removeItem(LS_PREFIX + 'pendingSync');
     showSync('synced', '☁️ Synchronisiert ✓');
-  } catch(e) { console.error('SB save:', e); showSync('error', '⚠️ Offline'); }
+  } catch(e) { console.error('SB save:', e); showSync('error', '⚠️ Offline'); localStorage.setItem(LS_PREFIX + 'pendingSync', '1'); }
 }
 
 function showSync(cls, text) {
@@ -1798,20 +1799,34 @@ document.addEventListener('DOMContentLoaded', function() {
   if (CURRENT_USER !== 'default') {
     document.getElementById('logoText').textContent = '⏱ ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
   }
-  // Cloud sync — cloud always wins
+  // Cloud sync — merge strategy (local changes preserved when offline)
   (async () => {
     try {
+      // If previous save failed, push local to cloud first
+      var hasPending = localStorage.getItem(LS_PREFIX + 'pendingSync');
+      if (hasPending) {
+        console.log('Pending sync found, pushing local data to cloud first...');
+        await sbSave({ userData, userTimes, userNotes, userNotdienst });
+      }
       const cloud = await sbLoad();
       if (cloud && (cloud.userData || cloud.userTimes)) {
-        console.log('Cloud data found, applying...');
-        userData = cloud.userData || {};
-        userTimes = cloud.userTimes || {};
-        userNotes = cloud.userNotes || {};
-        userNotdienst = cloud.userNotdienst || {};
+        console.log('Cloud data found, merging...');
+        // Merge: keep all keys from both local and cloud
+        // For conflicts: use whichever has more data (local wins if local has value cloud doesn't)
+        const mergedData = Object.assign({}, cloud.userData || {}, userData);
+        const mergedTimes = Object.assign({}, cloud.userTimes || {}, userTimes);
+        const mergedNotes = Object.assign({}, cloud.userNotes || {}, userNotes);
+        const mergedNd = Object.assign({}, cloud.userNotdienst || {}, userNotdienst);
+        userData = mergedData;
+        userTimes = mergedTimes;
+        userNotes = mergedNotes;
+        userNotdienst = mergedNd;
         localStorage.setItem(LS_PREFIX + 'data', JSON.stringify(userData));
         localStorage.setItem(LS_PREFIX + 'times', JSON.stringify(userTimes));
         localStorage.setItem(LS_PREFIX + 'notes', JSON.stringify(userNotes));
         localStorage.setItem(LS_PREFIX + 'notdienst', JSON.stringify(userNotdienst));
+        // Push merged data back to cloud
+        sbSave({ userData, userTimes, userNotes, userNotdienst });
         render();
         showSync('synced', '☁️ Synchronisiert ✓');
       } else {
