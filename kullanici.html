@@ -1373,6 +1373,28 @@ function renderJahres() {
       </div>
     </div>
 
+    <!-- Notdienst Jahresübersicht -->
+    ${totalNotdienst > 0 ? `
+    <div style="background:var(--surface);border:1px solid var(--orange);border-radius:var(--radius);padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--orange)">🚨 Notdienst Jahresübersicht ${currentYear}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--orange)">${totalNotdienst} Einsätze · ${minsToTime(totalNotdienstMins)} Std</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${monthData.map(function(s) {
+          if (s.notdienst === 0) return '';
+          return '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px">'
+            + '<span style="font-size:11px;font-weight:700;color:var(--text)">' + MONTHS[s.month].substring(0,3) + '</span>'
+            + '<span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--orange)">' + s.notdienst + '× · ' + minsToTime(s.ndMins) + '</span>'
+            + '</div>';
+        }).join('')}
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--muted)">
+        Ø ${(totalNotdienstMins / Math.max(totalNotdienst, 1) / 60).toFixed(1)} Std pro Einsatz · ca. ${(totalNotdienstMins / 60 / 8).toFixed(1)} Arbeitstage gesamt
+      </div>
+    </div>
+    ` : ''}
+
     <!-- Month bars -->
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 4px">📅 Monatsübersicht — Zeile anklicken zum Springen 👇</div>
     <div class="month-bar-list">${barsHtml}</div>
