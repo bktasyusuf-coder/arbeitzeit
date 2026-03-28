@@ -248,7 +248,45 @@
 </head>
 <body>
 
-<div class="header">
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="width:90%;max-width:360px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">🔐</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:4px;font-family:'Syne',sans-serif">Arbeitszeiterfassung</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:24px">Ideal Sanitär und Heizung</div>
+    <div id="loginUserLabel" style="font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:16px"></div>
+    <input type="password" id="loginPassword" class="form-input" placeholder="Passwort eingeben..." style="text-align:center;font-size:16px;margin-bottom:12px" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()" style="width:100%;padding:14px;background:var(--accent);border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer">🔓 Anmelden</button>
+    <div id="loginError" style="color:var(--red);font-size:12px;margin-top:10px;display:none">❌ Falsches Passwort!</div>
+    <div id="loginNoUser" style="color:var(--red);font-size:12px;margin-top:10px;display:none">❌ Benutzer nicht gefunden! Bitte Admin kontaktieren.</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9998;overflow-y:auto">
+  <div style="max-width:500px;margin:0 auto;padding:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:20px;font-weight:800">👑 Admin-Panel</div>
+      <button onclick="closeAdmin()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Benutzer hinzufügen, bearbeiten oder löschen</div>
+    
+    <!-- Add user form -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">➕ Neuer Benutzer</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Benutzername</label><input type="text" class="form-input" id="adminNewUser" placeholder="z.B. yusuf"></div>
+        <div class="form-group"><label class="form-label">Passwort</label><input type="text" class="form-input" id="adminNewPass" placeholder="z.B. 1234"></div>
+      </div>
+      <button onclick="adminAddUser()" style="width:100%;padding:10px;background:var(--green);border:none;border-radius:8px;color:white;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">💾 Benutzer anlegen</button>
+    </div>
+
+    <!-- User list -->
+    <div id="adminUserList" style="font-size:13px;color:var(--muted)">Lade Benutzer...</div>
+  </div>
+</div>
+
+<div class="header" id="appHeader" style="display:none">
   <div class="header-top">
     <span class="logo" id="logoText">⏱ Arbeitszeit</span>
     <div style="display:flex;gap:6px">
@@ -257,6 +295,7 @@
       <button onclick="setYear(2028)" id="ybtn2028" class="year-btn">2028</button>
     </div>
     <button class="today-btn" onclick="goToToday()">📍 Heute</button>
+    <button class="today-btn" onclick="logout()" style="border-color:var(--red);color:var(--red)">🚪</button>
   </div>
   <div class="month-nav">
     <button class="nav-btn" onclick="prevMonth()">‹</button>
@@ -266,7 +305,7 @@
   <div id="syncStatus" class="sync-status" style="text-align:center;font-size:10px;color:var(--muted);margin-top:6px">Verbinde...</div>
 </div>
 
-<div id="mainView">
+<div id="mainView" style="display:none">
   <div class="summary" id="summaryCards"></div>
   <div class="tabs">
     <div class="tab active" onclick="switchTab('days',this)">Tage</div>
@@ -277,7 +316,7 @@
 </div>
 
 <!-- Bottom Nav -->
-<div class="bottom-nav">
+<div class="bottom-nav" id="bottomNav" style="display:none">
   <button class="bnav-btn active" onclick="setView('month',this)">
     <span class="bnav-icon">📅</span>Monat
   </button>
@@ -628,7 +667,244 @@ function getUserId() {
 }
 const SB_ROW_ID = getUserId();
 const CURRENT_USER = new URLSearchParams(window.location.search).get('user') || 'default';
+const IS_ADMIN = new URLSearchParams(window.location.search).get('admin') === 'true';
+const ADMIN_PASS = 'ideal2026'; // Admin-Passwort — bitte ändern!
 console.log('USER:', CURRENT_USER, 'ROW_ID:', SB_ROW_ID);
+
+// ===== AUTHENTICATION SYSTEM =====
+const SB_USERS_ID = 99999; // Fixed row ID for user registry
+
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h = h & h;
+  }
+  return String(Math.abs(h));
+}
+
+async function loadUsers() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}?id=eq.${SB_USERS_ID}&select=data`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const rows = await r.json();
+    if (rows && rows.length > 0 && rows[0].data) {
+      const d = typeof rows[0].data === 'string' ? JSON.parse(rows[0].data) : rows[0].data;
+      return d.users || {};
+    }
+    return {};
+  } catch(e) { console.error('Load users error:', e); return {}; }
+}
+
+async function saveUsers(users) {
+  try {
+    const body = JSON.stringify({ id: SB_USERS_ID, data: JSON.stringify({ users: users }) });
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' };
+    await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, { method: 'POST', headers, body });
+  } catch(e) { console.error('Save users error:', e); }
+}
+
+async function checkAuth() {
+  // Admin mode
+  if (IS_ADMIN) {
+    var adminInput = prompt('Admin-Passwort:');
+    if (adminInput !== ADMIN_PASS) { alert('Falsches Admin-Passwort!'); return; }
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadAndShowUsers();
+    return;
+  }
+
+  // No user specified
+  if (CURRENT_USER === 'default') {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginUserLabel').textContent = 'Kein Benutzer angegeben';
+    document.getElementById('loginNoUser').style.display = 'block';
+    document.getElementById('loginNoUser').textContent = '⚠️ Bitte Link mit ?user=NAME verwenden';
+    document.getElementById('loginPassword').style.display = 'none';
+    document.querySelector('#loginScreen button').style.display = 'none';
+    return;
+  }
+
+  var users = await loadUsers();
+  var userObj = getUserObj(users, CURRENT_USER);
+
+  // User not found
+  if (!userObj) {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginUserLabel').textContent = CURRENT_USER;
+    document.getElementById('loginNoUser').style.display = 'block';
+    document.getElementById('loginPassword').style.display = 'none';
+    document.querySelector('#loginScreen button').style.display = 'none';
+    return;
+  }
+
+  // Check if already authenticated (and no reset needed)
+  var savedAuth = localStorage.getItem('az_auth_' + CURRENT_USER);
+  if (savedAuth && userObj.pass === savedAuth && !userObj.mustReset) {
+    showApp();
+    return;
+  }
+  localStorage.removeItem('az_auth_' + CURRENT_USER);
+
+  // Show login screen
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUserLabel').textContent = '👤 ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
+
+  // If must reset, show special message
+  if (userObj.mustReset) {
+    document.getElementById('loginPassword').placeholder = 'Temporäres Passwort eingeben...';
+  }
+  document.getElementById('loginPassword').focus();
+}
+
+// Helper: get user object (supports old format "hash" and new format {pass, mustReset})
+function getUserObj(users, name) {
+  var u = users[name];
+  if (!u) return null;
+  if (typeof u === 'string') return { pass: u, mustReset: false }; // old format
+  return u;
+}
+
+async function doLogin() {
+  var pass = document.getElementById('loginPassword').value;
+  if (!pass) return;
+  var hashed = simpleHash(pass);
+  var users = await loadUsers();
+  var userObj = getUserObj(users, CURRENT_USER);
+
+  if (!userObj) {
+    document.getElementById('loginNoUser').style.display = 'block';
+    return;
+  }
+
+  if (userObj.pass !== hashed) {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginPassword').focus();
+    return;
+  }
+
+  document.getElementById('loginError').style.display = 'none';
+
+  // Must reset password?
+  if (userObj.mustReset) {
+    showPasswordReset(users);
+    return;
+  }
+
+  // Login successful
+  localStorage.setItem('az_auth_' + CURRENT_USER, hashed);
+  showApp();
+}
+
+function showPasswordReset(users) {
+  var loginDiv = document.querySelector('#loginScreen > div');
+  loginDiv.innerHTML = '<div style="font-size:40px;margin-bottom:12px">🔑</div>'
+    + '<div style="font-size:18px;font-weight:800;margin-bottom:4px;font-family:\'Syne\',sans-serif">Neues Passwort festlegen</div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-bottom:20px">Bitte wähle ein persönliches Passwort</div>'
+    + '<div style="font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:16px">👤 ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1) + '</div>'
+    + '<input type="password" id="resetPass1" class="form-input" placeholder="Neues Passwort..." style="text-align:center;font-size:16px;margin-bottom:10px">'
+    + '<input type="password" id="resetPass2" class="form-input" placeholder="Passwort wiederholen..." style="text-align:center;font-size:16px;margin-bottom:12px" onkeydown="if(event.key===\'Enter\')doPasswordReset()">'
+    + '<button onclick="doPasswordReset()" style="width:100%;padding:14px;background:var(--green);border:none;border-radius:12px;color:white;font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;cursor:pointer">✅ Passwort speichern</button>'
+    + '<div id="resetError" style="color:var(--red);font-size:12px;margin-top:10px;display:none"></div>';
+  document.getElementById('resetPass1').focus();
+}
+
+async function doPasswordReset() {
+  var p1 = document.getElementById('resetPass1').value;
+  var p2 = document.getElementById('resetPass2').value;
+  var errEl = document.getElementById('resetError');
+
+  if (!p1 || !p2) { errEl.textContent = '❌ Bitte beide Felder ausfüllen!'; errEl.style.display = 'block'; return; }
+  if (p1 !== p2) { errEl.textContent = '❌ Passwörter stimmen nicht überein!'; errEl.style.display = 'block'; return; }
+  if (p1.length < 3) { errEl.textContent = '❌ Passwort muss mindestens 3 Zeichen haben!'; errEl.style.display = 'block'; return; }
+
+  var hashed = simpleHash(p1);
+  var users = await loadUsers();
+  users[CURRENT_USER] = { pass: hashed, mustReset: false };
+  await saveUsers(users);
+
+  localStorage.setItem('az_auth_' + CURRENT_USER, hashed);
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appHeader').style.display = 'block';
+  document.getElementById('mainView').style.display = 'block';
+  document.getElementById('bottomNav').style.display = 'flex';
+  initApp();
+}
+
+function logout() {
+  localStorage.removeItem('az_auth_' + CURRENT_USER);
+  location.reload();
+}
+
+// ===== ADMIN FUNCTIONS =====
+async function loadAndShowUsers() {
+  var users = await loadUsers();
+  var html = '';
+  var names = Object.keys(users);
+  if (names.length === 0) {
+    html = '<div style="color:var(--muted);text-align:center;padding:20px">Noch keine Benutzer angelegt</div>';
+  } else {
+    html = '<div style="font-size:13px;font-weight:700;margin-bottom:10px">📋 Registrierte Benutzer (' + names.length + ')</div>';
+    names.sort().forEach(function(name) {
+      var u = getUserObj(users, name);
+      var resetBadge = u.mustReset ? '<span style="background:var(--orange);color:white;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:6px">Passwort-Reset</span>' : '<span style="background:var(--green);color:white;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:6px">Aktiv</span>';
+      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">';
+      html += '<div><span style="font-size:14px;font-weight:700;color:var(--text)">👤 ' + name + '</span>' + resetBadge;
+      html += '<div style="font-size:10px;color:var(--muted);margin-top:2px">Link: ?user=' + name + '</div></div>';
+      html += '<div style="display:flex;gap:6px">';
+      html += '<button onclick="adminResetPass(\'' + name + '\')" style="background:var(--surface2);border:1px solid var(--accent);color:var(--accent2);padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">🔑</button>';
+      html += '<button onclick="adminDeleteUser(\'' + name + '\')" style="background:var(--surface2);border:1px solid var(--red);color:var(--red);padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">🗑</button>';
+      html += '</div></div>';
+    });
+  }
+  document.getElementById('adminUserList').innerHTML = html;
+}
+
+async function adminAddUser() {
+  var name = document.getElementById('adminNewUser').value.trim().toLowerCase();
+  var pass = document.getElementById('adminNewPass').value.trim();
+  if (!name || !pass) { alert('Bitte Name und Passwort eingeben!'); return; }
+  if (name === 'admin' || name === 'default') { alert('Dieser Name ist reserviert!'); return; }
+  var users = await loadUsers();
+  var existing = getUserObj(users, name);
+  if (existing) { alert('Benutzer "' + name + '" existiert bereits!'); return; }
+  users[name] = { pass: simpleHash(pass), mustReset: true };
+  await saveUsers(users);
+  document.getElementById('adminNewUser').value = '';
+  document.getElementById('adminNewPass').value = '';
+  alert('✅ Benutzer "' + name + '" angelegt!\n\nTemp. Passwort: ' + pass + '\nBeim ersten Login muss ein neues Passwort gesetzt werden.\n\nLink:\n' + location.origin + location.pathname + '?user=' + name);
+  loadAndShowUsers();
+}
+
+async function adminDeleteUser(name) {
+  if (!confirm('Benutzer "' + name + '" wirklich löschen?\n\nAchtung: Arbeitszeitdaten bleiben in der Cloud erhalten.')) return;
+  var users = await loadUsers();
+  delete users[name];
+  await saveUsers(users);
+  alert('🗑 Benutzer "' + name + '" gelöscht!');
+  loadAndShowUsers();
+}
+
+async function adminResetPass(name) {
+  var newPass = prompt('Neues temporäres Passwort für "' + name + '":\n\n(Benutzer muss beim nächsten Login ein eigenes Passwort wählen)');
+  if (!newPass) return;
+  var users = await loadUsers();
+  users[name] = { pass: simpleHash(newPass), mustReset: true };
+  await saveUsers(users);
+  alert('✅ Passwort für "' + name + '" zurückgesetzt!\n\nTemp. Passwort: ' + newPass + '\nBeim nächsten Login wird neues Passwort verlangt.');
+}
+
+function closeAdmin() {
+  document.getElementById('adminPanel').style.display = 'none';
+  location.href = location.pathname;
+}
 
 async function sbLoad() {
   try {
@@ -1880,7 +2156,7 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function initApp() {
   document.getElementById('datenModal').addEventListener('click', function(e){if(e.target===this)closeDatenModal();});
   document.getElementById('berichtModal').addEventListener('click', function(e){if(e.target===this)closeBericht();});
   document.getElementById('urlaubModal').addEventListener('click', function(e){if(e.target===this)closeUrlaubModal();});
@@ -1895,12 +2171,11 @@ document.addEventListener('DOMContentLoaded', function() {
   initSignatureCanvas();
   render();
   if (CURRENT_USER !== 'default') {
-    document.getElementById('logoText').textContent = '⏱ ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
+    document.getElementById('logoText').textContent = '🔒 ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
   }
   // Cloud sync — merge strategy (local changes preserved when offline)
   (async () => {
     try {
-      // If previous save failed, push local to cloud first
       var hasPending = localStorage.getItem(LS_PREFIX + 'pendingSync');
       if (hasPending) {
         console.log('Pending sync found, pushing local data to cloud first...');
@@ -1909,8 +2184,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const cloud = await sbLoad();
       if (cloud && (cloud.userData || cloud.userTimes)) {
         console.log('Cloud data found, merging...');
-        // Merge: keep all keys from both local and cloud
-        // For conflicts: use whichever has more data (local wins if local has value cloud doesn't)
         const mergedData = Object.assign({}, cloud.userData || {}, userData);
         const mergedTimes = Object.assign({}, cloud.userTimes || {}, userTimes);
         const mergedNotes = Object.assign({}, cloud.userNotes || {}, userNotes);
@@ -1923,7 +2196,6 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem(LS_PREFIX + 'times', JSON.stringify(userTimes));
         localStorage.setItem(LS_PREFIX + 'notes', JSON.stringify(userNotes));
         localStorage.setItem(LS_PREFIX + 'notdienst', JSON.stringify(userNotdienst));
-        // Push merged data back to cloud
         sbSave({ userData, userTimes, userNotes, userNotdienst });
         render();
         showSync('synced', '☁️ Synchronisiert ✓');
@@ -1934,6 +2206,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } catch(e) { console.error('Sync error:', e); showSync('error', '⚠️ Offline'); }
   })();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  checkAuth();
 });
 </script>
 </body>
