@@ -1365,26 +1365,53 @@ function renderJahres() {
   document.getElementById('jahresTab').innerHTML = `
     <div class="ys-header">📊 Jahresübersicht ${currentYear}</div>
 
-    <!-- GESAMT ÜBERSTUNDEN - combined -->
-    <div style="background:linear-gradient(135deg,${gesamtPos?'rgba(52,211,153,0.1)':'rgba(248,113,113,0.1)'},${gesamtPos?'rgba(124,106,247,0.08)':'rgba(248,113,113,0.05)'});border:1px solid ${gesamtPos?'var(--green)':'var(--red)'};border-radius:var(--radius);padding:16px;margin-bottom:12px;text-align:center">
-      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">⏱ Gesamt Überstunden ${currentYear}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:${gesamtPos?'var(--green)':'var(--red)'}">${gesamtPos?'+':''}${minsToTime(gesamtUeberstunden)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace">
-        Differenz ${isPos?'+':''}${minsToTime(totalDiff)} + Notdienst +${minsToTime(totalNotdienstMins)}
+    <!-- TOP ROW: Gesamt + Notdienst side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <!-- Gesamt Überstunden -->
+      <div style="background:linear-gradient(135deg,${gesamtPos?'rgba(52,211,153,0.12)':'rgba(248,113,113,0.12)'},transparent);border:1px solid ${gesamtPos?'var(--green)':'var(--red)'};border-radius:var(--radius);padding:14px;text-align:center">
+        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">⏱ Gesamt</div>
+        <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:${gesamtPos?'var(--green)':'var(--red)'}">${gesamtPos?'+':''}${minsToTime(gesamtUeberstunden)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">ca. ${(Math.abs(gesamtUeberstunden)/60/8).toFixed(1)} Tage</div>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:4px">
-        ${Math.floor(Math.abs(gesamtUeberstunden)/60)} Stunden ${Math.abs(gesamtUeberstunden)%60} Minuten ${gesamtPos?'Plus':'Minus'}
-        · ca. ${(Math.abs(gesamtUeberstunden)/60/8).toFixed(1)} Arbeitstage
+      <!-- Notdienst Hero -->
+      <div style="background:linear-gradient(135deg,rgba(251,146,60,0.15),rgba(251,146,60,0.03));border:1px solid var(--orange);border-radius:var(--radius);padding:14px;text-align:center">
+        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">🚨 Notdienst</div>
+        <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--orange)">+${minsToTime(totalNotdienstMins)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">${totalNotdienst} Einsätze</div>
       </div>
     </div>
 
-    <!-- Detail cards - balanced 2x2 grid -->
-    <div class="ys-grid">
-      <div class="ys-card ${isPos?'green':'red'}">
-        <div class="ys-label">Differenz (ohne Nd)</div>
-        <div class="ys-value ${isPos?'green':'red'}">${isPos?'+':''}${minsToTime(totalDiff)}</div>
-        <div class="ys-sub">${Math.floor(Math.abs(totalDiff)/60)}h ${Math.abs(totalDiff)%60}min</div>
+    <!-- NOTDIENST DETAIL BAR (only if data) -->
+    ${totalNotdienst > 0 ? `
+    <div style="background:var(--surface);border-left:3px solid var(--orange);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;margin-bottom:12px">
+      <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">
+        ${monthData.map(function(s) {
+          if (s.notdienst === 0) return '';
+          return '<div style="background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.3);border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:4px">'
+            + '<span style="font-size:10px;font-weight:700;color:var(--orange)">' + MONTHS[s.month].substring(0,3) + '</span>'
+            + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text)">' + s.notdienst + '× ' + minsToTime(s.ndMins) + '</span>'
+            + '</div>';
+        }).join('')}
+        <div style="margin-left:auto;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">Ø ${(totalNotdienstMins / Math.max(totalNotdienst, 1) / 60).toFixed(1)}h</div>
       </div>
+    </div>
+    ` : ''}
+
+    <!-- BREAKDOWN: Differenz + Überstunden formula -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-family:'DM Mono',monospace;font-size:13px">
+        <span style="color:${isPos?'var(--green)':'var(--red)'}">${isPos?'+':''}${minsToTime(totalDiff)}</span>
+        <span style="color:var(--muted);font-size:11px">Diff</span>
+        <span style="color:var(--muted)">+</span>
+        <span style="color:var(--orange)">+${minsToTime(totalNotdienstMins)}</span>
+        <span style="color:var(--muted);font-size:11px">Nd</span>
+        <span style="color:var(--muted)">=</span>
+        <span style="font-size:16px;font-weight:700;color:${gesamtPos?'var(--green)':'var(--red)'}">${gesamtPos?'+':''}${minsToTime(gesamtUeberstunden)}</span>
+      </div>
+    </div>
+
+    <!-- STATS GRID: 2x2 -->
+    <div class="ys-grid">
       <div class="ys-card blue">
         <div class="ys-label">Gearbeitet</div>
         <div class="ys-value blue">${minsToTime(totalWorked)}</div>
@@ -1395,66 +1422,41 @@ function renderJahres() {
         <div class="ys-value green">${realWorkedDays}</div>
         <div class="ys-sub">von ${totalArbeitstage} Werktagen</div>
       </div>
-      <div class="ys-card" style="border-top:3px solid var(--orange)">
-        <div class="ys-label">🚨 Notdienst</div>
-        <div class="ys-value" style="color:var(--orange)">+${minsToTime(totalNotdienstMins)}</div>
-        <div class="ys-sub">${totalNotdienst} Einsätze</div>
-      </div>
     </div>
 
-    <!-- Notdienst detail (full width, only if data exists) -->
-    ${totalNotdienst > 0 ? `
-    <div style="background:var(--surface);border:1px solid var(--orange);border-radius:var(--radius);padding:12px;margin-bottom:12px">
-      <div style="font-size:10px;color:var(--orange);font-weight:700;text-transform:uppercase;margin-bottom:6px">🚨 Notdienst Details ${currentYear}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
-        ${monthData.map(function(s) {
-          if (s.notdienst === 0) return '';
-          return '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;display:flex;align-items:center;gap:4px">'
-            + '<span style="font-size:10px;font-weight:700;color:var(--text)">' + MONTHS[s.month].substring(0,3) + '</span>'
-            + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--orange)">' + s.notdienst + '× ' + minsToTime(s.ndMins) + '</span>'
-            + '</div>';
-        }).join('')}
-      </div>
-      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">
-        Ø ${(totalNotdienstMins / Math.max(totalNotdienst, 1) / 60).toFixed(1)} Std/Einsatz · ca. ${(totalNotdienstMins / 60 / 8).toFixed(1)} Arbeitstage
-      </div>
-    </div>
-    ` : ''}
-
-    <!-- Urlaub / Krank / Feiertage row -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;border-top:3px solid var(--blue)">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">🏖 Urlaub</div>
-        <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--blue)">${totalUrlaub} T</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">Rest: ${urlaubKalan} von 30</div>
-        <div style="background:var(--surface2);border-radius:3px;height:4px;margin-top:4px;overflow:hidden">
+    <!-- URLAUB / KRANK / FEIERTAGE -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;border-top:3px solid var(--blue)">
+        <div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px">🏖 Urlaub</div>
+        <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--blue)">${totalUrlaub}</div>
+        <div style="font-size:9px;color:var(--muted)">Rest ${urlaubKalan}/30</div>
+        <div style="background:var(--surface2);border-radius:3px;height:3px;margin-top:3px;overflow:hidden">
           <div style="height:100%;background:var(--blue);width:${Math.round(totalUrlaub/30*100)}%"></div>
         </div>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;border-top:3px solid var(--red)">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">🤒 Krank</div>
-        <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--red)">${totalKrank} T</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">${totalKrank * 8} Std angerechnet</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;border-top:3px solid var(--red)">
+        <div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px">🤒 Krank</div>
+        <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--red)">${totalKrank}</div>
+        <div style="font-size:9px;color:var(--muted)">${totalKrank * 8}h</div>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;border-top:3px solid var(--yellow)">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">🎉 Feiertage</div>
-        <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--yellow)">${totalFeiertage} T</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">${totalFeiertage * 8} Std angerechnet</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;border-top:3px solid var(--yellow)">
+        <div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px">🎉 Feiertage</div>
+        <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--yellow)">${totalFeiertage}</div>
+        <div style="font-size:9px;color:var(--muted)">${totalFeiertage * 8}h</div>
       </div>
     </div>
 
-    <!-- Month bars -->
+    <!-- MONTH BARS -->
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 4px">📅 Monatsübersicht — Zeile anklicken zum Springen 👇</div>
     <div class="month-bar-list">${barsHtml}</div>
 
-    <!-- Info footer -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-top:12px">
-      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">ℹ️ Erklärung</div>
+    <!-- INFO -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">ℹ️ Erklärung</div>
       <div style="font-size:11px;color:var(--muted);line-height:1.6">
-        <b>Differenz</b> = Gearbeitete Stunden − Soll-Stunden (174h/Monat)<br>
-        <b>Notdienst</b> = Zusätzliche Überstunden aus Notdienst-Einsätzen<br>
-        <b>Gesamt Überstunden</b> = Differenz + Notdienst<br>
-        <b>Σ</b> in der Monatszeile = Monatliche Differenz + Notdienst zusammen
+        <b style="color:${isPos?'var(--green)':'var(--red)'}">Differenz</b> = Gearbeitet − Soll (174h/Mon) &nbsp;|&nbsp;
+        <b style="color:var(--orange)">Notdienst</b> = Extra-Stunden &nbsp;|&nbsp;
+        <b>Gesamt</b> = Diff + Nd
       </div>
     </div>
   `;
