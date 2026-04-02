@@ -937,6 +937,13 @@ function showSync(cls, text) {
   if (el) { el.className = 'sync-status ' + cls; el.textContent = text; }
 }
 
+function getMitarbeiterName() {
+  var ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
+  if (ma.vorname || ma.name) return (ma.vorname || '') + ' ' + (ma.name || '');
+  if (CURRENT_USER && CURRENT_USER !== 'default') return CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
+  return '';
+}
+
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const DAYS_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 
@@ -1247,7 +1254,51 @@ function renderDays() {
       html += `<div style="padding:4px 14px 10px"><button onclick="event.stopPropagation();openNotdienst('${dateStr}',-1)" style="background:transparent;border:1px dashed var(--orange);color:var(--orange);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%">+ Notdienst hinzufügen</button></div>`;
     }
     html += '</div>';
+
+    // Weekly Notdienst subtotal (show at end of each week = Sunday, or last day of month)
+    if (dow === 0 || d === total) {
+      // Calculate this week's Notdienst
+      var weekStart = d;
+      if (dow === 0) { weekStart = d - 6; } else { weekStart = d - dow; }
+      if (weekStart < 1) weekStart = 1;
+      var weekNdCount = 0, weekNdMins = 0;
+      for (var wd = weekStart; wd <= d; wd++) {
+        var wds = mk + '-' + String(wd).padStart(2,'0');
+        if (userNotdienst[wds]) {
+          var wa = Array.isArray(userNotdienst[wds]) ? userNotdienst[wds] : [userNotdienst[wds]];
+          weekNdCount += wa.length;
+          wa.forEach(function(wn) { if (wn.hours) weekNdMins += timeToMins(wn.hours); });
+        }
+      }
+      if (weekNdCount > 0) {
+        html += `<div style="background:rgba(251,146,60,0.08);border:1px solid var(--orange);border-radius:10px;padding:8px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11px;font-weight:700;color:var(--orange)">🚨 KW Notdienst</span>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--orange)">${weekNdCount}× · ${minsToTime(weekNdMins)} Std</span>
+        </div>`;
+      }
+    }
   }
+
+  // Monthly Notdienst total at bottom
+  var monthNdCount = 0, monthNdMins = 0;
+  for (var md = 1; md <= total; md++) {
+    var mds = mk + '-' + String(md).padStart(2,'0');
+    if (userNotdienst[mds]) {
+      var ma2 = Array.isArray(userNotdienst[mds]) ? userNotdienst[mds] : [userNotdienst[mds]];
+      monthNdCount += ma2.length;
+      ma2.forEach(function(mn) { if (mn.hours) monthNdMins += timeToMins(mn.hours); });
+    }
+  }
+  if (monthNdCount > 0) {
+    html += `<div style="background:linear-gradient(135deg,rgba(251,146,60,0.12),rgba(251,146,60,0.04));border:1px solid var(--orange);border-radius:var(--radius);padding:14px;margin-top:4px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:800;color:var(--orange)">🚨 Notdienst ${MONTHS[currentMonth]}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--orange)">${monthNdCount}× · ${minsToTime(monthNdMins)} Std</span>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">Ø ${(monthNdMins / monthNdCount / 60).toFixed(1)} Std pro Einsatz · ca. ${(monthNdMins / 60 / 8).toFixed(1)} Arbeitstage</div>
+    </div>`;
+  }
+
   document.getElementById('daysTab').innerHTML = html;
 }
 
@@ -1327,33 +1378,12 @@ function renderJahres() {
       </div>
     </div>
 
-    <!-- Detail cards -->
+    <!-- Detail cards - balanced 2x2 grid -->
     <div class="ys-grid">
       <div class="ys-card ${isPos?'green':'red'}">
         <div class="ys-label">Differenz (ohne Nd)</div>
         <div class="ys-value ${isPos?'green':'red'}">${isPos?'+':''}${minsToTime(totalDiff)}</div>
         <div class="ys-sub">${Math.floor(Math.abs(totalDiff)/60)}h ${Math.abs(totalDiff)%60}min</div>
-      </div>
-      <div class="ys-card" style="border-top:3px solid var(--orange);grid-column:span 2">
-        <div class="ys-label">🚨 Notdienst ${currentYear}</div>
-        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px">
-          <div class="ys-value" style="color:var(--orange)">+${minsToTime(totalNotdienstMins)}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--muted)">${totalNotdienst} Einsätze</div>
-        </div>
-        ${totalNotdienst > 0 ? `
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">
-          ${monthData.map(function(s) {
-            if (s.notdienst === 0) return '';
-            return '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;display:flex;align-items:center;gap:4px">'
-              + '<span style="font-size:10px;font-weight:700;color:var(--text)">' + MONTHS[s.month].substring(0,3) + '</span>'
-              + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--orange)">' + s.notdienst + '× ' + minsToTime(s.ndMins) + '</span>'
-              + '</div>';
-          }).join('')}
-        </div>
-        <div style="margin-top:6px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">
-          Ø ${(totalNotdienstMins / Math.max(totalNotdienst, 1) / 60).toFixed(1)} Std/Einsatz · ca. ${(totalNotdienstMins / 60 / 8).toFixed(1)} Arbeitstage
-        </div>
-        ` : ''}
       </div>
       <div class="ys-card blue">
         <div class="ys-label">Gearbeitet</div>
@@ -1365,7 +1395,31 @@ function renderJahres() {
         <div class="ys-value green">${realWorkedDays}</div>
         <div class="ys-sub">von ${totalArbeitstage} Werktagen</div>
       </div>
+      <div class="ys-card" style="border-top:3px solid var(--orange)">
+        <div class="ys-label">🚨 Notdienst</div>
+        <div class="ys-value" style="color:var(--orange)">+${minsToTime(totalNotdienstMins)}</div>
+        <div class="ys-sub">${totalNotdienst} Einsätze</div>
+      </div>
     </div>
+
+    <!-- Notdienst detail (full width, only if data exists) -->
+    ${totalNotdienst > 0 ? `
+    <div style="background:var(--surface);border:1px solid var(--orange);border-radius:var(--radius);padding:12px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--orange);font-weight:700;text-transform:uppercase;margin-bottom:6px">🚨 Notdienst Details ${currentYear}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        ${monthData.map(function(s) {
+          if (s.notdienst === 0) return '';
+          return '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;display:flex;align-items:center;gap:4px">'
+            + '<span style="font-size:10px;font-weight:700;color:var(--text)">' + MONTHS[s.month].substring(0,3) + '</span>'
+            + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--orange)">' + s.notdienst + '× ' + minsToTime(s.ndMins) + '</span>'
+            + '</div>';
+        }).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">
+        Ø ${(totalNotdienstMins / Math.max(totalNotdienst, 1) / 60).toFixed(1)} Std/Einsatz · ca. ${(totalNotdienstMins / 60 / 8).toFixed(1)} Arbeitstage
+      </div>
+    </div>
+    ` : ''}
 
     <!-- Urlaub / Krank / Feiertage row -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
@@ -1669,7 +1723,7 @@ function sendBericht() {
   body += `Ergebnis / Feststellungen:\n\n`;
   const zeilen = ergebnis.split('\n').filter(z => z.trim());
   zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
-  body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
+  body += `\nMit freundlichen Grüßen\n` + getMitarbeiterName();
   if (berichtDate && userNotdienst[berichtDate]) {
     const ndList = userNotdienst[berichtDate];
     const ndItems = Array.isArray(ndList) ? ndList : [ndList];
@@ -1744,7 +1798,7 @@ function sendBerichtFromNd() {
   body += `Ergebnis / Feststellungen:\n\n`;
   const zeilen = ergebnis.split('\n').filter(z => z.trim());
   zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
-  body += `\nMit freundlichen Grüßen\nYusuf Bektas`;
+  body += `\nMit freundlichen Grüßen\n` + getMitarbeiterName();
 
   const to = 'info@ideal-hannover.de';
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
