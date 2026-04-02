@@ -1254,51 +1254,7 @@ function renderDays() {
       html += `<div style="padding:4px 14px 10px"><button onclick="event.stopPropagation();openNotdienst('${dateStr}',-1)" style="background:transparent;border:1px dashed var(--orange);color:var(--orange);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%">+ Notdienst hinzufügen</button></div>`;
     }
     html += '</div>';
-
-    // Weekly Notdienst subtotal (show at end of each week = Sunday, or last day of month)
-    if (dow === 0 || d === total) {
-      // Calculate this week's Notdienst
-      var weekStart = d;
-      if (dow === 0) { weekStart = d - 6; } else { weekStart = d - dow; }
-      if (weekStart < 1) weekStart = 1;
-      var weekNdCount = 0, weekNdMins = 0;
-      for (var wd = weekStart; wd <= d; wd++) {
-        var wds = mk + '-' + String(wd).padStart(2,'0');
-        if (userNotdienst[wds]) {
-          var wa = Array.isArray(userNotdienst[wds]) ? userNotdienst[wds] : [userNotdienst[wds]];
-          weekNdCount += wa.length;
-          wa.forEach(function(wn) { if (wn.hours) weekNdMins += timeToMins(wn.hours); });
-        }
-      }
-      if (weekNdCount > 0) {
-        html += `<div style="background:rgba(251,146,60,0.08);border:1px solid var(--orange);border-radius:10px;padding:8px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:11px;font-weight:700;color:var(--orange)">🚨 KW Notdienst</span>
-          <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--orange)">${weekNdCount}× · ${minsToTime(weekNdMins)} Std</span>
-        </div>`;
-      }
-    }
   }
-
-  // Monthly Notdienst total at bottom
-  var monthNdCount = 0, monthNdMins = 0;
-  for (var md = 1; md <= total; md++) {
-    var mds = mk + '-' + String(md).padStart(2,'0');
-    if (userNotdienst[mds]) {
-      var ma2 = Array.isArray(userNotdienst[mds]) ? userNotdienst[mds] : [userNotdienst[mds]];
-      monthNdCount += ma2.length;
-      ma2.forEach(function(mn) { if (mn.hours) monthNdMins += timeToMins(mn.hours); });
-    }
-  }
-  if (monthNdCount > 0) {
-    html += `<div style="background:linear-gradient(135deg,rgba(251,146,60,0.12),rgba(251,146,60,0.04));border:1px solid var(--orange);border-radius:var(--radius);padding:14px;margin-top:4px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:13px;font-weight:800;color:var(--orange)">🚨 Notdienst ${MONTHS[currentMonth]}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--orange)">${monthNdCount}× · ${minsToTime(monthNdMins)} Std</span>
-      </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:4px">Ø ${(monthNdMins / monthNdCount / 60).toFixed(1)} Std pro Einsatz · ca. ${(monthNdMins / 60 / 8).toFixed(1)} Arbeitstage</div>
-    </div>`;
-  }
-
   document.getElementById('daysTab').innerHTML = html;
 }
 
