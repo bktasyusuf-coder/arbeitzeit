@@ -307,19 +307,15 @@
 
 <div id="mainView" style="display:none">
   <div class="summary" id="summaryCards"></div>
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('days',this)">Tage</div>
-    <div class="tab" onclick="switchTab('jahres',this)">📊 Jahresübersicht</div>
-  </div>
   <div id="daysTab" class="day-list"></div>
-  <div id="jahresTab" class="year-summary-view" style="display:none"></div>
+  <div id="jahresTab" class="year-summary-view"></div>
 </div>
+
+<!-- Scroll to top button -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none;position:fixed;bottom:80px;right:16px;z-index:150;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;color:white;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:opacity 0.3s">↑</button>
 
 <!-- Bottom Nav -->
 <div class="bottom-nav" id="bottomNav" style="display:none">
-  <button class="bnav-btn active" onclick="setView('month',this)">
-    <span class="bnav-icon">📅</span>Monat
-  </button>
   <button class="bnav-btn" onclick="openPhotoScan()">
     <span class="bnav-icon">📷</span>Scannen
   </button>
@@ -1418,7 +1414,7 @@ function renderJahres() {
   `;
 }
 
-function goToMonthJahres(m) { currentMonth = m; switchTab('days', document.querySelectorAll('.tab')[0]); render(); }
+function goToMonthJahres(m) { currentMonth = m; render(); window.scrollTo({top:0, behavior:'smooth'}); }
 function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } render(); }
 function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } render(); }
 function goToToday() {
@@ -1427,16 +1423,14 @@ function goToToday() {
   currentMonth = t.getMonth();
   document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active-year'));
   const yb = document.getElementById('ybtn'+currentYear); if(yb) yb.classList.add('active-year');
-  switchTab('days', document.querySelectorAll('.tab')[0]); render();
+  render();
   setTimeout(() => { const el = document.querySelector('.day-entry.today'); if (el) el.scrollIntoView({behavior:'smooth', block:'center'}); }, 100);
 }
-function switchTab(tab, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('daysTab').style.display = tab==='days'?'block':'none';
-  document.getElementById('jahresTab').style.display = tab==='jahres'?'block':'none';
-}
-function setView(v, el) { document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
+// Scroll to top button visibility
+window.addEventListener('scroll', function() {
+  var btn = document.getElementById('scrollTopBtn');
+  if (btn) btn.style.display = window.scrollY > 400 ? 'block' : 'none';
+});
 
 // ─── ENTRY MODAL ────────────────────────────────────────────────
 function onDayClick(dateStr, day) {
