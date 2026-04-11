@@ -308,7 +308,7 @@
 <div id="mainView" style="display:none">
   <div class="summary" id="summaryCards"></div>
   <div id="daysTab" class="day-list"></div>
-  <div id="jahresTab" class="year-summary-view"></div>
+  <div id="jahresTab" class="year-summary-view" style="display:none"></div>
 </div>
 
 <!-- Scroll to top button -->
@@ -316,10 +316,16 @@
 
 <!-- Bottom Nav -->
 <div class="bottom-nav" id="bottomNav" style="display:none">
+  <button class="bnav-btn active" id="bnav-tage" onclick="showTage()">
+    <span class="bnav-icon">📅</span>Tage
+  </button>
+  <button class="bnav-btn" id="bnav-jahres" onclick="showJahres()">
+    <span class="bnav-icon">📊</span>Jahr
+  </button>
   <button class="bnav-btn" onclick="openPhotoScan()">
     <span class="bnav-icon">📷</span>Scannen
   </button>
- <button class="bnav-btn" onclick="openUrlaubModal()">
+  <button class="bnav-btn" onclick="openUrlaubModal()">
     <span class="bnav-icon">🏖</span>Urlaub
   </button>
   <button class="bnav-btn" onclick="document.getElementById('importInput').click()">
@@ -1414,7 +1420,7 @@ function renderJahres() {
   `;
 }
 
-function goToMonthJahres(m) { currentMonth = m; render(); window.scrollTo({top:0, behavior:'smooth'}); }
+function goToMonthJahres(m) { currentMonth = m; render(); showTage(); }
 function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } render(); }
 function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } render(); }
 function goToToday() {
@@ -1426,6 +1432,23 @@ function goToToday() {
   render();
   setTimeout(() => { const el = document.querySelector('.day-entry.today'); if (el) el.scrollIntoView({behavior:'smooth', block:'center'}); }, 100);
 }
+// View switching
+function showTage() {
+  document.getElementById('daysTab').style.display = 'block';
+  document.getElementById('jahresTab').style.display = 'none';
+  document.getElementById('bnav-tage').classList.add('active');
+  document.getElementById('bnav-jahres').classList.remove('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function showJahres() {
+  document.getElementById('daysTab').style.display = 'none';
+  document.getElementById('jahresTab').style.display = 'block';
+  document.getElementById('bnav-tage').classList.remove('active');
+  document.getElementById('bnav-jahres').classList.add('active');
+  renderJahres();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
 // Scroll to top button visibility
 window.addEventListener('scroll', function() {
   var btn = document.getElementById('scrollTopBtn');
