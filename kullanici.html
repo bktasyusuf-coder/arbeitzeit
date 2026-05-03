@@ -39,7 +39,6 @@
     font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;
   }
   .year-btn.active-year { background:var(--accent); border-color:var(--accent); color:white; }
-  .year-badge { background:var(--accent); color:white; font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; }
   .month-nav { display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .month-title { font-size:26px; font-weight:800; letter-spacing:-0.02em; flex:1; text-align:center; }
   .nav-btn {
@@ -77,21 +76,12 @@
   .card-value.purple { color:var(--accent2); }
   .card-sub { font-size:11px; color:var(--muted); margin-top:4px; font-family:'DM Mono',monospace; }
 
-  .tabs { display:flex; padding:14px 16px 0; gap:8px; }
-  .tab {
-    flex:1; padding:9px 8px; border-radius:10px; border:1px solid var(--border);
-    background:var(--surface); color:var(--muted); font-family:'Syne',sans-serif;
-    font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; text-align:center;
-  }
-  .tab.active { background:var(--accent); border-color:var(--accent); color:white; }
-
   .day-list { padding:12px 16px 100px; }
   .day-entry {
     background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
     margin-bottom:8px; overflow:hidden; transition:all 0.2s;
   }
   .day-entry.today { border-color:var(--accent); }
-  .day-entry.weekend { opacity:1; }
   .day-entry.feiertag { border-color:var(--yellow); }
   .day-entry.notdienst { border-color:var(--orange); }
   .day-entry.urlaub { border-color:var(--blue); }
@@ -120,23 +110,6 @@
   .chip-val { color:var(--text); font-weight:500; }
 
   .year-view { padding:12px 16px 100px; }
-  .month-row {
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    padding:14px; margin-bottom:8px; display:flex; align-items:center; gap:12px;
-    cursor:pointer; transition:all 0.15s;
-  }
-  .month-row:active { transform:scale(0.98); }
-  .month-row.active-month { border-color:var(--accent); background:#1e1b38; }
-  .month-name { font-size:15px; font-weight:700; flex:1; }
-  .month-stats { display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
-  .stat-pill { font-family:'DM Mono',monospace; font-size:11px; display:flex; align-items:center; gap:4px; }
-  .stat-pill .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .dot-green { background:var(--green); }
-  .dot-red { background:var(--red); }
-  .dot-blue { background:var(--blue); }
-  .diff-pos { color:var(--green); font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
-  .diff-neg { color:var(--red); font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
-
   .year-summary-view { padding:12px 16px 100px; }
   .ys-header { font-size:22px; font-weight:800; margin-bottom:16px; }
   .ys-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
@@ -232,7 +205,6 @@
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-
   .holiday-name { font-size:10px; color:var(--yellow); margin-top:1px; }
   .sync-status { transition:color 0.3s; }
   .sync-status.synced { color:var(--green)!important; }
@@ -243,6 +215,20 @@
     font-weight:500; cursor:pointer; transition:all 0.2s;
   }
   .nd-preset-btn:active, .nd-preset-btn.active { background:rgba(251,146,60,0.2); transform:scale(0.95); }
+
+  /* Haftalık Notdienst tablo satırları */
+  .nd-week-row {
+    display:grid; grid-template-columns:44px 1fr 60px 60px;
+    gap:0; align-items:center; padding:4px 0;
+    border-bottom:1px solid rgba(46,46,61,0.5);
+  }
+  .nd-week-row:last-child { border-bottom:none; }
+  .nd-week-kw { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .nd-week-bar { padding:0 6px; }
+  .nd-week-bar-bg { background:var(--surface2); border-radius:3px; height:4px; overflow:hidden; }
+  .nd-week-bar-fill { height:100%; border-radius:3px; background:var(--orange); }
+  .nd-week-nd { font-size:10px; color:var(--orange); font-family:'DM Mono',monospace; text-align:right; }
+  .nd-week-ue { font-size:10px; font-family:'DM Mono',monospace; text-align:right; }
 </style>
 <script src="https://bktasyusuf-coder.github.io/arbeitzeit/jspdf.min.js"></script>
 </head>
@@ -258,7 +244,7 @@
     <input type="password" id="loginPassword" class="form-input" placeholder="Passwort eingeben..." style="text-align:center;font-size:16px;margin-bottom:12px" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()" style="width:100%;padding:14px;background:var(--accent);border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer">🔓 Anmelden</button>
     <div id="loginError" style="color:var(--red);font-size:12px;margin-top:10px;display:none">❌ Falsches Passwort!</div>
-    <div id="loginNoUser" style="color:var(--red);font-size:12px;margin-top:10px;display:none">❌ Benutzer nicht gefunden! Bitte Admin kontaktieren.</div>
+    <div id="loginNoUser" style="color:var(--red);font-size:12px;margin-top:10px;display:none">❌ Benutzer nicht gefunden!</div>
   </div>
 </div>
 
@@ -269,9 +255,6 @@
       <div style="font-size:20px;font-weight:800">👑 Admin-Panel</div>
       <button onclick="closeAdmin()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Benutzer hinzufügen, bearbeiten oder löschen</div>
-    
-    <!-- Add user form -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px">
       <div style="font-size:13px;font-weight:700;margin-bottom:12px">➕ Neuer Benutzer</div>
       <div class="form-row">
@@ -280,8 +263,6 @@
       </div>
       <button onclick="adminAddUser()" style="width:100%;padding:10px;background:var(--green);border:none;border-radius:8px;color:white;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">💾 Benutzer anlegen</button>
     </div>
-
-    <!-- User list -->
     <div id="adminUserList" style="font-size:13px;color:var(--muted)">Lade Benutzer...</div>
   </div>
 </div>
@@ -311,23 +292,13 @@
   <div id="jahresTab" class="year-summary-view" style="display:none"></div>
 </div>
 
-<!-- Scroll to top button -->
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none;position:fixed;bottom:80px;right:16px;z-index:150;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;color:white;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:opacity 0.3s">↑</button>
 
-<!-- Bottom Nav -->
 <div class="bottom-nav" id="bottomNav" style="display:none">
-  <button class="bnav-btn active" id="bnav-tage" onclick="showTage()">
-    <span class="bnav-icon">📅</span>Tage
-  </button>
-  <button class="bnav-btn" id="bnav-jahres" onclick="showJahres()">
-    <span class="bnav-icon">📊</span>Jahr
-  </button>
-  <button class="bnav-btn" onclick="openPhotoScan()">
-    <span class="bnav-icon">📷</span>Scannen
-  </button>
-  <button class="bnav-btn" onclick="openUrlaubModal()">
-    <span class="bnav-icon">🏖</span>Urlaub
-  </button>
+  <button class="bnav-btn active" id="bnav-tage" onclick="showTage()"><span class="bnav-icon">📅</span>Tage</button>
+  <button class="bnav-btn" id="bnav-jahres" onclick="showJahres()"><span class="bnav-icon">📊</span>Jahr</button>
+  <button class="bnav-btn" onclick="openPhotoScan()"><span class="bnav-icon">📷</span>Scannen</button>
+  <button class="bnav-btn" onclick="openUrlaubModal()"><span class="bnav-icon">🏖</span>Urlaub</button>
   <button class="bnav-btn" onclick="document.getElementById('importInput').click()">
     <span class="bnav-icon">📥</span>Import
     <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
@@ -372,29 +343,6 @@
   </div>
 </div>
 
-<!-- Daten Modal -->
-<div class="modal-overlay" id="datenModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div style="display:flex;justify-content:center;align-items:center;margin-bottom:24px;gap:12px;position:relative">
-      <div style="font-size:20px;font-weight:800;text-align:center">🗂 Datenverwaltung</div>
-      <button onclick="closeDatenModal()" style="position:absolute;right:0;background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <button onclick="exportData()" style="background:rgba(52,211,153,0.1);border:1px solid var(--green);border-radius:14px;padding:24px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px">
-        <span style="font-size:32px">💾</span>
-        <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--green)">Export</span>
-        <span style="font-size:11px;color:var(--muted);font-family:'Syne',sans-serif">Daten sichern</span>
-      </button>
-      <button onclick="document.getElementById('importInput').click()" style="background:rgba(96,165,250,0.1);border:1px solid var(--blue);border-radius:14px;padding:24px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px">
-        <span style="font-size:32px">📂</span>
-        <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--blue)">Import</span>
-        <span style="font-size:11px;color:var(--muted);font-family:'Syne',sans-serif">Daten laden</span>
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- Notdienst Modal -->
 <div class="modal-overlay" id="notdienstModal">
   <div class="modal">
@@ -404,8 +352,6 @@
       <button onclick="closeNotdienst()" style="background:var(--orange);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
     </div>
     <div id="ndDateLabel" style="font-size:13px;color:var(--muted);margin-bottom:16px"></div>
-
-    <!-- 1) Kunde, Adresse, Problem, Ergebnis -->
     <div class="form-group">
       <label class="form-label">Kunde (Name, Stockwerk)</label>
       <input type="text" class="form-input" id="ndBrKunde" placeholder="z.B. Frau Ermakov/Kraft, 2. OG rechts">
@@ -414,7 +360,7 @@
       <label class="form-label">Adresse</label>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="text" class="form-input" id="ndBrAdresse" placeholder="z.B. Kniestraße 22, 30519 Hannover" style="flex:1">
-        <button onclick="openGoogleMaps('ndBrAdresse')" style="background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:16px;flex-shrink:0" title="In Google Maps öffnen">📍</button>
+        <button onclick="openGoogleMaps('ndBrAdresse')" style="background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:16px;flex-shrink:0">📍</button>
       </div>
     </div>
     <div class="form-group">
@@ -425,8 +371,6 @@
       <label class="form-label">Ergebnis / Feststellungen (jede Zeile = ein Punkt)</label>
       <textarea class="form-input" id="ndBrErgebnis" rows="4" placeholder="Laut telefonischer Auskunft wurde...&#10;Nach der Reparatur trat erneut...&#10;Vor Ort wurde festgestellt..." style="resize:none;line-height:1.5;font-family:'Syne',sans-serif;font-size:13px"></textarea>
     </div>
-
-    <!-- 2) Saat bölümü -->
     <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">⏰ Schnellauswahl</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
@@ -440,26 +384,13 @@
         <button onclick="setNdPreset('08:00','16:00')" class="nd-preset-btn">Sa/So 08–16</button>
       </div>
       <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
-        <div class="form-group">
-          <label class="form-label">Start</label>
-          <input type="time" class="form-input" id="ndStart">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Ende</label>
-          <input type="time" class="form-input" id="ndEnd">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Arbeitszeit</label>
-          <input type="text" class="form-input" id="ndCalc" readonly placeholder="--:--">
-        </div>
+        <div class="form-group"><label class="form-label">Start</label><input type="time" class="form-input" id="ndStart"></div>
+        <div class="form-group"><label class="form-label">Ende</label><input type="time" class="form-input" id="ndEnd"></div>
+        <div class="form-group"><label class="form-label">Arbeitszeit</label><input type="text" class="form-input" id="ndCalc" readonly placeholder="--:--"></div>
       </div>
     </div>
-
-    <!-- 3) Speichern -->
     <button class="save-btn" onclick="saveNotdienst()" style="background:var(--orange)">💾 Speichern</button>
     <button id="ndDeleteBtn" class="cancel-btn" onclick="deleteNotdienst()" style="color:var(--red);margin-top:8px;display:none">🗑 Eintrag löschen</button>
-
-    <!-- 4) Per Mail senden -->
     <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
       <button onclick="sendBerichtFromNd()" style="width:100%;padding:16px;background:#ea4335;border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
         <span style="font-size:20px">📧</span> Per Mail senden
@@ -468,6 +399,7 @@
     </div>
   </div>
 </div>
+
 <!-- Urlaub Modal -->
 <div class="modal-overlay" id="urlaubModal">
   <div class="modal">
@@ -476,8 +408,6 @@
       <div style="font-size:20px;font-weight:800">🏖 Urlaubsantrag</div>
       <button onclick="closeUrlaubModal()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
     </div>
-
-    <!-- Saved info preview -->
     <div id="mitarbeiterPreview" style="display:none;margin-bottom:16px">
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between">
         <div>
@@ -487,8 +417,6 @@
         <button onclick="toggleMitarbeiterEdit()" style="background:var(--surface);border:1px solid var(--accent);color:var(--accent2);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0">✏️ Ändern</button>
       </div>
     </div>
-
-    <!-- Editable fields (hidden by default if saved) -->
     <div id="mitarbeiterSection" style="display:none">
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">Mitarbeiter</div>
       <div class="form-row">
@@ -505,34 +433,17 @@
       </div>
       <button onclick="saveMitarbeiter()" style="width:100%;padding:10px;background:var(--green);border:none;border-radius:8px;color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px">💾 Mitarbeiter speichern</button>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">Von (Datum)</label>
-      <input type="date" class="form-input" id="urlaubVon">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Bis (Datum)</label>
-      <input type="date" class="form-input" id="urlaubBis">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Urlaubsart</label>
-      <input type="text" class="form-input" id="urlaubArt" value="Erholungsurlaub">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Bemerkungen</label>
-      <input type="text" class="form-input" id="urlaubBemerkung" placeholder="Optional...">
-    </div>
-    
+    <div class="form-group"><label class="form-label">Von (Datum)</label><input type="date" class="form-input" id="urlaubVon"></div>
+    <div class="form-group"><label class="form-label">Bis (Datum)</label><input type="date" class="form-input" id="urlaubBis"></div>
+    <div class="form-group"><label class="form-label">Urlaubsart</label><input type="text" class="form-input" id="urlaubArt" value="Erholungsurlaub"></div>
+    <div class="form-group"><label class="form-label">Bemerkungen</label><input type="text" class="form-input" id="urlaubBemerkung" placeholder="Optional..."></div>
     <div id="urlaubGirilen" style="margin-bottom:16px"></div>
-
-    <!-- Signature Section -->
     <div style="margin-bottom:16px;border-top:1px solid var(--border);padding-top:16px">
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">✍️ Unterschrift</div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <button id="sigTabDraw" onclick="switchSigTab('draw')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer">✍️ Zeichnen</button>
         <button id="sigTabUpload" onclick="switchSigTab('upload')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer">📁 Bild laden</button>
       </div>
-      <!-- Draw tab -->
       <div id="sigDrawArea">
         <canvas id="sigCanvas" width="340" height="120" style="width:100%;height:120px;background:white;border:1px solid var(--border);border-radius:10px;cursor:crosshair;touch-action:none"></canvas>
         <div style="display:flex;gap:8px;margin-top:8px">
@@ -540,7 +451,6 @@
           <button onclick="saveSignature()" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--green);background:transparent;color:var(--green);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer">💾 Speichern</button>
         </div>
       </div>
-      <!-- Upload tab -->
       <div id="sigUploadArea" style="display:none">
         <div onclick="document.getElementById('sigFileInput').click()" style="border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer">
           <div style="font-size:28px;margin-bottom:6px">📁</div>
@@ -548,57 +458,14 @@
           <input type="file" id="sigFileInput" accept="image/*" style="display:none" onchange="onSigFileSelected(event)">
         </div>
       </div>
-      <!-- Saved signature preview -->
       <div id="sigPreview" style="display:none;margin-top:10px">
         <div style="font-size:10px;color:var(--green);font-weight:700;margin-bottom:4px">✅ Unterschrift gespeichert</div>
         <img id="sigPreviewImg" style="max-width:200px;max-height:80px;border:1px solid var(--border);border-radius:6px;background:white;padding:4px">
       </div>
     </div>
-
-    <!-- Mail-Empfänger -->
-    <div class="form-group">
-      <label class="form-label">📧 Mail-Empfänger</label>
-      <input type="email" class="form-input" id="urlaubMailTo" value="info@ideal-hannover.de" placeholder="info@ideal-hannover.de">
-    </div>
-
-    <!-- Action buttons -->
+    <div class="form-group"><label class="form-label">📧 Mail-Empfänger</label><input type="email" class="form-input" id="urlaubMailTo" value="info@ideal-hannover.de"></div>
     <button class="save-btn" onclick="generateUrlaubPDF()" style="background:var(--blue)">📄 PDF speichern & per Mail senden</button>
     <button class="cancel-btn" onclick="resetUrlaub()" style="color:var(--red)">🗑 Urlaub zurücksetzen (Von–Bis)</button>
-  </div>
-</div>
-<!-- Bericht Modal -->
-<div class="modal-overlay" id="berichtModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px">
-      <div style="font-size:20px;font-weight:800">📧 Notdienst-Bericht</div>
-      <button onclick="closeBericht()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">Schließen</button>
-    </div>
-    <div id="berichtDateLabel" style="font-size:13px;color:var(--muted);margin-bottom:16px"></div>
-    <div class="form-group">
-      <label class="form-label">Kunde (Name, Stockwerk)</label>
-      <input type="text" class="form-input" id="brKunde" placeholder="z.B. Frau Ermakov/Kraft, 2. OG rechts">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Adresse</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="text" class="form-input" id="brAdresse" placeholder="z.B. Kniestraße 22, 30519 Hannover" style="flex:1">
-        <button onclick="openGoogleMaps('brAdresse')" style="background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:16px;flex-shrink:0" title="In Google Maps öffnen">📍</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Problem</label>
-      <textarea class="form-input" id="brProblem" rows="2" placeholder="z.B. Die WC-Spülung ist undicht..." style="resize:none;line-height:1.5;font-family:'Syne',sans-serif;font-size:13px"></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Ergebnis / Feststellungen (jede Zeile = ein Punkt)</label>
-      <textarea class="form-input" id="brErgebnis" rows="5" placeholder="Laut telefonischer Auskunft wurde...&#10;Nach der Reparatur trat erneut...&#10;Vor Ort wurde festgestellt..." style="resize:none;line-height:1.5;font-family:'Syne',sans-serif;font-size:13px"></textarea>
-    </div>
-    <button onclick="sendBericht()" style="width:100%;padding:16px;background:#ea4335;border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px">
-      <span style="font-size:20px">📧</span> Per Mail senden
-    </button>
-    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">📎 Fotos bitte manuell anhängen</div>
-    <button class="cancel-btn" onclick="closeBericht()">Abbrechen</button>
   </div>
 </div>
 
@@ -610,10 +477,7 @@
       <div style="font-size:20px;font-weight:800" id="modalTitle">Neuer Eintrag</div>
       <button onclick="closeModal()" style="background:var(--accent);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0">Schließen</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Datum</label>
-      <input type="date" class="form-input" id="entryDate">
-    </div>
+    <div class="form-group"><label class="form-label">Datum</label><input type="date" class="form-input" id="entryDate"></div>
     <div class="form-group">
       <label class="form-label">Status</label>
       <div class="status-btns">
@@ -625,22 +489,10 @@
       </div>
     </div>
     <div class="form-row" id="timeFields">
-      <div class="form-group">
-        <label class="form-label">Start</label>
-        <input type="time" class="form-input" id="entryStart">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Pause</label>
-        <input type="time" class="form-input" id="entryPause">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Ende</label>
-        <input type="time" class="form-input" id="entryEnd">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Arbeitszeit</label>
-        <input type="text" class="form-input" id="entryCalc" readonly placeholder="--:--">
-      </div>
+      <div class="form-group"><label class="form-label">Start</label><input type="time" class="form-input" id="entryStart"></div>
+      <div class="form-group"><label class="form-label">Pause</label><input type="time" class="form-input" id="entryPause"></div>
+      <div class="form-group"><label class="form-label">Ende</label><input type="time" class="form-input" id="entryEnd"></div>
+      <div class="form-group"><label class="form-label">Arbeitszeit</label><input type="text" class="form-input" id="entryCalc" readonly placeholder="--:--"></div>
     </div>
     <div class="form-group">
       <label class="form-label">📝 Notiz</label>
@@ -652,36 +504,27 @@
 </div>
 
 <script>
-// ===== SUPABASE AUTO-SYNC =====
+// ===== SUPABASE =====
 const SUPABASE_URL = 'https://yubefgtlicwwsjryqdrj.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1YmVmZ3RsaWN3d3NqcnlxZHJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMzc2MDUsImV4cCI6MjA4OTYxMzYwNX0.7cyRLQxR1hzZt6HAOpwsbwvYohwIkl60UuKc8I_5MyY';
 const SB_TABLE = 'arbeitszeit';
+const SB_USERS_ID = 99999;
+const ADMIN_PASS = 'ideal2026';
 
 function getUserId() {
-  const params = new URLSearchParams(window.location.search);
-  const user = params.get('user') || 'default';
-  let hash = 0;
-  for (let i = 0; i < user.length; i++) {
-    hash = ((hash << 5) - hash) + user.charCodeAt(i);
-    hash = hash & hash;
-  }
-  return Math.abs(hash) + 1;
+  const u = new URLSearchParams(window.location.search).get('user') || 'default';
+  let h = 0;
+  for (let i = 0; i < u.length; i++) { h = ((h << 5) - h) + u.charCodeAt(i); h = h & h; }
+  return Math.abs(h) + 1;
 }
 const SB_ROW_ID = getUserId();
 const CURRENT_USER = new URLSearchParams(window.location.search).get('user') || 'default';
 const IS_ADMIN = new URLSearchParams(window.location.search).get('admin') === 'true';
-const ADMIN_PASS = 'ideal2026'; // Admin-Passwort — bitte ändern!
-console.log('USER:', CURRENT_USER, 'ROW_ID:', SB_ROW_ID);
 
-// ===== AUTHENTICATION SYSTEM =====
-const SB_USERS_ID = 99999; // Fixed row ID for user registry
-
+// ===== AUTH =====
 function simpleHash(str) {
   let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = ((h << 5) - h) + str.charCodeAt(i);
-    h = h & h;
-  }
+  for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h = h & h; }
   return String(Math.abs(h));
 }
 
@@ -696,29 +539,34 @@ async function loadUsers() {
       return d.users || {};
     }
     return {};
-  } catch(e) { console.error('Load users error:', e); return {}; }
+  } catch(e) { return {}; }
 }
 
 async function saveUsers(users) {
   try {
-    const body = JSON.stringify({ id: SB_USERS_ID, data: JSON.stringify({ users: users }) });
-    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' };
-    await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, { method: 'POST', headers, body });
-  } catch(e) { console.error('Save users error:', e); }
+    await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ id: SB_USERS_ID, data: JSON.stringify({ users }) })
+    });
+  } catch(e) {}
+}
+
+function getUserObj(users, name) {
+  const u = users[name];
+  if (!u) return null;
+  return typeof u === 'string' ? { pass: u, mustReset: false } : u;
 }
 
 async function checkAuth() {
-  // Admin mode
   if (IS_ADMIN) {
-    var adminInput = prompt('Admin-Passwort:');
-    if (adminInput !== ADMIN_PASS) { alert('Falsches Admin-Passwort!'); return; }
+    const p = prompt('Admin-Passwort:');
+    if (p !== ADMIN_PASS) { alert('Falsches Admin-Passwort!'); return; }
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
     loadAndShowUsers();
     return;
   }
-
-  // No user specified
   if (CURRENT_USER === 'default') {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('loginUserLabel').textContent = 'Kein Benutzer angegeben';
@@ -728,11 +576,8 @@ async function checkAuth() {
     document.querySelector('#loginScreen button').style.display = 'none';
     return;
   }
-
-  var users = await loadUsers();
-  var userObj = getUserObj(users, CURRENT_USER);
-
-  // User not found
+  const users = await loadUsers();
+  const userObj = getUserObj(users, CURRENT_USER);
   if (!userObj) {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('loginUserLabel').textContent = CURRENT_USER;
@@ -741,72 +586,36 @@ async function checkAuth() {
     document.querySelector('#loginScreen button').style.display = 'none';
     return;
   }
-
-  // Check if already authenticated (and no reset needed)
-  var savedAuth = localStorage.getItem('az_auth_' + CURRENT_USER);
-  if (savedAuth && userObj.pass === savedAuth && !userObj.mustReset) {
-    showApp();
-    return;
-  }
+  const saved = localStorage.getItem('az_auth_' + CURRENT_USER);
+  if (saved && userObj.pass === saved && !userObj.mustReset) { showApp(); return; }
   localStorage.removeItem('az_auth_' + CURRENT_USER);
-
-  // Show login screen
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginUserLabel').textContent = '👤 ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
-
-  // If must reset, show special message
-  if (userObj.mustReset) {
-    document.getElementById('loginPassword').placeholder = 'Temporäres Passwort eingeben...';
-  }
   document.getElementById('loginPassword').focus();
 }
 
-// Helper: get user object (supports old format "hash" and new format {pass, mustReset})
-function getUserObj(users, name) {
-  var u = users[name];
-  if (!u) return null;
-  if (typeof u === 'string') return { pass: u, mustReset: false }; // old format
-  return u;
-}
-
 async function doLogin() {
-  var pass = document.getElementById('loginPassword').value;
+  const pass = document.getElementById('loginPassword').value;
   if (!pass) return;
-  var hashed = simpleHash(pass);
-  var users = await loadUsers();
-  var userObj = getUserObj(users, CURRENT_USER);
-
-  if (!userObj) {
-    document.getElementById('loginNoUser').style.display = 'block';
-    return;
-  }
-
-  if (userObj.pass !== hashed) {
+  const hashed = simpleHash(pass);
+  const users = await loadUsers();
+  const userObj = getUserObj(users, CURRENT_USER);
+  if (!userObj || userObj.pass !== hashed) {
     document.getElementById('loginError').style.display = 'block';
     document.getElementById('loginPassword').value = '';
     document.getElementById('loginPassword').focus();
     return;
   }
-
   document.getElementById('loginError').style.display = 'none';
-
-  // Must reset password?
-  if (userObj.mustReset) {
-    showPasswordReset(users);
-    return;
-  }
-
-  // Login successful
+  if (userObj.mustReset) { showPasswordReset(users); return; }
   localStorage.setItem('az_auth_' + CURRENT_USER, hashed);
   showApp();
 }
 
-function showPasswordReset(users) {
-  var loginDiv = document.querySelector('#loginScreen > div');
+function showPasswordReset() {
+  const loginDiv = document.querySelector('#loginScreen > div');
   loginDiv.innerHTML = '<div style="font-size:40px;margin-bottom:12px">🔑</div>'
-    + '<div style="font-size:18px;font-weight:800;margin-bottom:4px;font-family:\'Syne\',sans-serif">Neues Passwort festlegen</div>'
-    + '<div style="font-size:12px;color:var(--muted);margin-bottom:20px">Bitte wähle ein persönliches Passwort</div>'
-    + '<div style="font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:16px">👤 ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1) + '</div>'
+    + '<div style="font-size:18px;font-weight:800;margin-bottom:20px;font-family:\'Syne\',sans-serif">Neues Passwort festlegen</div>'
     + '<input type="password" id="resetPass1" class="form-input" placeholder="Neues Passwort..." style="text-align:center;font-size:16px;margin-bottom:10px">'
     + '<input type="password" id="resetPass2" class="form-input" placeholder="Passwort wiederholen..." style="text-align:center;font-size:16px;margin-bottom:12px" onkeydown="if(event.key===\'Enter\')doPasswordReset()">'
     + '<button onclick="doPasswordReset()" style="width:100%;padding:14px;background:var(--green);border:none;border-radius:12px;color:white;font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;cursor:pointer">✅ Passwort speichern</button>'
@@ -815,19 +624,16 @@ function showPasswordReset(users) {
 }
 
 async function doPasswordReset() {
-  var p1 = document.getElementById('resetPass1').value;
-  var p2 = document.getElementById('resetPass2').value;
-  var errEl = document.getElementById('resetError');
-
+  const p1 = document.getElementById('resetPass1').value;
+  const p2 = document.getElementById('resetPass2').value;
+  const errEl = document.getElementById('resetError');
   if (!p1 || !p2) { errEl.textContent = '❌ Bitte beide Felder ausfüllen!'; errEl.style.display = 'block'; return; }
   if (p1 !== p2) { errEl.textContent = '❌ Passwörter stimmen nicht überein!'; errEl.style.display = 'block'; return; }
-  if (p1.length < 3) { errEl.textContent = '❌ Passwort muss mindestens 3 Zeichen haben!'; errEl.style.display = 'block'; return; }
-
-  var hashed = simpleHash(p1);
-  var users = await loadUsers();
+  if (p1.length < 3) { errEl.textContent = '❌ Mindestens 3 Zeichen!'; errEl.style.display = 'block'; return; }
+  const hashed = simpleHash(p1);
+  const users = await loadUsers();
   users[CURRENT_USER] = { pass: hashed, mustReset: false };
   await saveUsers(users);
-
   localStorage.setItem('az_auth_' + CURRENT_USER, hashed);
   showApp();
 }
@@ -840,98 +646,88 @@ function showApp() {
   initApp();
 }
 
-function logout() {
-  localStorage.removeItem('az_auth_' + CURRENT_USER);
-  location.reload();
-}
+function logout() { localStorage.removeItem('az_auth_' + CURRENT_USER); location.reload(); }
 
-// ===== ADMIN FUNCTIONS =====
+// ===== ADMIN =====
 async function loadAndShowUsers() {
-  var users = await loadUsers();
-  var html = '';
-  var names = Object.keys(users);
-  if (names.length === 0) {
-    html = '<div style="color:var(--muted);text-align:center;padding:20px">Noch keine Benutzer angelegt</div>';
-  } else {
-    html = '<div style="font-size:13px;font-weight:700;margin-bottom:10px">📋 Registrierte Benutzer (' + names.length + ')</div>';
-    names.sort().forEach(function(name) {
-      var u = getUserObj(users, name);
-      var resetBadge = u.mustReset ? '<span style="background:var(--orange);color:white;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:6px">Passwort-Reset</span>' : '<span style="background:var(--green);color:white;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:6px">Aktiv</span>';
-      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">';
-      html += '<div><span style="font-size:14px;font-weight:700;color:var(--text)">👤 ' + name + '</span>' + resetBadge;
-      html += '<div style="font-size:10px;color:var(--muted);margin-top:2px">Link: ?user=' + name + '</div></div>';
-      html += '<div style="display:flex;gap:6px">';
-      html += '<button onclick="adminResetPass(\'' + name + '\')" style="background:var(--surface2);border:1px solid var(--accent);color:var(--accent2);padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">🔑</button>';
-      html += '<button onclick="adminDeleteUser(\'' + name + '\')" style="background:var(--surface2);border:1px solid var(--red);color:var(--red);padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">🗑</button>';
-      html += '</div></div>';
-    });
-  }
+  const users = await loadUsers();
+  const names = Object.keys(users).sort();
+  let html = names.length === 0
+    ? '<div style="color:var(--muted);text-align:center;padding:20px">Noch keine Benutzer</div>'
+    : '<div style="font-size:13px;font-weight:700;margin-bottom:10px">📋 Benutzer (' + names.length + ')</div>';
+  names.forEach(name => {
+    const u = getUserObj(users, name);
+    const badge = u.mustReset
+      ? '<span style="background:var(--orange);color:white;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:6px">Reset</span>'
+      : '<span style="background:var(--green);color:white;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:6px">Aktiv</span>';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'
+      + '<div><span style="font-size:14px;font-weight:700">👤 ' + name + '</span>' + badge
+      + '<div style="font-size:10px;color:var(--muted);margin-top:2px">?user=' + name + '</div></div>'
+      + '<div style="display:flex;gap:6px">'
+      + '<button onclick="adminResetPass(\'' + name + '\')" style="background:var(--surface2);border:1px solid var(--accent);color:var(--accent2);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer">🔑</button>'
+      + '<button onclick="adminDeleteUser(\'' + name + '\')" style="background:var(--surface2);border:1px solid var(--red);color:var(--red);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer">🗑</button>'
+      + '</div></div>';
+  });
   document.getElementById('adminUserList').innerHTML = html;
 }
 
 async function adminAddUser() {
-  var name = document.getElementById('adminNewUser').value.trim().toLowerCase();
-  var pass = document.getElementById('adminNewPass').value.trim();
-  if (!name || !pass) { alert('Bitte Name und Passwort eingeben!'); return; }
-  if (name === 'admin' || name === 'default') { alert('Dieser Name ist reserviert!'); return; }
-  var users = await loadUsers();
-  var existing = getUserObj(users, name);
-  if (existing) { alert('Benutzer "' + name + '" existiert bereits!'); return; }
+  const name = document.getElementById('adminNewUser').value.trim().toLowerCase();
+  const pass = document.getElementById('adminNewPass').value.trim();
+  if (!name || !pass) { alert('Name und Passwort eingeben!'); return; }
+  const users = await loadUsers();
+  if (getUserObj(users, name)) { alert('Benutzer existiert bereits!'); return; }
   users[name] = { pass: simpleHash(pass), mustReset: true };
   await saveUsers(users);
   document.getElementById('adminNewUser').value = '';
   document.getElementById('adminNewPass').value = '';
-  alert('✅ Benutzer "' + name + '" angelegt!\n\nTemp. Passwort: ' + pass + '\nBeim ersten Login muss ein neues Passwort gesetzt werden.\n\nLink:\n' + location.origin + location.pathname + '?user=' + name);
+  alert('✅ "' + name + '" angelegt!\nTemp. Passwort: ' + pass + '\nLink: ' + location.origin + location.pathname + '?user=' + name);
   loadAndShowUsers();
 }
 
 async function adminDeleteUser(name) {
-  if (!confirm('Benutzer "' + name + '" wirklich löschen?\n\nAchtung: Arbeitszeitdaten bleiben in der Cloud erhalten.')) return;
-  var users = await loadUsers();
+  if (!confirm('Benutzer "' + name + '" löschen?')) return;
+  const users = await loadUsers();
   delete users[name];
   await saveUsers(users);
-  alert('🗑 Benutzer "' + name + '" gelöscht!');
   loadAndShowUsers();
 }
 
 async function adminResetPass(name) {
-  var newPass = prompt('Neues temporäres Passwort für "' + name + '":\n\n(Benutzer muss beim nächsten Login ein eigenes Passwort wählen)');
-  if (!newPass) return;
-  var users = await loadUsers();
-  users[name] = { pass: simpleHash(newPass), mustReset: true };
+  const p = prompt('Neues temporäres Passwort für "' + name + '":');
+  if (!p) return;
+  const users = await loadUsers();
+  users[name] = { pass: simpleHash(p), mustReset: true };
   await saveUsers(users);
-  alert('✅ Passwort für "' + name + '" zurückgesetzt!\n\nTemp. Passwort: ' + newPass + '\nBeim nächsten Login wird neues Passwort verlangt.');
+  alert('✅ Passwort zurückgesetzt!\nTemp: ' + p);
 }
 
-function closeAdmin() {
-  document.getElementById('adminPanel').style.display = 'none';
-  location.href = location.pathname;
-}
+function closeAdmin() { document.getElementById('adminPanel').style.display = 'none'; location.href = location.pathname; }
 
+// ===== SUPABASE SYNC =====
 async function sbLoad() {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}?id=eq.${SB_ROW_ID}&select=data`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
     const rows = await r.json();
-    if (rows && rows.length > 0 && rows[0].data) {
+    if (rows && rows.length > 0 && rows[0].data)
       return typeof rows[0].data === 'string' ? JSON.parse(rows[0].data) : rows[0].data;
-    }
     return null;
-  } catch(e) { console.error('SB load:', e); return null; }
+  } catch(e) { return null; }
 }
 
 async function sbSave(data) {
   try {
-    console.log('SB: Saving to cloud...');
-    const body = JSON.stringify({ id: SB_ROW_ID, data: JSON.stringify(data) });
-    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' };
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, { method: 'POST', headers, body });
-    console.log('SB: Response status:', resp.status);
-    if (!resp.ok) { console.error('SB: Error'); showSync('error', '⚠️ Sync-Fehler'); localStorage.setItem(LS_PREFIX + 'pendingSync', '1'); return; }
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ id: SB_ROW_ID, data: JSON.stringify(data) })
+    });
+    if (!resp.ok) { showSync('error', '⚠️ Sync-Fehler'); localStorage.setItem(LS_PREFIX + 'pendingSync', '1'); return; }
     localStorage.removeItem(LS_PREFIX + 'pendingSync');
     showSync('synced', '☁️ Synchronisiert ✓');
-  } catch(e) { console.error('SB save:', e); showSync('error', '⚠️ Offline'); localStorage.setItem(LS_PREFIX + 'pendingSync', '1'); }
+  } catch(e) { showSync('error', '⚠️ Offline'); localStorage.setItem(LS_PREFIX + 'pendingSync', '1'); }
 }
 
 function showSync(cls, text) {
@@ -939,16 +735,19 @@ function showSync(cls, text) {
   if (el) { el.className = 'sync-status ' + cls; el.textContent = text; }
 }
 
-function getMitarbeiterName() {
-  var ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
-  if (ma.vorname || ma.name) return (ma.vorname || '') + ' ' + (ma.name || '');
-  if (CURRENT_USER && CURRENT_USER !== 'default') return CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
-  return '';
-}
-
+// ===== CONSTANTS =====
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const DAYS_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const STANDARD_TIMES = {
+  1:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
+  2:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
+  3:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
+  4:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
+  5:{start:'07:45',pause:'00:30',end:'14:30',hours:'06:15'},
+};
+const URLAUB_KRANK_TIMES = {start:'08:00',pause:'01:00',end:'17:00',hours:'08:00'};
 
+// ===== YEAR DATA (cached once) =====
 function calcEaster(year) {
   const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4;
   const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
@@ -974,173 +773,227 @@ function buildYearData(year) {
     [year+'-12-25']:'1. Weihnachtstag',
     [year+'-12-26']:'2. Weihnachtstag',
   };
-  const STD = {
-    1:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
-    2:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
-    3:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
-    4:{start:'07:45',pause:'01:00',end:'17:00',hours:'08:15'},
-    5:{start:'07:45',pause:'00:30',end:'14:30',hours:'06:15'},
-  };
   const days={}, times={};
   const d = new Date(year,0,1);
   while(d.getFullYear()===year){
-    const ds = fmt(d);
-    const dow = d.getDay();
-    if(dow>0 && dow<6 && !feiertage[ds]){
-      days[ds]='Arbeiten';
-      times[ds]={...STD[dow]};
-    }
+    const ds=fmt(d), dow=d.getDay();
+    if(dow>0 && dow<6 && !feiertage[ds]){ days[ds]='Arbeiten'; times[ds]={...STANDARD_TIMES[dow]}; }
     d.setDate(d.getDate()+1);
   }
-  return {feiertage, days, times};
+  return {feiertage,days,times};
 }
+const YEAR_DATA = { 2026:buildYearData(2026), 2027:buildYearData(2027), 2028:buildYearData(2028) };
 
-const YEAR_DATA = { 2026: buildYearData(2026), 2027: buildYearData(2027), 2028: buildYearData(2028) };
-
-const STANDARD_TIMES = {
-  1: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
-  2: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
-  3: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
-  4: {start:'07:45', pause:'01:00', end:'17:00', hours:'08:15'},
-  5: {start:'07:45', pause:'00:30', end:'14:30', hours:'06:15'},
-};
-const URLAUB_KRANK_TIMES = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'};
-
-function getStandardTimes(dateStr) {
-  const d = new Date(dateStr); const dow = d.getDay();
-  const year = parseInt(dateStr.split('-')[0]);
-  const yd = YEAR_DATA[year] || {};
-  if (yd.feiertage && yd.feiertage[dateStr]) return URLAUB_KRANK_TIMES;
-  return STANDARD_TIMES[dow] || null;
-}
-function getStatusDefaultTimes(status, dateStr) {
-  if (status === 'Urlaub' || status === 'Krank' || status === 'Feiertag') return URLAUB_KRANK_TIMES;
-  if (status === 'Notdienst') return {start:'', pause:'', end:'', hours:''};
-  return getStandardTimes(dateStr);
-}
-
+// ===== STATE =====
 const LS_PREFIX = 'az_' + CURRENT_USER + '_';
-let userData = JSON.parse(localStorage.getItem(LS_PREFIX + 'data')||'{}');
-let userTimes = JSON.parse(localStorage.getItem(LS_PREFIX + 'times')||'{}');
-let userNotes = JSON.parse(localStorage.getItem(LS_PREFIX + 'notes')||'{}');
-let userNotdienst = JSON.parse(localStorage.getItem(LS_PREFIX + 'notdienst')||'{}');
+let userData    = JSON.parse(localStorage.getItem(LS_PREFIX+'data')||'{}');
+let userTimes   = JSON.parse(localStorage.getItem(LS_PREFIX+'times')||'{}');
+let userNotes   = JSON.parse(localStorage.getItem(LS_PREFIX+'notes')||'{}');
+let userNotdienst = JSON.parse(localStorage.getItem(LS_PREFIX+'notdienst')||'{}');
 
 let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear() >= 2026 && new Date().getFullYear() <= 2028 ? new Date().getFullYear() : 2026;
+let currentYear  = (new Date().getFullYear()>=2026&&new Date().getFullYear()<=2028)?new Date().getFullYear():2026;
 let selectedStatus = 'Arbeiten';
 let editingDate = null;
 
 function saveData() {
-  console.log('saveData() called');
-  localStorage.setItem(LS_PREFIX + 'data', JSON.stringify(userData));
-  localStorage.setItem(LS_PREFIX + 'times', JSON.stringify(userTimes));
-  localStorage.setItem(LS_PREFIX + 'notes', JSON.stringify(userNotes));
-  localStorage.setItem(LS_PREFIX + 'notdienst', JSON.stringify(userNotdienst));
-  sbSave({ userData, userTimes, userNotes, userNotdienst });
+  localStorage.setItem(LS_PREFIX+'data', JSON.stringify(userData));
+  localStorage.setItem(LS_PREFIX+'times', JSON.stringify(userTimes));
+  localStorage.setItem(LS_PREFIX+'notes', JSON.stringify(userNotes));
+  localStorage.setItem(LS_PREFIX+'notdienst', JSON.stringify(userNotdienst));
+  sbSave({userData,userTimes,userNotes,userNotdienst});
 }
 
-function getDayStatus(dateStr) {
-  const year = parseInt(dateStr.split('-')[0]);
-  const yd = YEAR_DATA[year] || {};
-  return userData[dateStr] || (yd.days && yd.days[dateStr]) || ((yd.feiertage && yd.feiertage[dateStr]) ? 'Feiertag' : null);
+// ===== HELPERS =====
+function getDayStatus(ds) {
+  const year=parseInt(ds.split('-')[0]), yd=YEAR_DATA[year]||{};
+  return userData[ds]||(yd.days&&yd.days[ds])||((yd.feiertage&&yd.feiertage[ds])?'Feiertag':null);
 }
-function getDayTimes(dateStr) {
-  const year = parseInt(dateStr.split('-')[0]);
-  const yd = YEAR_DATA[year] || {};
-  return userTimes[dateStr] || (yd.times && yd.times[dateStr]) || getStandardTimes(dateStr) || null;
+function getDayTimes(ds) {
+  const year=parseInt(ds.split('-')[0]), yd=YEAR_DATA[year]||{};
+  return userTimes[ds]||(yd.times&&yd.times[ds])||getStandardTimes(ds)||null;
 }
-function getDaysInMonth(y, m) { return new Date(y, m+1, 0).getDate(); }
-function getDayOfWeek(y, m, d) { return new Date(y, m, d).getDay(); }
-function isWeekend(dow) { return dow === 0 || dow === 6; }
-function isToday(y, m, d) { const t = new Date(); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===d; }
-
+function getStandardTimes(ds) {
+  const d=new Date(ds), dow=d.getDay(), year=parseInt(ds.split('-')[0]);
+  const yd=YEAR_DATA[year]||{};
+  if(yd.feiertage&&yd.feiertage[ds]) return URLAUB_KRANK_TIMES;
+  return STANDARD_TIMES[dow]||null;
+}
+function getStatusDefaultTimes(status,ds) {
+  if(status==='Urlaub'||status==='Krank'||status==='Feiertag') return URLAUB_KRANK_TIMES;
+  if(status==='Notdienst') return {start:'',pause:'',end:'',hours:''};
+  return getStandardTimes(ds);
+}
+function getDaysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+function getDayOfWeek(y,m,d){return new Date(y,m,d).getDay();}
+function isWeekend(dow){return dow===0||dow===6;}
+function isToday(y,m,d){const t=new Date();return t.getFullYear()===y&&t.getMonth()===m&&t.getDate()===d;}
 function timeToMins(t) {
-  if (!t || t === '--:--' || t === '') return 0;
-  const parts = t.replace('-','').split(':').map(Number);
-  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return 0;
-  const result = parts[0]*60 + parts[1];
-  return t.startsWith('-') ? -result : result;
+  if(!t||t==='--:--'||t==='') return 0;
+  const parts=t.replace('-','').split(':').map(Number);
+  if(parts.length<2||isNaN(parts[0])||isNaN(parts[1])) return 0;
+  const r=parts[0]*60+parts[1];
+  return t.startsWith('-')?-r:r;
 }
 function minsToTime(m) {
-  const h = Math.floor(Math.abs(m)/60), mm = Math.abs(m)%60;
+  const h=Math.floor(Math.abs(m)/60), mm=Math.abs(m)%60;
   return `${m<0?'-':''}${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
-function calcWorkHours(start, pause, end) {
-  if (!start || !end) return '';
-  let mins = timeToMins(end) - timeToMins(start) - timeToMins(pause||'00:00');
-  if (mins < 0) return '';
-  return minsToTime(mins);
+function calcWorkHours(start,pause,end) {
+  if(!start||!end) return '';
+  const mins=timeToMins(end)-timeToMins(start)-timeToMins(pause||'00:00');
+  return mins<0?'':minsToTime(mins);
+}
+function getMitarbeiterName() {
+  const ma=JSON.parse(localStorage.getItem(LS_PREFIX+'mitarbeiter')||'{}');
+  if(ma.vorname||ma.name) return (ma.vorname||'')+' '+(ma.name||'');
+  if(CURRENT_USER&&CURRENT_USER!=='default') return CURRENT_USER.charAt(0).toUpperCase()+CURRENT_USER.slice(1);
+  return '';
 }
 
+// ===== KW (Kalenderwoche) =====
+function getWeekNumber(ds) {
+  const d=new Date(ds);
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+4-(d.getDay()||7));
+  const yearStart=new Date(d.getFullYear(),0,1);
+  return Math.ceil((((d-yearStart)/86400000)+1)/7);
+}
+
+// ===== STATS =====
 function calcMonthStats(year, month) {
-  const mk = `${year}-${String(month+1).padStart(2,'0')}`;
-  const total = getDaysInMonth(year, month);
-  let workedMins = 0, urlaub = 0, krank = 0, feiertage = 0, notdienst = 0, arbeitstage = 0;
-  for (let d = 1; d <= total; d++) {
-    const dateStr = `${mk}-${String(d).padStart(2,'0')}`;
-    const dow = getDayOfWeek(year, month, d);
-    const weekend = isWeekend(dow);
-    const status = getDayStatus(dateStr);
-    const times = getDayTimes(dateStr);
-    if (weekend) {
-      if (userNotdienst[dateStr]) {
-        const arr = Array.isArray(userNotdienst[dateStr]) ? userNotdienst[dateStr] : [userNotdienst[dateStr]];
-        notdienst += arr.length;
+  const mk=`${year}-${String(month+1).padStart(2,'0')}`;
+  const total=getDaysInMonth(year,month);
+  let workedMins=0, urlaub=0, krank=0, feiertage=0, notdienst=0, arbeitstage=0;
+  for(let d=1;d<=total;d++){
+    const ds=`${mk}-${String(d).padStart(2,'0')}`;
+    const dow=getDayOfWeek(year,month,d);
+    const weekend=isWeekend(dow);
+    const status=getDayStatus(ds);
+    const times=getDayTimes(ds);
+    if(weekend){
+      if(userNotdienst[ds]){
+        const arr=Array.isArray(userNotdienst[ds])?userNotdienst[ds]:[userNotdienst[ds]];
+        notdienst+=arr.length;
       }
       continue;
     }
     arbeitstage++;
-    if (status === 'Urlaub') { urlaub++; workedMins += 8*60; }
-    else if (status === 'Krank') { krank++; workedMins += 8*60; }
-    else if (status === 'Feiertag') { feiertage++; workedMins += 8*60; }
-    else if (status === 'Arbeiten') {
-      if (times && times.hours) workedMins += timeToMins(times.hours);
-      else { const std = STANDARD_TIMES[dow]; if (std) workedMins += timeToMins(std.hours); }
+    if(status==='Urlaub'){urlaub++;workedMins+=8*60;}
+    else if(status==='Krank'){krank++;workedMins+=8*60;}
+    else if(status==='Feiertag'){feiertage++;workedMins+=8*60;}
+    else if(status==='Arbeiten'){
+      if(times&&times.hours) workedMins+=timeToMins(times.hours);
+      else{const std=STANDARD_TIMES[dow];if(std) workedMins+=timeToMins(std.hours);}
     }
-    if (userNotdienst[dateStr]) {
-      const arr = Array.isArray(userNotdienst[dateStr]) ? userNotdienst[dateStr] : [userNotdienst[dateStr]];
-      notdienst += arr.length;
+    if(userNotdienst[ds]){
+      const arr=Array.isArray(userNotdienst[ds])?userNotdienst[ds]:[userNotdienst[ds]];
+      notdienst+=arr.length;
     }
   }
-  const standardMins = 174 * 60;
-  const diffMins = workedMins - standardMins;
-  return { workedMins, diffMins, urlaub, krank, feiertage, notdienst, arbeitstage, standardMins };
-}
-
-function setYear(year) {
-  currentYear = year;
-  document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active-year'));
-  document.getElementById('ybtn'+year).classList.add('active-year');
-  currentMonth = 0; render();
+  return {workedMins,diffMins:workedMins-(174*60),urlaub,krank,feiertage,notdienst,arbeitstage,standardMins:174*60};
 }
 
 function calcNotdienstMins(year, month) {
-  const mk = `${year}-${String(month+1).padStart(2,'0')}`;
-  let t = 0;
-  for (let d = 1; d <= getDaysInMonth(year, month); d++) {
-    const ds = `${mk}-${String(d).padStart(2,'0')}`;
-    if (userNotdienst[ds]) {
-      const arr = Array.isArray(userNotdienst[ds]) ? userNotdienst[ds] : [userNotdienst[ds]];
-      arr.forEach(nd => { if (nd.hours) t += timeToMins(nd.hours); });
+  const mk=`${year}-${String(month+1).padStart(2,'0')}`;
+  let t=0;
+  for(let d=1;d<=getDaysInMonth(year,month);d++){
+    const ds=`${mk}-${String(d).padStart(2,'0')}`;
+    if(userNotdienst[ds]){
+      const arr=Array.isArray(userNotdienst[ds])?userNotdienst[ds]:[userNotdienst[ds]];
+      arr.forEach(nd=>{if(nd.hours) t+=timeToMins(nd.hours);});
     }
   }
   return t;
 }
 
+// ===== NEU: Haftalık Notdienst + Diff =====
+function calcWeeklyNotdienst(year, month) {
+  const mk=`${year}-${String(month+1).padStart(2,'0')}`;
+  const total=getDaysInMonth(year,month);
+  const weeks={};
+  for(let d=1;d<=total;d++){
+    const ds=`${mk}-${String(d).padStart(2,'0')}`;
+    const kw=getWeekNumber(ds);
+    if(!weeks[kw]) weeks[kw]={kw,ndMins:0,ndCount:0,workedMins:0,sollMins:0};
+    const dow=getDayOfWeek(year,month,d);
+    if(!isWeekend(dow)){
+      const status=getDayStatus(ds);
+      const times=getDayTimes(ds);
+      const std=STANDARD_TIMES[dow];
+      if(std) weeks[kw].sollMins+=timeToMins(std.hours);
+      if(status==='Urlaub'||status==='Krank'||status==='Feiertag') weeks[kw].workedMins+=8*60;
+      else if(status==='Arbeiten'){
+        if(times&&times.hours) weeks[kw].workedMins+=timeToMins(times.hours);
+        else if(std) weeks[kw].workedMins+=timeToMins(std.hours);
+      }
+    }
+    if(userNotdienst[ds]){
+      const arr=Array.isArray(userNotdienst[ds])?userNotdienst[ds]:[userNotdienst[ds]];
+      arr.forEach(nd=>{if(nd.hours){weeks[kw].ndMins+=timeToMins(nd.hours);weeks[kw].ndCount++;}});
+    }
+  }
+  return Object.values(weeks).sort((a,b)=>a.kw-b.kw);
+}
+
+// ===== NAVIGATION =====
+function setYear(year) {
+  currentYear=year;
+  document.querySelectorAll('.year-btn').forEach(b=>b.classList.remove('active-year'));
+  document.getElementById('ybtn'+year).classList.add('active-year');
+  currentMonth=0; render();
+}
+function prevMonth(){currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--;}render();}
+function nextMonth(){currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++;}render();}
+function goToToday(){
+  const t=new Date();
+  currentYear=(t.getFullYear()>=2026&&t.getFullYear()<=2028)?t.getFullYear():2026;
+  currentMonth=t.getMonth();
+  document.querySelectorAll('.year-btn').forEach(b=>b.classList.remove('active-year'));
+  const yb=document.getElementById('ybtn'+currentYear); if(yb) yb.classList.add('active-year');
+  render();
+  setTimeout(()=>{const el=document.querySelector('.day-entry.today');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);
+}
+
+// ===== RENDER =====
 function render() {
   document.getElementById('monthTitle').textContent = MONTHS[currentMonth];
   const stats = calcMonthStats(currentYear, currentMonth);
-  let urlaubGenommen = 0;
-  for (let m = 0; m < 12; m++) { urlaubGenommen += calcMonthStats(currentYear, m).urlaub; }
-  const urlaubKalan = 30 - urlaubGenommen;
   const notdienstMins = calcNotdienstMins(currentYear, currentMonth);
-  const normalDiffMins = stats.diffMins;
-  const normalPos = normalDiffMins >= 0;
+
+  // Haftalık Notdienst verisi
+  const weeklyData = calcWeeklyNotdienst(currentYear, currentMonth);
+  const hasWeeklyNd = weeklyData.some(w=>w.ndCount>0);
+  const maxNdMins = Math.max(...weeklyData.map(w=>w.ndMins), 1);
+
+  // Haftalık satırlar HTML
+  let weeklyRowsHtml = '';
+  if(hasWeeklyNd){
+    weeklyData.forEach(w=>{
+      if(w.ndCount===0&&w.ndMins===0) return;
+      const diff = w.workedMins - w.sollMins;
+      const ue = diff + w.ndMins;
+      const uePos = ue>=0;
+      const pct = Math.round(w.ndMins/maxNdMins*100);
+      weeklyRowsHtml += `<div class="nd-week-row">
+        <span class="nd-week-kw">KW ${w.kw}</span>
+        <div class="nd-week-bar"><div class="nd-week-bar-bg"><div class="nd-week-bar-fill" style="width:${pct}%"></div></div></div>
+        <span class="nd-week-nd">${w.ndCount>0?minsToTime(w.ndMins):'—'}</span>
+        <span class="nd-week-ue" style="color:${uePos?'var(--green)':'var(--red)'}">${uePos?'+':''}${minsToTime(ue)}</span>
+      </div>`;
+    });
+  }
+
+  // Yıllık toplam urlaub
+  let urlaubGenommen=0;
+  for(let m=0;m<12;m++) urlaubGenommen+=calcMonthStats(currentYear,m).urlaub;
+  const urlaubKalan=30-urlaubGenommen;
+  const normalPos=stats.diffMins>=0;
 
   document.getElementById('summaryCards').innerHTML = `
     <div class="card ${normalPos?'green':'red'}">
       <div class="card-label">Differenz</div>
-      <div class="card-value ${normalPos?'green':'red'}">${normalPos?'+':''}${minsToTime(normalDiffMins)}</div>
+      <div class="card-value ${normalPos?'green':'red'}">${normalPos?'+':''}${minsToTime(stats.diffMins)}</div>
       <div class="card-sub">ohne Notdienst</div>
     </div>
     <div class="card blue">
@@ -1151,30 +1004,42 @@ function render() {
     <div class="card yellow">
       <div class="card-label">Urlaub</div>
       <div class="card-value yellow">${stats.urlaub} Tage</div>
-      <div class="card-sub">${stats.urlaub * 8}:00 Std</div>
+      <div class="card-sub">${stats.urlaub*8}:00 Std</div>
     </div>
     <div class="card red">
       <div class="card-label">Krank</div>
       <div class="card-value red">${stats.krank} Tage</div>
-      <div class="card-sub">${stats.krank * 8}:00 Std</div>
+      <div class="card-sub">${stats.krank*8}:00 Std</div>
     </div>
-    <div class="card" style="min-width:130px;border-top:3px solid var(--orange)">
-      <div class="card-label">Notdienst</div>
-      <div class="card-value" style="color:var(--orange)">${stats.notdienst} Mal</div>
-      <div class="card-sub">${minsToTime(notdienstMins)} Std</div>
+    <div class="card" style="min-width:${hasWeeklyNd?'220px':'150px'};border-top:3px solid var(--orange)">
+      <div class="card-label">🚨 Notdienst</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:${hasWeeklyNd?'8px':'0'}">
+        <div class="card-value" style="color:var(--orange)">${stats.notdienst} Mal</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--orange)">+${minsToTime(notdienstMins)}</div>
+      </div>
+      ${hasWeeklyNd?`
+      <div style="border-top:1px solid var(--border);padding-top:6px">
+        <div style="display:grid;grid-template-columns:44px 1fr 60px 60px;gap:0;padding-bottom:4px;margin-bottom:2px;border-bottom:1px solid var(--border)">
+          <span style="font-size:9px;color:var(--muted)">KW</span>
+          <span></span>
+          <span style="font-size:9px;color:var(--muted);text-align:right">Nd-Std</span>
+          <span style="font-size:9px;color:var(--muted);text-align:right">Überstd</span>
+        </div>
+        ${weeklyRowsHtml}
+      </div>`:''}
     </div>
     <div class="card" style="min-width:150px;border-top:3px solid var(--accent2)">
       <div class="card-label">📈 Überstunden</div>
       <div class="card-value" style="color:var(--accent2)">+${minsToTime(notdienstMins)}</div>
       <div class="card-sub">aus Notdienst</div>
     </div>
-    <div class="card ${urlaubKalan <= 5 ? 'red' : 'green'}" style="min-width:180px!important">
+    <div class="card ${urlaubKalan<=5?'red':'green'}" style="min-width:180px">
       <div class="card-label">🏖 Urlaubskonto ${currentYear}</div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
-        <div class="card-value ${urlaubKalan <= 5 ? 'red' : 'green'}">${urlaubKalan} Tage</div>
+        <div class="card-value ${urlaubKalan<=5?'red':'green'}">${urlaubKalan} Tage</div>
         <div style="flex:1">
           <div style="background:var(--surface2);border-radius:4px;height:8px;overflow:hidden">
-            <div style="height:100%;border-radius:4px;background:${urlaubKalan <= 5 ? 'var(--red)' : 'var(--green)'};width:${Math.round(urlaubKalan/30*100)}%;transition:width 0.5s"></div>
+            <div style="height:100%;border-radius:4px;background:${urlaubKalan<=5?'var(--red)':'var(--green)'};width:${Math.round(urlaubKalan/30*100)}%;transition:width 0.5s"></div>
           </div>
           <div style="display:flex;justify-content:space-between;margin-top:4px">
             <span style="font-size:10px;color:var(--muted)">${urlaubGenommen} genommen</span>
@@ -1189,120 +1054,154 @@ function render() {
 }
 
 function renderDays() {
-  const total = getDaysInMonth(currentYear, currentMonth);
-  let html = '';
-  const mk = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
-  for (let d = 1; d <= total; d++) {
-    const dow = getDayOfWeek(currentYear, currentMonth, d);
-    const dateStr = `${mk}-${String(d).padStart(2,'0')}`;
-    const status = getDayStatus(dateStr);
-    const times = getDayTimes(dateStr);
-    const weekend = isWeekend(dow);
-    const today = isToday(currentYear, currentMonth, d);
-    const yd = YEAR_DATA[currentYear] || {}; const holidayName = yd.feiertage && yd.feiertage[dateStr];
-    let cls = 'day-entry';
-    if (today) cls += ' today';
-    if (weekend && !status) cls += ' weekend';
-    if (status === 'Urlaub') cls += ' urlaub';
-    if (status === 'Krank') cls += ' krank';
-    if (status === 'Feiertag') cls += ' feiertag';
-    if (status === 'Notdienst') cls += ' notdienst';
-    let statusLabel = '—', statusCls = 'status-frei';
-    if (status === 'Arbeiten') { statusLabel = '✓ Arbeiten'; statusCls = 'status-arbeiten'; }
-    else if (status === 'Urlaub') { statusLabel = '🏖 Urlaub'; statusCls = 'status-urlaub'; }
-    else if (status === 'Krank') { statusLabel = '🤒 Krank'; statusCls = 'status-krank'; }
-    else if (status === 'Feiertag') { statusLabel = '🎉 Feiertag'; statusCls = 'status-feiertag'; }
-    else if (status === 'Notdienst') { statusLabel = '🚨 Notdienst'; statusCls = 'status-notdienst'; }
-    else if (weekend) { statusLabel = 'Wochenende'; statusCls = 'status-frei'; }
-    const hoursStr = times && times.hours ? times.hours : '';
-    html += `<div class="${cls}" onclick="onDayClick('${dateStr}',${d})">
+  const total=getDaysInMonth(currentYear,currentMonth);
+  const mk=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
+  let html='';
+  for(let d=1;d<=total;d++){
+    const dow=getDayOfWeek(currentYear,currentMonth,d);
+    const ds=`${mk}-${String(d).padStart(2,'0')}`;
+    const status=getDayStatus(ds);
+    const times=getDayTimes(ds);
+    const weekend=isWeekend(dow);
+    const today=isToday(currentYear,currentMonth,d);
+    const yd=YEAR_DATA[currentYear]||{};
+    const holidayName=yd.feiertage&&yd.feiertage[ds];
+    let cls='day-entry';
+    if(today) cls+=' today';
+    if(weekend&&!status) cls+=' weekend';
+    if(status==='Urlaub') cls+=' urlaub';
+    if(status==='Krank') cls+=' krank';
+    if(status==='Feiertag') cls+=' feiertag';
+    if(status==='Notdienst') cls+=' notdienst';
+    let statusLabel='—', statusCls='status-frei';
+    if(status==='Arbeiten'){statusLabel='✓ Arbeiten';statusCls='status-arbeiten';}
+    else if(status==='Urlaub'){statusLabel='🏖 Urlaub';statusCls='status-urlaub';}
+    else if(status==='Krank'){statusLabel='🤒 Krank';statusCls='status-krank';}
+    else if(status==='Feiertag'){statusLabel='🎉 Feiertag';statusCls='status-feiertag';}
+    else if(status==='Notdienst'){statusLabel='🚨 Notdienst';statusCls='status-notdienst';}
+    else if(weekend){statusLabel='Wochenende';statusCls='status-frei';}
+    const hoursStr=times&&times.hours?times.hours:'';
+    html+=`<div class="${cls}" onclick="onDayClick('${ds}',${d})">
       <div class="day-header">
         <div class="day-num">${d}${today?'<span class="today-indicator"></span>':''}</div>
         <div class="day-info">
           <div class="day-name">${DAYS_DE[dow]}</div>
           <div class="day-status ${statusCls}">${statusLabel}</div>
-          ${holidayName ? `<div class="holiday-name">${holidayName}</div>` : ''}
+          ${holidayName?`<div class="holiday-name">${holidayName}</div>`:''}
         </div>
         <div class="day-hours">${hoursStr?`<span style="color:var(--green)">${hoursStr}</span>`:''}</div>
       </div>`;
-    const hasRealTimes = times && (times.start || times.end);
-    if (hasRealTimes && (status === 'Arbeiten' || status === 'Urlaub' || status === 'Krank' || status === 'Feiertag' || status === 'Notdienst' || userTimes[dateStr])) {
-      html += `<div class="time-strip">
+    const hasRealTimes=times&&(times.start||times.end);
+    if(hasRealTimes&&(status==='Arbeiten'||status==='Urlaub'||status==='Krank'||status==='Feiertag'||status==='Notdienst'||userTimes[ds])){
+      html+=`<div class="time-strip">
         <div class="time-chip"><span class="chip-label">Start</span><span class="chip-val">${times.start||'--:--'}</span></div>
         <div class="time-chip"><span class="chip-label">Pause</span><span class="chip-val">${times.pause||'--:--'}</span></div>
         <div class="time-chip"><span class="chip-label">Ende</span><span class="chip-val">${times.end||'--:--'}</span></div>
         ${times.hours?`<div class="time-chip"><span class="chip-label">Std</span><span class="chip-val" style="color:var(--orange)">${times.hours}</span></div>`:''}
       </div>`;
     }
-    if (userNotes[dateStr]) {
-      html += `<div style="padding:0 14px 10px;font-size:12px;color:var(--accent2);display:flex;gap:6px;align-items:flex-start"><span>📝</span><span style="line-height:1.4">${userNotes[dateStr]}</span></div>`;
+    if(userNotes[ds]){
+      html+=`<div style="padding:0 14px 10px;font-size:12px;color:var(--accent2);display:flex;gap:6px;align-items:flex-start"><span>📝</span><span style="line-height:1.4">${userNotes[ds]}</span></div>`;
     }
-    const ndList = userNotdienst[dateStr] || [];
-    const ndArr = Array.isArray(ndList) ? ndList : [ndList];
-    ndArr.forEach((nd, idx) => {
-      html += `<div style="padding:4px 14px 6px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);flex-wrap:wrap">
+    const ndList=userNotdienst[ds]||[];
+    const ndArr=Array.isArray(ndList)?ndList:[ndList];
+    ndArr.forEach((nd,idx)=>{
+      html+=`<div style="padding:4px 14px 6px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);flex-wrap:wrap">
         <span style="font-size:11px;font-weight:700;color:var(--orange)">🚨 Nd ${ndArr.length>1?idx+1:''}</span>
         <div class="time-chip"><span class="chip-label">Start</span><span class="chip-val" style="color:var(--orange)">${nd.start||'--:--'}</span></div>
         <div class="time-chip"><span class="chip-label">Ende</span><span class="chip-val" style="color:var(--orange)">${nd.end||'--:--'}</span></div>
         <div class="time-chip"><span class="chip-label">Std</span><span class="chip-val" style="color:var(--orange)">${nd.hours||'--:--'}</span></div>
         ${nd.note?`<div class="time-chip"><span class="chip-val" style="color:var(--muted);font-size:10px">📝 ${nd.note}</span></div>`:''}
         <div style="margin-left:auto;display:flex;gap:4px;align-items:center">
-          <button onclick="event.stopPropagation();toggleNdStatus('${dateStr}',${idx})" style="font-size:14px;background:none;border:none;cursor:pointer">${nd.erledigt ? '✅' : '❌'}</button>
-          <button onclick="event.stopPropagation();openNotdienst('${dateStr}',${idx})" style="background:var(--surface2);border:1px solid var(--orange);color:var(--orange);padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">✏️</button>
+          <button onclick="event.stopPropagation();toggleNdStatus('${ds}',${idx})" style="font-size:14px;background:none;border:none;cursor:pointer">${nd.erledigt?'✅':'❌'}</button>
+          <button onclick="event.stopPropagation();openNotdienst('${ds}',${idx})" style="background:var(--surface2);border:1px solid var(--orange);color:var(--orange);padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">✏️</button>
         </div>
       </div>`;
     });
-    if (ndArr.length < 6 && (status === 'Arbeiten' || weekend || status === 'Feiertag')) {
-      html += `<div style="padding:4px 14px 10px"><button onclick="event.stopPropagation();openNotdienst('${dateStr}',-1)" style="background:transparent;border:1px dashed var(--orange);color:var(--orange);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%">+ Notdienst hinzufügen</button></div>`;
+    if(ndArr.length<6&&(status==='Arbeiten'||weekend||status==='Feiertag')){
+      html+=`<div style="padding:4px 14px 10px"><button onclick="event.stopPropagation();openNotdienst('${ds}',-1)" style="background:transparent;border:1px dashed var(--orange);color:var(--orange);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%">+ Notdienst hinzufügen</button></div>`;
     }
-    html += '</div>';
+    html+='</div>';
   }
-  document.getElementById('daysTab').innerHTML = html;
+  document.getElementById('daysTab').innerHTML=html;
 }
 
 function renderJahres() {
-  let totalWorked = 0, totalUrlaub = 0, totalKrank = 0, totalFeiertage = 0, totalNotdienst = 0, totalStandard = 0, totalNotdienstMins = 0, totalArbeitstage = 0;
-  const monthData = [];
-  for (let m = 0; m < 12; m++) {
-    const stats = calcMonthStats(currentYear, m);
-    totalWorked += stats.workedMins; totalUrlaub += stats.urlaub; totalKrank += stats.krank;
-    totalFeiertage += stats.feiertage; totalNotdienst += stats.notdienst;
-    totalArbeitstage += stats.arbeitstage;
-    const ndMins = calcNotdienstMins(currentYear, m);
-    totalNotdienstMins += ndMins;
-    totalStandard += stats.standardMins; monthData.push({...stats, month: m, ndMins: ndMins});
+  let totalWorked=0,totalUrlaub=0,totalKrank=0,totalFeiertage=0,totalNotdienst=0,totalStandard=0,totalNotdienstMins=0,totalArbeitstage=0;
+  const monthData=[];
+  for(let m=0;m<12;m++){
+    const stats=calcMonthStats(currentYear,m);
+    totalWorked+=stats.workedMins; totalUrlaub+=stats.urlaub; totalKrank+=stats.krank;
+    totalFeiertage+=stats.feiertage; totalNotdienst+=stats.notdienst;
+    totalArbeitstage+=stats.arbeitstage;
+    const ndMins=calcNotdienstMins(currentYear,m);
+    totalNotdienstMins+=ndMins; totalStandard+=stats.standardMins;
+    monthData.push({...stats,month:m,ndMins});
   }
-  const totalDiff = totalWorked - totalStandard;
-  const isPos = totalDiff >= 0;
-  const gesamtUeberstunden = totalDiff + totalNotdienstMins;
-  const gesamtPos = gesamtUeberstunden >= 0;
+  const totalDiff=totalWorked-totalStandard;
+  const isPos=totalDiff>=0;
+  const gesamtUe=totalDiff+totalNotdienstMins;
+  const gesamtPos=gesamtUe>=0;
 
-  // Arbeitstage worked (not urlaub/krank/feiertag)
-  let realWorkedDays = 0;
-  for (let m = 0; m < 12; m++) {
-    const mk = `${currentYear}-${String(m+1).padStart(2,'0')}`;
-    const total = getDaysInMonth(currentYear, m);
-    for (let d = 1; d <= total; d++) {
-      const dateStr = `${mk}-${String(d).padStart(2,'0')}`;
-      const dow = getDayOfWeek(currentYear, m, d);
-      if (dow > 0 && dow < 6) {
-        const status = getDayStatus(dateStr);
-        if (status === 'Arbeiten') realWorkedDays++;
-      }
+  let realWorkedDays=0;
+  for(let m=0;m<12;m++){
+    const mk=`${currentYear}-${String(m+1).padStart(2,'0')}`;
+    for(let d=1;d<=getDaysInMonth(currentYear,m);d++){
+      const ds=`${mk}-${String(d).padStart(2,'0')}`;
+      const dow=getDayOfWeek(currentYear,m,d);
+      if(dow>0&&dow<6&&getDayStatus(ds)==='Arbeiten') realWorkedDays++;
     }
   }
+  const urlaubKalan=30-totalUrlaub;
+  const maxAbs=Math.max(...monthData.map(s=>Math.abs(s.diffMins)),1);
 
-  const urlaubKalan = 30 - totalUrlaub;
-  const maxAbs = Math.max(...monthData.map(s => Math.abs(s.diffMins)), 1);
+  // Jahresübersicht — haftalık Notdienst için de veri hesapla
+  const yearWeeklyData = calcWeeklyNotdienst(currentYear, currentMonth);
+  const hasYearWeekly = yearWeeklyData.some(w=>w.ndCount>0);
+  const maxYearNd = Math.max(...yearWeeklyData.map(w=>w.ndMins),1);
 
-  // Month bars with more detail
-  const barsHtml = monthData.map((s) => {
-    const pct = Math.min(100, Math.abs(s.diffMins) / maxAbs * 100);
-    const pos = s.diffMins >= 0;
-    const isCur = s.month === currentMonth;
-    const ndH = s.ndMins > 0 ? `<span style="font-size:10px;color:var(--orange)">🚨 ${minsToTime(s.ndMins)}</span>` : '';
-    const monthTotal = s.diffMins + s.ndMins;
-    const monthTotalPos = monthTotal >= 0;
+  let yearWeeklyHtml = '';
+  if(hasYearWeekly){
+    yearWeeklyHtml = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">📅 Notdienst — ${MONTHS[currentMonth]} (Wöchentlich)</div>
+      <div style="display:grid;grid-template-columns:44px 1fr 70px 70px;gap:0;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid var(--border)">
+        <span style="font-size:9px;color:var(--muted)">KW</span>
+        <span></span>
+        <span style="font-size:9px;color:var(--muted);text-align:right">Nd-Std</span>
+        <span style="font-size:9px;color:var(--muted);text-align:right">Überstd</span>
+      </div>`;
+    yearWeeklyData.forEach(w=>{
+      const diff=w.workedMins-w.sollMins;
+      const ue=diff+w.ndMins;
+      const uePos=ue>=0;
+      const pct=Math.round(w.ndMins/maxYearNd*100);
+      yearWeeklyHtml+=`<div class="nd-week-row">
+        <span class="nd-week-kw">KW ${w.kw}</span>
+        <div class="nd-week-bar"><div class="nd-week-bar-bg"><div class="nd-week-bar-fill" style="width:${pct}%"></div></div></div>
+        <span class="nd-week-nd">${w.ndMins>0?minsToTime(w.ndMins):'—'}</span>
+        <span class="nd-week-ue" style="color:${uePos?'var(--green)':'var(--red)'}">${uePos?'+':''}${minsToTime(ue)}</span>
+      </div>`;
+    });
+    // Haftalık toplamlar
+    const totalWNd=yearWeeklyData.reduce((s,w)=>s+w.ndMins,0);
+    const totalWUe=yearWeeklyData.reduce((s,w)=>s+(w.workedMins-w.sollMins+w.ndMins),0);
+    const totalWPos=totalWUe>=0;
+    yearWeeklyHtml+=`<div style="display:grid;grid-template-columns:44px 1fr 70px 70px;padding-top:6px;border-top:1px solid var(--border);margin-top:2px">
+      <span style="font-size:10px;font-weight:700;color:var(--text)">Ges.</span>
+      <span></span>
+      <span style="font-size:10px;font-weight:700;color:var(--orange);text-align:right">${minsToTime(totalWNd)}</span>
+      <span style="font-size:10px;font-weight:700;text-align:right;color:${totalWPos?'var(--green)':'var(--red)'}">${totalWPos?'+':''}${minsToTime(totalWUe)}</span>
+    </div>`;
+    yearWeeklyHtml+='</div>';
+  }
+
+  const barsHtml=monthData.map(s=>{
+    const pct=Math.min(100,Math.abs(s.diffMins)/maxAbs*100);
+    const pos=s.diffMins>=0;
+    const isCur=s.month===currentMonth;
+    const ndH=s.ndMins>0?`<span style="font-size:10px;color:var(--orange)">🚨 ${minsToTime(s.ndMins)}</span>`:'';
+    const monthTotal=s.diffMins+s.ndMins;
+    const monthTotalPos=monthTotal>=0;
     return `<div class="month-bar-item" onclick="goToMonthJahres(${s.month})" style="cursor:pointer;padding:8px 12px;border-radius:10px;background:${isCur?'var(--surface2)':'transparent'};margin-bottom:4px;">
       <div class="month-bar-label">
         <span class="month-bar-name" style="${isCur?'color:var(--accent2)':''}">${MONTHS[s.month].substring(0,3)}</span>
@@ -1312,7 +1211,7 @@ function renderJahres() {
           ${s.feiertage?`<span style="font-size:10px;color:var(--yellow)">🎉 ${s.feiertage}T</span>`:''}
           ${ndH}
           <span class="month-bar-val" style="color:${pos?'var(--green)':'var(--red)'}">${pos?'+':''}${minsToTime(s.diffMins)}</span>
-          ${s.ndMins > 0 ? `<span style="font-size:10px;color:var(--accent2);font-family:'DM Mono',monospace">Σ ${monthTotalPos?'+':''}${minsToTime(monthTotal)}</span>` : ''}
+          ${s.ndMins>0?`<span style="font-size:10px;color:var(--accent2);font-family:'DM Mono',monospace">Σ ${monthTotalPos?'+':''}${minsToTime(monthTotal)}</span>`:''}
         </div>
       </div>
       <div class="bar-track"><div class="bar-fill ${pos?'bar-pos':'bar-neg'}" style="width:${pct}%"></div></div>
@@ -1320,42 +1219,31 @@ function renderJahres() {
     </div>`;
   }).join('');
 
-  document.getElementById('jahresTab').innerHTML = `
+  document.getElementById('jahresTab').innerHTML=`
     <div class="ys-header">📊 Jahresübersicht ${currentYear}</div>
-
-    <!-- TOP ROW: Gesamt + Notdienst side by side -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <!-- Gesamt Überstunden -->
       <div style="background:linear-gradient(135deg,${gesamtPos?'rgba(52,211,153,0.12)':'rgba(248,113,113,0.12)'},transparent);border:1px solid ${gesamtPos?'var(--green)':'var(--red)'};border-radius:var(--radius);padding:14px;text-align:center">
-        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">⏱ Gesamt</div>
-        <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:${gesamtPos?'var(--green)':'var(--red)'}">${gesamtPos?'+':''}${minsToTime(gesamtUeberstunden)}</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">ca. ${(Math.abs(gesamtUeberstunden)/60/8).toFixed(1)} Tage</div>
+        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">⏱ Gesamt</div>
+        <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:${gesamtPos?'var(--green)':'var(--red)'}">${gesamtPos?'+':''}${minsToTime(gesamtUe)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">ca. ${(Math.abs(gesamtUe)/60/8).toFixed(1)} Tage</div>
       </div>
-      <!-- Notdienst Hero -->
       <div style="background:linear-gradient(135deg,rgba(251,146,60,0.15),rgba(251,146,60,0.03));border:1px solid var(--orange);border-radius:var(--radius);padding:14px;text-align:center">
-        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">🚨 Notdienst</div>
+        <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">🚨 Notdienst</div>
         <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--orange)">+${minsToTime(totalNotdienstMins)}</div>
         <div style="font-size:10px;color:var(--muted);margin-top:4px">${totalNotdienst} Einsätze</div>
       </div>
     </div>
 
-    <!-- NOTDIENST DETAIL BAR (only if data) -->
-    ${totalNotdienst > 0 ? `
+    ${totalNotdienst>0?`
     <div style="background:var(--surface);border-left:3px solid var(--orange);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;margin-bottom:12px">
       <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">
-        ${monthData.map(function(s) {
-          if (s.notdienst === 0) return '';
-          return '<div style="background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.3);border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:4px">'
-            + '<span style="font-size:10px;font-weight:700;color:var(--orange)">' + MONTHS[s.month].substring(0,3) + '</span>'
-            + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text)">' + s.notdienst + '× ' + minsToTime(s.ndMins) + '</span>'
-            + '</div>';
-        }).join('')}
-        <div style="margin-left:auto;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">Ø ${(totalNotdienstMins / Math.max(totalNotdienst, 1) / 60).toFixed(1)}h</div>
+        ${monthData.map(s=>s.notdienst===0?'':'<div style="background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.3);border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:4px"><span style="font-size:10px;font-weight:700;color:var(--orange)">'+MONTHS[s.month].substring(0,3)+'</span><span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text)">'+s.notdienst+'× '+minsToTime(s.ndMins)+'</span></div>').join('')}
+        <div style="margin-left:auto;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">Ø ${(totalNotdienstMins/Math.max(totalNotdienst,1)/60).toFixed(1)}h</div>
       </div>
-    </div>
-    ` : ''}
+    </div>`:''}
 
-    <!-- BREAKDOWN: Differenz + Überstunden formula -->
+    ${yearWeeklyHtml}
+
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-family:'DM Mono',monospace;font-size:13px">
         <span style="color:${isPos?'var(--green)':'var(--red)'}">${isPos?'+':''}${minsToTime(totalDiff)}</span>
@@ -1364,51 +1252,32 @@ function renderJahres() {
         <span style="color:var(--orange)">+${minsToTime(totalNotdienstMins)}</span>
         <span style="color:var(--muted);font-size:11px">Nd</span>
         <span style="color:var(--muted)">=</span>
-        <span style="font-size:16px;font-weight:700;color:${gesamtPos?'var(--green)':'var(--red)'}">${gesamtPos?'+':''}${minsToTime(gesamtUeberstunden)}</span>
+        <span style="font-size:16px;font-weight:700;color:${gesamtPos?'var(--green)':'var(--red)'}">${gesamtPos?'+':''}${minsToTime(gesamtUe)}</span>
       </div>
     </div>
-
-    <!-- STATS GRID: 2x2 -->
     <div class="ys-grid">
-      <div class="ys-card blue">
-        <div class="ys-label">Gearbeitet</div>
-        <div class="ys-value blue">${minsToTime(totalWorked)}</div>
-        <div class="ys-sub">Soll: ${minsToTime(totalStandard)}</div>
-      </div>
-      <div class="ys-card green">
-        <div class="ys-label">Arbeitstage</div>
-        <div class="ys-value green">${realWorkedDays}</div>
-        <div class="ys-sub">von ${totalArbeitstage} Werktagen</div>
-      </div>
+      <div class="ys-card blue"><div class="ys-label">Gearbeitet</div><div class="ys-value blue">${minsToTime(totalWorked)}</div><div class="ys-sub">Soll: ${minsToTime(totalStandard)}</div></div>
+      <div class="ys-card green"><div class="ys-label">Arbeitstage</div><div class="ys-value green">${realWorkedDays}</div><div class="ys-sub">von ${totalArbeitstage} Werktagen</div></div>
     </div>
-
-    <!-- URLAUB / KRANK / FEIERTAGE -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;border-top:3px solid var(--blue)">
         <div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px">🏖 Urlaub</div>
         <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--blue)">${totalUrlaub}</div>
         <div style="font-size:9px;color:var(--muted)">Rest ${urlaubKalan}/30</div>
-        <div style="background:var(--surface2);border-radius:3px;height:3px;margin-top:3px;overflow:hidden">
-          <div style="height:100%;background:var(--blue);width:${Math.round(totalUrlaub/30*100)}%"></div>
-        </div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;border-top:3px solid var(--red)">
         <div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px">🤒 Krank</div>
         <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--red)">${totalKrank}</div>
-        <div style="font-size:9px;color:var(--muted)">${totalKrank * 8}h</div>
+        <div style="font-size:9px;color:var(--muted)">${totalKrank*8}h</div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;border-top:3px solid var(--yellow)">
         <div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px">🎉 Feiertage</div>
         <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--yellow)">${totalFeiertage}</div>
-        <div style="font-size:9px;color:var(--muted)">${totalFeiertage * 8}h</div>
+        <div style="font-size:9px;color:var(--muted)">${totalFeiertage*8}h</div>
       </div>
     </div>
-
-    <!-- MONTH BARS -->
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 4px">📅 Monatsübersicht — Zeile anklicken zum Springen 👇</div>
     <div class="month-bar-list">${barsHtml}</div>
-
-    <!-- INFO -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px">
       <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">ℹ️ Erklärung</div>
       <div style="font-size:11px;color:var(--muted);line-height:1.6">
@@ -1420,842 +1289,505 @@ function renderJahres() {
   `;
 }
 
-function goToMonthJahres(m) { currentMonth = m; render(); showTage(); }
-function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } render(); }
-function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } render(); }
-function goToToday() {
-  const t = new Date();
-  currentYear = t.getFullYear() >= 2026 && t.getFullYear() <= 2028 ? t.getFullYear() : 2026;
-  currentMonth = t.getMonth();
-  document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active-year'));
-  const yb = document.getElementById('ybtn'+currentYear); if(yb) yb.classList.add('active-year');
-  render();
-  setTimeout(() => { const el = document.querySelector('.day-entry.today'); if (el) el.scrollIntoView({behavior:'smooth', block:'center'}); }, 100);
-}
-// View switching
-function showTage() {
-  document.getElementById('daysTab').style.display = 'block';
-  document.getElementById('jahresTab').style.display = 'none';
+function goToMonthJahres(m){currentMonth=m;render();showTage();}
+
+// ===== VIEW SWITCHING =====
+function showTage(){
+  document.getElementById('daysTab').style.display='block';
+  document.getElementById('jahresTab').style.display='none';
   document.getElementById('bnav-tage').classList.add('active');
   document.getElementById('bnav-jahres').classList.remove('active');
-  window.scrollTo({top:0, behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-function showJahres() {
-  document.getElementById('daysTab').style.display = 'none';
-  document.getElementById('jahresTab').style.display = 'block';
+function showJahres(){
+  document.getElementById('daysTab').style.display='none';
+  document.getElementById('jahresTab').style.display='block';
   document.getElementById('bnav-tage').classList.remove('active');
   document.getElementById('bnav-jahres').classList.add('active');
   renderJahres();
-  window.scrollTo({top:0, behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-
-// Scroll to top button visibility
-window.addEventListener('scroll', function() {
-  var btn = document.getElementById('scrollTopBtn');
-  if (btn) btn.style.display = window.scrollY > 400 ? 'block' : 'none';
+window.addEventListener('scroll',function(){
+  const btn=document.getElementById('scrollTopBtn');
+  if(btn) btn.style.display=window.scrollY>400?'block':'none';
 });
 
-// ─── ENTRY MODAL ────────────────────────────────────────────────
-function onDayClick(dateStr, day) {
-  editingDate = dateStr;
-  const status = getDayStatus(dateStr); const times = getDayTimes(dateStr);
-  document.getElementById('modalTitle').textContent = `${day}. ${MONTHS[currentMonth]}`;
-  document.getElementById('entryDate').value = dateStr;
-  selectedStatus = status || 'Arbeiten'; updateStatusBtns();
-  const isNotdienst = selectedStatus === 'Notdienst';
-  const locked = selectedStatus === 'Urlaub' || selectedStatus === 'Krank' || selectedStatus === 'Feiertag';
-  let t = {};
-  if (times && times.start) { t = times; }
-  else if (!isNotdienst) { t = getStatusDefaultTimes(selectedStatus, dateStr) || getStandardTimes(dateStr) || {}; }
-  const _s = t.start || (isNotdienst ? '' : '07:45');
-  const _p = t.pause || (isNotdienst ? '' : '01:00');
-  const _e = t.end || (isNotdienst ? '' : '17:00');
-  document.getElementById('entryNote').value = userNotes[dateStr] || '';
+// ===== ENTRY MODAL =====
+function onDayClick(ds,day){
+  editingDate=ds;
+  const status=getDayStatus(ds), times=getDayTimes(ds);
+  document.getElementById('modalTitle').textContent=`${day}. ${MONTHS[currentMonth]}`;
+  document.getElementById('entryDate').value=ds;
+  selectedStatus=status||'Arbeiten'; updateStatusBtns();
+  const isNotdienst=selectedStatus==='Notdienst';
+  const locked=selectedStatus==='Urlaub'||selectedStatus==='Krank'||selectedStatus==='Feiertag';
+  let t={};
+  if(times&&times.start){t=times;}
+  else if(!isNotdienst){t=getStatusDefaultTimes(selectedStatus,ds)||getStandardTimes(ds)||{};}
+  document.getElementById('entryNote').value=userNotes[ds]||'';
   document.getElementById('entryModal').classList.add('open');
-  setTimeout(() => {
-    document.getElementById('entryStart').value = _s;
-    document.getElementById('entryPause').value = _p;
-    document.getElementById('entryEnd').value = _e;
+  setTimeout(()=>{
+    document.getElementById('entryStart').value=t.start||(isNotdienst?'':'07:45');
+    document.getElementById('entryPause').value=t.pause||(isNotdienst?'':'01:00');
+    document.getElementById('entryEnd').value=t.end||(isNotdienst?'':'17:00');
     setTimeFieldsLocked(locked); updateCalc();
-  }, 50);
+  },50);
 }
-function closeModal() { document.getElementById('entryModal').classList.remove('open'); editingDate = null; }
-function selectStatus(s) {
-  selectedStatus = s; updateStatusBtns();
-  const dateStr = document.getElementById('entryDate').value;
-  const locked = s === 'Urlaub' || s === 'Krank' || s === 'Feiertag';
-  const t = getStatusDefaultTimes(s, dateStr) || {};
-  document.getElementById('entryStart').value = t.start || '07:45';
-  document.getElementById('entryPause').value = t.pause || '01:00';
-  document.getElementById('entryEnd').value = t.end || '17:00';
+function closeModal(){document.getElementById('entryModal').classList.remove('open');editingDate=null;}
+function selectStatus(s){
+  selectedStatus=s; updateStatusBtns();
+  const ds=document.getElementById('entryDate').value;
+  const locked=s==='Urlaub'||s==='Krank'||s==='Feiertag';
+  const t=getStatusDefaultTimes(s,ds)||{};
+  document.getElementById('entryStart').value=t.start||'07:45';
+  document.getElementById('entryPause').value=t.pause||'01:00';
+  document.getElementById('entryEnd').value=t.end||'17:00';
   setTimeFieldsLocked(locked); updateCalc();
-  document.getElementById('timeFields').style.display = s==='Frei' ? 'none' : 'grid';
+  document.getElementById('timeFields').style.display=s==='Frei'?'none':'grid';
 }
-function setTimeFieldsLocked(locked) {
-  ['entryStart','entryPause','entryEnd'].forEach(id => {
-    const el = document.getElementById(id);
-    el.style.opacity = locked ? '0.5' : '1';
-    el.style.pointerEvents = locked ? 'none' : 'auto';
-    el.readOnly = locked;
+function setTimeFieldsLocked(locked){
+  ['entryStart','entryPause','entryEnd'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.opacity=locked?'0.5':'1';
+    el.style.pointerEvents=locked?'none':'auto';
+    el.readOnly=locked;
   });
 }
-function updateStatusBtns() {
-  document.querySelectorAll('.status-btn').forEach(b => {
-    b.className = 'status-btn';
-    const s = b.textContent.trim().split(' ').pop();
-    if (s === selectedStatus) b.className = `status-btn sel-${selectedStatus.toLowerCase()}`;
+function updateStatusBtns(){
+  document.querySelectorAll('.status-btn').forEach(b=>{
+    b.className='status-btn';
+    const s=b.textContent.trim().split(' ').pop();
+    if(s===selectedStatus) b.className=`status-btn sel-${selectedStatus.toLowerCase()}`;
   });
-  document.getElementById('timeFields').style.display = selectedStatus==='Frei' ? 'none' : 'grid';
+  document.getElementById('timeFields').style.display=selectedStatus==='Frei'?'none':'grid';
 }
-function updateCalc() {
-  const s = document.getElementById('entryStart').value;
-  const p = document.getElementById('entryPause').value;
-  const e = document.getElementById('entryEnd').value;
-  document.getElementById('entryCalc').value = calcWorkHours(s,p,e) || '--:--';
+function updateCalc(){
+  document.getElementById('entryCalc').value=calcWorkHours(
+    document.getElementById('entryStart').value,
+    document.getElementById('entryPause').value,
+    document.getElementById('entryEnd').value
+  )||'--:--';
 }
-function saveEntry() {
-  const dateStr = document.getElementById('entryDate').value;
-  if (!dateStr) return;
-  userData[dateStr] = selectedStatus;
-  if (selectedStatus !== 'Frei') {
-    const locked = selectedStatus === 'Urlaub' || selectedStatus === 'Krank' || selectedStatus === 'Feiertag';
-    if (locked) { userTimes[dateStr] = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'}; }
-    else { userTimes[dateStr] = { start: document.getElementById('entryStart').value, pause: document.getElementById('entryPause').value, end: document.getElementById('entryEnd').value, hours: document.getElementById('entryCalc').value }; }
-  } else { delete userTimes[dateStr]; }
-  const note = document.getElementById('entryNote').value.trim();
-  if (note) userNotes[dateStr] = note; else delete userNotes[dateStr];
+function saveEntry(){
+  const ds=document.getElementById('entryDate').value;
+  if(!ds) return;
+  userData[ds]=selectedStatus;
+  if(selectedStatus!=='Frei'){
+    const locked=selectedStatus==='Urlaub'||selectedStatus==='Krank'||selectedStatus==='Feiertag';
+    userTimes[ds]=locked
+      ?{start:'08:00',pause:'01:00',end:'17:00',hours:'08:00'}
+      :{start:document.getElementById('entryStart').value,pause:document.getElementById('entryPause').value,end:document.getElementById('entryEnd').value,hours:document.getElementById('entryCalc').value};
+  } else { delete userTimes[ds]; }
+  const note=document.getElementById('entryNote').value.trim();
+  if(note) userNotes[ds]=note; else delete userNotes[ds];
   saveData(); closeModal();
-  const parts = dateStr.split('-'); currentYear = parseInt(parts[0]); currentMonth = parseInt(parts[1]) - 1;
+  const parts=ds.split('-'); currentYear=parseInt(parts[0]); currentMonth=parseInt(parts[1])-1;
   render();
 }
 
-// ─── NOTDIENST MODAL ────────────────────────────────────────────
-let currentNdDate = null;
-let currentNdIndex = -1;
+// ===== NOTDIENST MODAL =====
+let currentNdDate=null, currentNdIndex=-1;
 
-function openNotdienst(dateStr, index) {
-  currentNdDate = dateStr;
-  currentNdIndex = index;
-  const parts = dateStr.split('-');
-  const d = new Date(dateStr);
-  const DAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
-  const ndArr = userNotdienst[dateStr] || [];
-  const arr = Array.isArray(ndArr) ? ndArr : [ndArr];
-  const nd = (index >= 0 && arr[index]) ? arr[index] : {};
-  const count = arr.length;
-
-  document.getElementById('ndDateLabel').textContent = `${DAYS[d.getDay()]}, ${parts[2]}.${parts[1]}.${parts[0]}${index >= 0 ? ' — Eintrag ' + (index+1) : ' — Neu (' + (count+1) + '. Eintrag)'}`;
-
-  // Fill time fields
-  document.getElementById('ndStart').value = nd.start || '';
-  document.getElementById('ndEnd').value = nd.end || '';
-  document.getElementById('ndCalc').value = nd.hours || '';
-
-  // Fill Kunde/Adresse from saved note
-  const noteStr = nd.note || '';
-  const dashIdx = noteStr.indexOf(' — ');
-  if (dashIdx >= 0) {
-    document.getElementById('ndBrKunde').value = noteStr.substring(0, dashIdx);
-    document.getElementById('ndBrAdresse').value = noteStr.substring(dashIdx + 3);
-  } else {
-    document.getElementById('ndBrKunde').value = noteStr;
-    document.getElementById('ndBrAdresse').value = '';
-  }
-
-  // Fill Problem/Ergebnis from saved data
-  document.getElementById('ndBrProblem').value = nd.problem || '';
-  document.getElementById('ndBrErgebnis').value = nd.ergebnis || '';
-
-  // Show delete button only for existing entries
-  document.getElementById('ndDeleteBtn').style.display = index >= 0 ? 'block' : 'none';
-
+function openNotdienst(ds,index){
+  currentNdDate=ds; currentNdIndex=index;
+  const parts=ds.split('-'), d=new Date(ds);
+  const TAGE=['So','Mo','Di','Mi','Do','Fr','Sa'];
+  const ndArr=userNotdienst[ds]||[];
+  const arr=Array.isArray(ndArr)?ndArr:[ndArr];
+  const nd=(index>=0&&arr[index])?arr[index]:{};
+  document.getElementById('ndDateLabel').textContent=`${TAGE[d.getDay()]}, ${parts[2]}.${parts[1]}.${parts[0]}${index>=0?' — Eintrag '+(index+1):' — Neu ('+(arr.length+1)+'. Eintrag)'}`;
+  document.getElementById('ndStart').value=nd.start||'';
+  document.getElementById('ndEnd').value=nd.end||'';
+  document.getElementById('ndCalc').value=nd.hours||'';
+  const noteStr=nd.note||'';
+  const dashIdx=noteStr.indexOf(' — ');
+  document.getElementById('ndBrKunde').value=dashIdx>=0?noteStr.substring(0,dashIdx):noteStr;
+  document.getElementById('ndBrAdresse').value=dashIdx>=0?noteStr.substring(dashIdx+3):'';
+  document.getElementById('ndBrProblem').value=nd.problem||'';
+  document.getElementById('ndBrErgebnis').value=nd.ergebnis||'';
+  document.getElementById('ndDeleteBtn').style.display=index>=0?'block':'none';
   document.getElementById('notdienstModal').classList.add('open');
 }
-
-function closeNotdienst() {
-  document.getElementById('notdienstModal').classList.remove('open');
-  currentNdDate = null;
-  currentNdIndex = -1;
+function closeNotdienst(){document.getElementById('notdienstModal').classList.remove('open');currentNdDate=null;currentNdIndex=-1;}
+function updateNdCalc(){document.getElementById('ndCalc').value=calcWorkHours(document.getElementById('ndStart').value,'00:00',document.getElementById('ndEnd').value)||'--:--';}
+function buildNdEntry(){
+  const start=document.getElementById('ndStart').value;
+  const end=document.getElementById('ndEnd').value;
+  const hours=calcWorkHours(start,'00:00',end)||'00:00';
+  const kunde=document.getElementById('ndBrKunde').value.trim();
+  const adresse=document.getElementById('ndBrAdresse').value.trim();
+  const problem=document.getElementById('ndBrProblem').value.trim();
+  const ergebnis=document.getElementById('ndBrErgebnis').value.trim();
+  return {start,end,hours,note:kunde+(adresse?' — '+adresse:''),problem,ergebnis};
 }
-
-function updateNdCalc() {
-  const s = document.getElementById('ndStart').value;
-  const e = document.getElementById('ndEnd').value;
-  document.getElementById('ndCalc').value = calcWorkHours(s, '00:00', e) || '--:--';
-}
-
-function buildNdEntry() {
-  const start = document.getElementById('ndStart').value;
-  const end = document.getElementById('ndEnd').value;
-  const hours = calcWorkHours(start, '00:00', end) || '00:00';
-  const kunde = document.getElementById('ndBrKunde').value.trim();
-  const adresse = document.getElementById('ndBrAdresse').value.trim();
-  const problem = document.getElementById('ndBrProblem').value.trim();
-  const ergebnis = document.getElementById('ndBrErgebnis').value.trim();
-  let note = '';
-  if (kunde) note = kunde + (adresse ? ' — ' + adresse : '');
-  return { start, end, hours, note, problem, ergebnis };
-}
-
-function saveNotdienst() {
-  if (!currentNdDate) return;
-  const start = document.getElementById('ndStart').value;
-  const end = document.getElementById('ndEnd').value;
-  if (!start || !end) { alert('Bitte Start und Ende eingeben!'); return; }
-
-  const entry = buildNdEntry();
-  let arr = userNotdienst[currentNdDate] || [];
-  if (!Array.isArray(arr)) arr = [arr];
-
-  // Preserve erledigt status
-  const erledigt = (currentNdIndex >= 0 && arr[currentNdIndex]) ? !!arr[currentNdIndex].erledigt : false;
-  entry.erledigt = erledigt;
-
-  if (currentNdIndex >= 0) {
-    arr[currentNdIndex] = entry;
-  } else {
-    entry.erledigt = false;
-    arr.push(entry);
-    // Update index to point to newly created entry
-    currentNdIndex = arr.length - 1;
-  }
-  userNotdienst[currentNdDate] = arr;
-  saveData();
-  render();
-  // Visual feedback
-  const saveBtn = document.querySelector('#notdienstModal .save-btn');
-  if (saveBtn) {
-    const orig = saveBtn.textContent;
-    saveBtn.textContent = '✅ Gespeichert!';
-    saveBtn.style.background = 'var(--green)';
-    setTimeout(() => { saveBtn.textContent = orig; saveBtn.style.background = 'var(--orange)'; }, 1500);
-  }
-}
-
-function deleteNotdienst() {
-  if (!currentNdDate) return;
-  let arr = userNotdienst[currentNdDate] || [];
-  if (!Array.isArray(arr)) arr = [arr];
-  if (currentNdIndex >= 0) {
-    arr.splice(currentNdIndex, 1);
-    if (arr.length === 0) delete userNotdienst[currentNdDate];
-    else userNotdienst[currentNdDate] = arr;
-  } else {
-    delete userNotdienst[currentNdDate];
-  }
-  saveData();
-  closeNotdienst();
-  render();
-}
-
-function toggleNdStatus(dateStr, idx) {
-  let arr = userNotdienst[dateStr] || [];
-  if (!Array.isArray(arr)) arr = [arr];
-  if (arr[idx]) {
-    arr[idx].erledigt = !arr[idx].erledigt;
-    userNotdienst[dateStr] = arr;
-    saveData();
-    render();
-  }
-}
-// ─── BERICHT (REPORT) ──────────────────────────────────────────
-let berichtDate = null;
-
-function openBericht(dateStr) {
-  berichtDate = dateStr || null;
-  if (!berichtDate) return;
-  const parts = berichtDate.split('-');
-  const d = new Date(berichtDate);
-  const TAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
-  document.getElementById('berichtDateLabel').textContent = `${TAGE[d.getDay()]}, ${parts[2]}.${parts[1]}.${parts[0]}`;
-  // Auto-fill Kunde from last Notdienst note
-  const ndArr = userNotdienst[berichtDate] || [];
-  const bArr = Array.isArray(ndArr) ? ndArr : [ndArr];
-  const lastNd = bArr[bArr.length - 1];
-  document.getElementById('brKunde').value = (lastNd && lastNd.note) ? lastNd.note : '';
-  document.getElementById('brAdresse').value = '';
-  document.getElementById('brProblem').value = '';
-  document.getElementById('brErgebnis').value = '';
-  document.getElementById('berichtModal').classList.add('open');
-}
-
-function closeBericht() { document.getElementById('berichtModal').classList.remove('open'); berichtDate = null; }
-
-function sendBericht() {
-  const kunde = document.getElementById('brKunde').value.trim();
-  const adresse = document.getElementById('brAdresse').value.trim();
-  const problem = document.getElementById('brProblem').value.trim();
-  const ergebnis = document.getElementById('brErgebnis').value.trim();
-  if (!kunde || !problem) { alert('Bitte mindestens Kunde und Problem ausfüllen!'); return; }
-  const heute = new Date();
-  const datumStr = `${String(heute.getDate()).padStart(2,'0')}.${String(heute.getMonth()+1).padStart(2,'0')}.${heute.getFullYear()}`;
-  const kurzProblem = problem.length > 60 ? problem.substring(0, 60) + '...' : problem;
-  const betreff = `${datumStr} – ${kunde}, ${adresse} / ${kurzProblem}`;
-  let body = `Sehr geehrte Damen und Herren,\n\n`;
-  body += `Kunde:\n${kunde}\n\n`;
-  body += `Adresse:\n${adresse}\n\n`;
-  body += `Problem:\n${problem}\n\n`;
-  body += `Ergebnis / Feststellungen:\n\n`;
-  const zeilen = ergebnis.split('\n').filter(z => z.trim());
-  zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
-  body += `\nMit freundlichen Grüßen\n` + getMitarbeiterName();
-  if (berichtDate && userNotdienst[berichtDate]) {
-    const ndList = userNotdienst[berichtDate];
-    const ndItems = Array.isArray(ndList) ? ndList : [ndList];
-    const lastItem = ndItems[ndItems.length - 1];
-    if (lastItem) {
-      lastItem.note = `${kunde} — ${adresse}`;
-      userNotdienst[berichtDate] = ndItems;
-      saveData();
-      render();
-    }
-  }
-  const to = 'info@ideal-hannover.de';
-  const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
-  window.open(mailtoUrl, '_self');
-  closeBericht();
-}
-
-// ─── GOOGLE MAPS ────────────────────────────────────────────────
-function openGoogleMaps(inputId) {
-  const adresse = document.getElementById(inputId).value.trim();
-  if (!adresse) { alert('Bitte zuerst eine Adresse eingeben!'); return; }
-  const url = 'https://www.google.com/maps/search/' + encodeURIComponent(adresse);
-  window.open(url, '_blank');
-}
-
-// ─── NOTDIENST PRESETS ─────────────────────────────────────────
-function setNdPreset(start, end) {
-  document.getElementById('ndStart').value = start;
-  document.getElementById('ndEnd').value = end;
-  updateNdCalc();
-}
-
-// ─── SEND BERICHT FROM NOTDIENST MODAL ─────────────────────────
-function sendBerichtFromNd() {
-  const kunde = document.getElementById('ndBrKunde').value.trim();
-  const adresse = document.getElementById('ndBrAdresse').value.trim();
-  const problem = document.getElementById('ndBrProblem').value.trim();
-  const ergebnis = document.getElementById('ndBrErgebnis').value.trim();
-  if (!kunde || !problem) { alert('Bitte mindestens Kunde und Problem ausfüllen!'); return; }
-
-  // Save all fields to notdienst entry first
-  if (currentNdDate) {
-    const start = document.getElementById('ndStart').value;
-    const end = document.getElementById('ndEnd').value;
-    if (start && end) {
-      const entry = buildNdEntry();
-      let arr = userNotdienst[currentNdDate] || [];
-      if (!Array.isArray(arr)) arr = [arr];
-      const idx = currentNdIndex >= 0 ? currentNdIndex : arr.length - 1;
-      if (idx >= 0 && arr[idx]) {
-        entry.erledigt = !!arr[idx].erledigt;
-        arr[idx] = entry;
-      } else if (currentNdIndex < 0) {
-        entry.erledigt = false;
-        arr.push(entry);
-      }
-      userNotdienst[currentNdDate] = arr;
-      saveData();
-      render();
-    }
-  }
-
-  // Build and send mail
-  const heute = new Date();
-  const datumStr = `${String(heute.getDate()).padStart(2,'0')}.${String(heute.getMonth()+1).padStart(2,'0')}.${heute.getFullYear()}`;
-  const kurzProblem = problem.length > 60 ? problem.substring(0, 60) + '...' : problem;
-  const betreff = `${datumStr} – ${kunde}, ${adresse} / ${kurzProblem}`;
-  let body = `Sehr geehrte Damen und Herren,\n\n`;
-  body += `Kunde:\n${kunde}\n\n`;
-  body += `Adresse:\n${adresse}\n\n`;
-  body += `Problem:\n${problem}\n\n`;
-  body += `Ergebnis / Feststellungen:\n\n`;
-  const zeilen = ergebnis.split('\n').filter(z => z.trim());
-  zeilen.forEach(z => { body += `* ${z.trim()}\n`; });
-  body += `\nMit freundlichen Grüßen\n` + getMitarbeiterName();
-
-  const to = 'info@ideal-hannover.de';
-  const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
-  window.open(mailtoUrl, '_self');
-}
-// ─── URLAUB ANTRAG ──────────────────────────────────────────
-function openUrlaubModal() {
-  const ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
-  document.getElementById('maName').value = ma.name || '';
-  document.getElementById('maVorname').value = ma.vorname || '';
-  document.getElementById('maPersonalNr').value = ma.personalNr || '';
-  document.getElementById('maEintritt').value = ma.eintritt || '';
-  document.getElementById('maAbteilung').value = ma.abteilung || '';
-  document.getElementById('maVorgesetzter').value = ma.vorgesetzter || '';
-
-  // Show preview or edit form
-  if (ma.name) {
-    document.getElementById('mitarbeiterSection').style.display = 'none';
-    document.getElementById('mitarbeiterPreview').style.display = 'block';
-    document.getElementById('maPreviewText').textContent = (ma.vorname || '') + ' ' + (ma.name || '') + (ma.personalNr ? ' · Nr. ' + ma.personalNr : '') + (ma.abteilung ? ' · ' + ma.abteilung : '');
-  } else {
-    document.getElementById('mitarbeiterSection').style.display = 'block';
-    document.getElementById('mitarbeiterPreview').style.display = 'none';
-  }
-
-  // Show saved Urlaub days
-  const urlaubDays = [];
-  for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubDays.push(ds); }
-  urlaubDays.sort();
-  let html = '';
-  if (urlaubDays.length > 0) {
-    html = '<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">Eingetragene Urlaubstage (' + urlaubDays.length + ')</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
-    urlaubDays.forEach(ds => { const p = ds.split('-'); html += '<span style="background:var(--surface2);border:1px solid var(--blue);color:var(--blue);padding:4px 8px;border-radius:6px;font-size:11px;font-family:DM Mono,monospace">' + p[2] + '.' + p[1] + '.' + p[0] + '</span>'; });
-    html += '</div>';
-  }
-  document.getElementById('urlaubGirilen').innerHTML = html;
-  document.getElementById('urlaubModal').classList.add('open');
-  // Init signature canvas after modal is visible
-  setTimeout(initSignatureCanvas, 100);
-}
-
-function toggleMitarbeiterEdit() {
-  const section = document.getElementById('mitarbeiterSection');
-  const preview = document.getElementById('mitarbeiterPreview');
-  if (section.style.display === 'none') {
-    section.style.display = 'block';
-    preview.style.display = 'none';
-  } else {
-    section.style.display = 'none';
-    preview.style.display = 'block';
-  }
-}
-function saveMitarbeiter() {
-  const ma = {
-    name: document.getElementById('maName').value.trim(),
-    vorname: document.getElementById('maVorname').value.trim(),
-    personalNr: document.getElementById('maPersonalNr').value.trim(),
-    eintritt: document.getElementById('maEintritt').value.trim(),
-    abteilung: document.getElementById('maAbteilung').value.trim(),
-    vorgesetzter: document.getElementById('maVorgesetzter').value.trim()
-  };
-  localStorage.setItem(LS_PREFIX + 'mitarbeiter', JSON.stringify(ma));
-  alert('✅ Mitarbeiter gespeichert!');
-  document.getElementById('mitarbeiterSection').style.display = 'none';
-  document.getElementById('mitarbeiterPreview').style.display = 'block';
-  document.getElementById('maPreviewText').textContent = (ma.vorname || '') + ' ' + (ma.name || '') + (ma.personalNr ? ' · Nr. ' + ma.personalNr : '') + (ma.abteilung ? ' · ' + ma.abteilung : '');
-}
-function closeUrlaubModal() { document.getElementById('urlaubModal').classList.remove('open'); }
-
-function resetUrlaub() {
-  const urlaubDays = [];
-  for (const ds in userData) { if (userData[ds] === 'Urlaub') urlaubDays.push(ds); }
-  urlaubDays.sort();
-  if (urlaubDays.length === 0) { alert('Keine Urlaubstage vorhanden!'); return; }
-  let msg = 'Welche Urlaubstage löschen?\n\n';
-  urlaubDays.forEach((ds, i) => {
-    const p = ds.split('-');
-    const d = new Date(ds);
-    const TAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
-    msg += (i+1) + '. ' + TAGE[d.getDay()] + ' ' + p[2] + '.' + p[1] + '.' + p[0] + '\n';
-  });
-  msg += '\nNummern eingeben (z.B. 1,2,3 oder "alle"):';
-  const input = prompt(msg);
-  if (!input) return;
-  let toDelete = [];
-  if (input.trim().toLowerCase() === 'alle') {
-    toDelete = urlaubDays;
-  } else {
-    const nums = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-    nums.forEach(n => { if (n >= 1 && n <= urlaubDays.length) toDelete.push(urlaubDays[n-1]); });
-  }
-  if (toDelete.length === 0) { alert('Keine gültige Auswahl!'); return; }
-  toDelete.forEach(ds => { delete userData[ds]; delete userTimes[ds]; });
+function saveNotdienst(){
+  if(!currentNdDate) return;
+  const start=document.getElementById('ndStart').value, end=document.getElementById('ndEnd').value;
+  if(!start||!end){alert('Bitte Start und Ende eingeben!');return;}
+  const entry=buildNdEntry();
+  let arr=userNotdienst[currentNdDate]||[];
+  if(!Array.isArray(arr)) arr=[arr];
+  const erledigt=(currentNdIndex>=0&&arr[currentNdIndex])?!!arr[currentNdIndex].erledigt:false;
+  entry.erledigt=erledigt;
+  if(currentNdIndex>=0) arr[currentNdIndex]=entry;
+  else{entry.erledigt=false;arr.push(entry);currentNdIndex=arr.length-1;}
+  userNotdienst[currentNdDate]=arr;
   saveData(); render();
-  alert(toDelete.length + ' Urlaubstage gelöscht!');
-  openUrlaubModal();
+  const btn=document.querySelector('#notdienstModal .save-btn');
+  if(btn){const orig=btn.textContent;btn.textContent='✅ Gespeichert!';btn.style.background='var(--green)';setTimeout(()=>{btn.textContent=orig;btn.style.background='var(--orange)';},1500);}
+}
+function deleteNotdienst(){
+  if(!currentNdDate) return;
+  let arr=userNotdienst[currentNdDate]||[];
+  if(!Array.isArray(arr)) arr=[arr];
+  if(currentNdIndex>=0){arr.splice(currentNdIndex,1);if(arr.length===0) delete userNotdienst[currentNdDate];else userNotdienst[currentNdDate]=arr;}
+  else{delete userNotdienst[currentNdDate];}
+  saveData(); closeNotdienst(); render();
+}
+function toggleNdStatus(ds,idx){
+  let arr=userNotdienst[ds]||[];
+  if(!Array.isArray(arr)) arr=[arr];
+  if(arr[idx]){arr[idx].erledigt=!arr[idx].erledigt;userNotdienst[ds]=arr;saveData();render();}
 }
 
-function printUrlaub() { generateUrlaubPDF(); }
+// ===== GOOGLE MAPS =====
+function openGoogleMaps(inputId){
+  const a=document.getElementById(inputId).value.trim();
+  if(!a){alert('Bitte zuerst eine Adresse eingeben!');return;}
+  window.open('https://www.google.com/maps/search/'+encodeURIComponent(a),'_blank');
+}
 
-// ─── SIGNATURE SYSTEM ──────────────────────────────────────────
-let sigCanvas, sigCtx, sigDrawing = false;
-let savedSignatureData = localStorage.getItem('az_signature') || null;
+// ===== NOTDIENST PRESETS =====
+function setNdPreset(start,end){document.getElementById('ndStart').value=start;document.getElementById('ndEnd').value=end;updateNdCalc();}
 
-function initSignatureCanvas() {
-  sigCanvas = document.getElementById('sigCanvas');
-  if (!sigCanvas) return;
-  sigCtx = sigCanvas.getContext('2d');
-  const rect = sigCanvas.getBoundingClientRect();
-  sigCanvas.width = rect.width * 2;
-  sigCanvas.height = 240;
-  sigCtx.scale(2, 2);
-  sigCtx.strokeStyle = '#000';
-  sigCtx.lineWidth = 2;
-  sigCtx.lineCap = 'round';
-  sigCtx.lineJoin = 'round';
-
-  const getPos = (e) => {
-    const r = sigCanvas.getBoundingClientRect();
-    const t = e.touches ? e.touches[0] : e;
-    return { x: t.clientX - r.left, y: t.clientY - r.top };
-  };
-  const start = (e) => { e.preventDefault(); sigDrawing = true; sigCtx.beginPath(); const p = getPos(e); sigCtx.moveTo(p.x, p.y); };
-  const move = (e) => { if (!sigDrawing) return; e.preventDefault(); const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); };
-  const end = () => { sigDrawing = false; };
-
-  sigCanvas.addEventListener('mousedown', start);
-  sigCanvas.addEventListener('mousemove', move);
-  sigCanvas.addEventListener('mouseup', end);
-  sigCanvas.addEventListener('mouseleave', end);
-  sigCanvas.addEventListener('touchstart', start, {passive:false});
-  sigCanvas.addEventListener('touchmove', move, {passive:false});
-  sigCanvas.addEventListener('touchend', end);
-
-  // Show saved signature if exists
-  if (savedSignatureData) {
-    document.getElementById('sigPreview').style.display = 'block';
-    document.getElementById('sigPreviewImg').src = savedSignatureData;
+// ===== SEND BERICHT FROM NOTDIENST MODAL =====
+function sendBerichtFromNd(){
+  const kunde=document.getElementById('ndBrKunde').value.trim();
+  const adresse=document.getElementById('ndBrAdresse').value.trim();
+  const problem=document.getElementById('ndBrProblem').value.trim();
+  const ergebnis=document.getElementById('ndBrErgebnis').value.trim();
+  if(!kunde||!problem){alert('Bitte mindestens Kunde und Problem ausfüllen!');return;}
+  if(currentNdDate){
+    const start=document.getElementById('ndStart').value, end=document.getElementById('ndEnd').value;
+    if(start&&end){
+      const entry=buildNdEntry();
+      let arr=userNotdienst[currentNdDate]||[];
+      if(!Array.isArray(arr)) arr=[arr];
+      const idx=currentNdIndex>=0?currentNdIndex:arr.length-1;
+      if(idx>=0&&arr[idx]){entry.erledigt=!!arr[idx].erledigt;arr[idx]=entry;}
+      else if(currentNdIndex<0){entry.erledigt=false;arr.push(entry);}
+      userNotdienst[currentNdDate]=arr; saveData(); render();
+    }
   }
+  const heute=new Date();
+  const datumStr=String(heute.getDate()).padStart(2,'0')+'.'+String(heute.getMonth()+1).padStart(2,'0')+'.'+heute.getFullYear();
+  const kurzProblem=problem.length>60?problem.substring(0,60)+'...':problem;
+  const betreff=`${datumStr} – ${kunde}, ${adresse} / ${kurzProblem}`;
+  let body=`Sehr geehrte Damen und Herren,\n\nKunde:\n${kunde}\n\nAdresse:\n${adresse}\n\nProblem:\n${problem}\n\nErgebnis / Feststellungen:\n\n`;
+  ergebnis.split('\n').filter(z=>z.trim()).forEach(z=>{body+=`* ${z.trim()}\n`;});
+  body+=`\nMit freundlichen Grüßen\n${getMitarbeiterName()}`;
+  window.open('mailto:info@ideal-hannover.de?subject='+encodeURIComponent(betreff)+'&body='+encodeURIComponent(body),'_self');
 }
 
-function clearSignature() {
-  if (!sigCtx || !sigCanvas) return;
-  sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+// ===== URLAUB =====
+function openUrlaubModal(){
+  const ma=JSON.parse(localStorage.getItem(LS_PREFIX+'mitarbeiter')||'{}');
+  ['maName','maVorname','maPersonalNr','maEintritt','maAbteilung','maVorgesetzter'].forEach(id=>{
+    const key=id.replace('ma','').charAt(0).toLowerCase()+id.replace('ma','').slice(1);
+    document.getElementById(id).value=ma[key]||'';
+  });
+  if(ma.name){
+    document.getElementById('mitarbeiterSection').style.display='none';
+    document.getElementById('mitarbeiterPreview').style.display='block';
+    document.getElementById('maPreviewText').textContent=(ma.vorname||'')+' '+(ma.name||'')+(ma.personalNr?' · Nr. '+ma.personalNr:'')+(ma.abteilung?' · '+ma.abteilung:'');
+  } else {
+    document.getElementById('mitarbeiterSection').style.display='block';
+    document.getElementById('mitarbeiterPreview').style.display='none';
+  }
+  const urlaubDays=Object.keys(userData).filter(ds=>userData[ds]==='Urlaub').sort();
+  let html='';
+  if(urlaubDays.length>0){
+    html='<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">Eingetragene Urlaubstage ('+urlaubDays.length+')</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
+    urlaubDays.forEach(ds=>{const p=ds.split('-');html+='<span style="background:var(--surface2);border:1px solid var(--blue);color:var(--blue);padding:4px 8px;border-radius:6px;font-size:11px;font-family:DM Mono,monospace">'+p[2]+'.'+p[1]+'.'+p[0]+'</span>';});
+    html+='</div>';
+  }
+  document.getElementById('urlaubGirilen').innerHTML=html;
+  document.getElementById('urlaubModal').classList.add('open');
+  setTimeout(initSignatureCanvas,100);
 }
-
-function saveSignature() {
-  if (!sigCanvas) return;
-  savedSignatureData = sigCanvas.toDataURL('image/png');
-  localStorage.setItem('az_signature', savedSignatureData);
-  document.getElementById('sigPreview').style.display = 'block';
-  document.getElementById('sigPreviewImg').src = savedSignatureData;
+function toggleMitarbeiterEdit(){
+  const s=document.getElementById('mitarbeiterSection'), p=document.getElementById('mitarbeiterPreview');
+  s.style.display=s.style.display==='none'?'block':'none';
+  p.style.display=p.style.display==='none'?'block':'none';
 }
-
-function onSigFileSelected(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    savedSignatureData = e.target.result;
-    localStorage.setItem('az_signature', savedSignatureData);
-    document.getElementById('sigPreview').style.display = 'block';
-    document.getElementById('sigPreviewImg').src = savedSignatureData;
+function saveMitarbeiter(){
+  const ma={
+    name:document.getElementById('maName').value.trim(),
+    vorname:document.getElementById('maVorname').value.trim(),
+    personalNr:document.getElementById('maPersonalNr').value.trim(),
+    eintritt:document.getElementById('maEintritt').value.trim(),
+    abteilung:document.getElementById('maAbteilung').value.trim(),
+    vorgesetzter:document.getElementById('maVorgesetzter').value.trim()
   };
+  localStorage.setItem(LS_PREFIX+'mitarbeiter',JSON.stringify(ma));
+  alert('✅ Mitarbeiter gespeichert!');
+  document.getElementById('mitarbeiterSection').style.display='none';
+  document.getElementById('mitarbeiterPreview').style.display='block';
+  document.getElementById('maPreviewText').textContent=(ma.vorname||'')+' '+(ma.name||'')+(ma.personalNr?' · Nr. '+ma.personalNr:'')+(ma.abteilung?' · '+ma.abteilung:'');
+}
+function closeUrlaubModal(){document.getElementById('urlaubModal').classList.remove('open');}
+function resetUrlaub(){
+  const urlaubDays=Object.keys(userData).filter(ds=>userData[ds]==='Urlaub').sort();
+  if(urlaubDays.length===0){alert('Keine Urlaubstage vorhanden!');return;}
+  let msg='Welche Urlaubstage löschen?\n\n';
+  const TAGE=['So','Mo','Di','Mi','Do','Fr','Sa'];
+  urlaubDays.forEach((ds,i)=>{const p=ds.split('-'),d=new Date(ds);msg+=(i+1)+'. '+TAGE[d.getDay()]+' '+p[2]+'.'+p[1]+'.'+p[0]+'\n';});
+  msg+='\nNummern eingeben (z.B. 1,2,3 oder "alle"):';
+  const input=prompt(msg); if(!input) return;
+  let toDelete=input.trim().toLowerCase()==='alle'?urlaubDays:input.split(',').map(n=>parseInt(n.trim())).filter(n=>!isNaN(n)&&n>=1&&n<=urlaubDays.length).map(n=>urlaubDays[n-1]);
+  if(toDelete.length===0){alert('Keine gültige Auswahl!');return;}
+  toDelete.forEach(ds=>{delete userData[ds];delete userTimes[ds];});
+  saveData();render();alert(toDelete.length+' Urlaubstage gelöscht!');openUrlaubModal();
+}
+
+// ===== SIGNATURE =====
+let sigCanvas,sigCtx,sigDrawing=false;
+let savedSignatureData=localStorage.getItem('az_signature')||null;
+function initSignatureCanvas(){
+  sigCanvas=document.getElementById('sigCanvas'); if(!sigCanvas) return;
+  sigCtx=sigCanvas.getContext('2d');
+  const rect=sigCanvas.getBoundingClientRect();
+  sigCanvas.width=rect.width*2; sigCanvas.height=240;
+  sigCtx.scale(2,2); sigCtx.strokeStyle='#000'; sigCtx.lineWidth=2; sigCtx.lineCap='round'; sigCtx.lineJoin='round';
+  const getPos=(e)=>{const r=sigCanvas.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};};
+  const start=(e)=>{e.preventDefault();sigDrawing=true;sigCtx.beginPath();const p=getPos(e);sigCtx.moveTo(p.x,p.y);};
+  const move=(e)=>{if(!sigDrawing)return;e.preventDefault();const p=getPos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();};
+  const end=()=>{sigDrawing=false;};
+  sigCanvas.addEventListener('mousedown',start); sigCanvas.addEventListener('mousemove',move);
+  sigCanvas.addEventListener('mouseup',end); sigCanvas.addEventListener('mouseleave',end);
+  sigCanvas.addEventListener('touchstart',start,{passive:false}); sigCanvas.addEventListener('touchmove',move,{passive:false});
+  sigCanvas.addEventListener('touchend',end);
+  if(savedSignatureData){document.getElementById('sigPreview').style.display='block';document.getElementById('sigPreviewImg').src=savedSignatureData;}
+}
+function clearSignature(){if(sigCtx&&sigCanvas) sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);}
+function saveSignature(){
+  if(!sigCanvas) return;
+  savedSignatureData=sigCanvas.toDataURL('image/png');
+  localStorage.setItem('az_signature',savedSignatureData);
+  document.getElementById('sigPreview').style.display='block';
+  document.getElementById('sigPreviewImg').src=savedSignatureData;
+}
+function onSigFileSelected(event){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{savedSignatureData=e.target.result;localStorage.setItem('az_signature',savedSignatureData);document.getElementById('sigPreview').style.display='block';document.getElementById('sigPreviewImg').src=savedSignatureData;};
   reader.readAsDataURL(file);
 }
-
-function switchSigTab(tab) {
-  const drawBtn = document.getElementById('sigTabDraw');
-  const uploadBtn = document.getElementById('sigTabUpload');
-  const drawArea = document.getElementById('sigDrawArea');
-  const uploadArea = document.getElementById('sigUploadArea');
-  if (tab === 'draw') {
-    drawBtn.style.background = 'var(--accent)'; drawBtn.style.color = 'white'; drawBtn.style.borderColor = 'var(--accent)';
-    uploadBtn.style.background = 'var(--surface2)'; uploadBtn.style.color = 'var(--muted)'; uploadBtn.style.borderColor = 'var(--border)';
-    drawArea.style.display = 'block'; uploadArea.style.display = 'none';
+function switchSigTab(tab){
+  const drawBtn=document.getElementById('sigTabDraw'), uploadBtn=document.getElementById('sigTabUpload');
+  const drawArea=document.getElementById('sigDrawArea'), uploadArea=document.getElementById('sigUploadArea');
+  if(tab==='draw'){
+    drawBtn.style.cssText='flex:1;padding:8px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:white;font-family:\'Syne\',sans-serif;font-size:12px;font-weight:700;cursor:pointer';
+    uploadBtn.style.cssText='flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:\'Syne\',sans-serif;font-size:12px;font-weight:700;cursor:pointer';
+    drawArea.style.display='block'; uploadArea.style.display='none';
   } else {
-    uploadBtn.style.background = 'var(--accent)'; uploadBtn.style.color = 'white'; uploadBtn.style.borderColor = 'var(--accent)';
-    drawBtn.style.background = 'var(--surface2)'; drawBtn.style.color = 'var(--muted)'; drawBtn.style.borderColor = 'var(--border)';
-    uploadArea.style.display = 'block'; drawArea.style.display = 'none';
+    uploadBtn.style.cssText='flex:1;padding:8px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:white;font-family:\'Syne\',sans-serif;font-size:12px;font-weight:700;cursor:pointer';
+    drawBtn.style.cssText='flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:\'Syne\',sans-serif;font-size:12px;font-weight:700;cursor:pointer';
+    uploadArea.style.display='block'; drawArea.style.display='none';
   }
 }
 
-// ─── PDF GENERATION (jsPDF) ─────────────────────────────────────
-// ─── PDF GENERATION (jsPDF) ─────────────────────────────────────
-// Preload logo
-var logoBase64 = null;
-(function() {
-  var img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function() {
-    var cv = document.createElement('canvas');
-    cv.width = img.width; cv.height = img.height;
-    cv.getContext('2d').drawImage(img, 0, 0);
-    try { logoBase64 = cv.toDataURL('image/png'); } catch(e) {}
-  };
-  img.src = 'https://bktasyusuf-coder.github.io/arbeitzeit/logo.png';
+// ===== PDF =====
+var logoBase64=null;
+(function(){
+  var img=new Image(); img.crossOrigin='anonymous';
+  img.onload=function(){var cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;cv.getContext('2d').drawImage(img,0,0);try{logoBase64=cv.toDataURL('image/png');}catch(e){}};
+  img.src='https://bktasyusuf-coder.github.io/arbeitzeit/logo.png';
 })();
 
-function generateUrlaubPDF() {
-  var von = document.getElementById('urlaubVon').value;
-  var bis = document.getElementById('urlaubBis').value;
-  var art = document.getElementById('urlaubArt').value || 'Erholungsurlaub';
-  var bemerkung = document.getElementById('urlaubBemerkung').value;
-  if (!von || !bis) { alert('Bitte Von und Bis Datum eingeben!'); return; }
-  if (!window.jspdf || !window.jspdf.jsPDF) { alert('PDF wird geladen... Bitte kurz warten und erneut klicken.'); return; }
-
-  var vonDate = new Date(von), bisDate = new Date(bis);
-  var tage = 0, tmpD = new Date(vonDate);
-  while (tmpD <= bisDate) { if (tmpD.getDay() > 0 && tmpD.getDay() < 6) tage++; tmpD.setDate(tmpD.getDate() + 1); }
-  var vonStr = von.split('-').reverse().join('.');
-  var bisStr = bis.split('-').reverse().join('.');
-
-  // Save urlaub days
-  var loopD = new Date(vonDate);
-  while (loopD <= bisDate) {
-    if (loopD.getDay() > 0 && loopD.getDay() < 6) {
-      var dKey = fmt(loopD);
-      userData[dKey] = 'Urlaub';
-      userTimes[dKey] = {start:'08:00', pause:'01:00', end:'17:00', hours:'08:00'};
-    }
-    loopD.setDate(loopD.getDate() + 1);
+function generateUrlaubPDF(){
+  const von=document.getElementById('urlaubVon').value, bis=document.getElementById('urlaubBis').value;
+  const art=document.getElementById('urlaubArt').value||'Erholungsurlaub';
+  const bemerkung=document.getElementById('urlaubBemerkung').value;
+  if(!von||!bis){alert('Bitte Von und Bis Datum eingeben!');return;}
+  if(!window.jspdf||!window.jspdf.jsPDF){alert('PDF wird geladen... Bitte kurz warten.');return;}
+  const vonDate=new Date(von), bisDate=new Date(bis);
+  let tage=0, tmpD=new Date(vonDate);
+  while(tmpD<=bisDate){if(tmpD.getDay()>0&&tmpD.getDay()<6)tage++;tmpD.setDate(tmpD.getDate()+1);}
+  const vonStr=von.split('-').reverse().join('.'), bisStr=bis.split('-').reverse().join('.');
+  const loopD=new Date(vonDate);
+  while(loopD<=bisDate){
+    if(loopD.getDay()>0&&loopD.getDay()<6){const dKey=fmt(loopD);userData[dKey]='Urlaub';userTimes[dKey]={start:'08:00',pause:'01:00',end:'17:00',hours:'08:00'};}
+    loopD.setDate(loopD.getDate()+1);
   }
-
-  // Count urlaub for the year of Von date
-  var urlaubYear = vonDate.getFullYear();
-  var urlaubGenommen = 0;
-  var yearPrefix = String(urlaubYear) + '-';
-  for (var key in userData) {
-    if (key.startsWith(yearPrefix) && userData[key] === 'Urlaub') urlaubGenommen++;
-  }
-  var resturlaub = 30 - urlaubGenommen;
-
-  var heute = new Date();
-  var heuteStr = String(heute.getDate()).padStart(2,'0') + '.' + String(heute.getMonth()+1).padStart(2,'0') + '.' + heute.getFullYear();
-  var ma = JSON.parse(localStorage.getItem(LS_PREFIX + 'mitarbeiter') || '{}');
-  var mailTo = document.getElementById('urlaubMailTo').value.trim() || 'info@ideal-hannover.de';
-
+  const urlaubYear=vonDate.getFullYear();
+  let urlaubGenommen=0;
+  Object.keys(userData).filter(k=>k.startsWith(String(urlaubYear)+'-')&&userData[k]==='Urlaub').forEach(()=>urlaubGenommen++);
+  const resturlaub=30-urlaubGenommen;
+  const heute=new Date();
+  const heuteStr=String(heute.getDate()).padStart(2,'0')+'.'+String(heute.getMonth()+1).padStart(2,'0')+'.'+heute.getFullYear();
+  const ma=JSON.parse(localStorage.getItem(LS_PREFIX+'mitarbeiter')||'{}');
+  const mailTo=document.getElementById('urlaubMailTo').value.trim()||'info@ideal-hannover.de';
   try {
-    var doc = new window.jspdf.jsPDF('p', 'mm', 'a4');
-    var W = 210, L = 18, R = 192, CW = R - L;
-    var y = 15;
-
-    // LOGO
-    if (logoBase64) {
-      try { doc.addImage(logoBase64, 'PNG', W/2 - 8, y, 16, 16); y += 19; } catch(e) { y += 2; }
-    }
-
-    // HEADER
-    doc.setFontSize(13); doc.setFont('helvetica','bold');
-    doc.text('Ideal Sanitaer und Heizung', W/2, y, {align:'center'}); y += 4.5;
-    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
-    doc.text('Voltmerstrasse 27a - 30165 Hannover | Tel. 0511 1627870 | info@ideal-hannover.de', W/2, y, {align:'center'}); y += 3;
-    doc.setDrawColor(80); doc.setLineWidth(0.5); doc.line(L, y, R, y); y += 7;
-
-    // TITLE
-    doc.setFontSize(15); doc.setFont('helvetica','bold');
-    doc.text('URLAUBSANTRAG', W/2, y, {align:'center'}); y += 9;
-
-    // Helpers
-    var secFn = function(t) {
-      doc.setFillColor(235,235,235); doc.rect(L, y-3, CW, 5.5, 'F');
-      doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(50);
-      doc.text(t, L+3, y+0.5); doc.setTextColor(0); y += 6;
-    };
-    var rwFn = function(lbl, val) {
-      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.text(lbl, L+2, y);
-      doc.setFont('helvetica','normal'); doc.text(String(val || ''), L+40, y);
-      doc.setDrawColor(220); doc.setLineWidth(0.1); doc.line(L, y+1.5, R, y+1.5); y += 4.5;
-    };
-
-    // MITARBEITER
+    const doc=new window.jspdf.jsPDF('p','mm','a4');
+    const W=210,L=18,R=192,CW=R-L; let y=15;
+    if(logoBase64){try{doc.addImage(logoBase64,'PNG',W/2-8,y,16,16);y+=19;}catch(e){y+=2;}}
+    doc.setFontSize(13);doc.setFont('helvetica','bold');doc.text('Ideal Sanitaer und Heizung',W/2,y,{align:'center'});y+=4.5;
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text('Voltmerstrasse 27a - 30165 Hannover | Tel. 0511 1627870 | info@ideal-hannover.de',W/2,y,{align:'center'});y+=3;
+    doc.setDrawColor(80);doc.setLineWidth(0.5);doc.line(L,y,R,y);y+=7;
+    doc.setFontSize(15);doc.setFont('helvetica','bold');doc.text('URLAUBSANTRAG',W/2,y,{align:'center'});y+=9;
+    const secFn=(t)=>{doc.setFillColor(235,235,235);doc.rect(L,y-3,CW,5.5,'F');doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(50);doc.text(t,L+3,y+0.5);doc.setTextColor(0);y+=6;};
+    const rwFn=(lbl,val)=>{doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text(lbl,L+2,y);doc.setFont('helvetica','normal');doc.text(String(val||''),L+40,y);doc.setDrawColor(220);doc.setLineWidth(0.1);doc.line(L,y+1.5,R,y+1.5);y+=4.5;};
     secFn('MITARBEITER');
-    rwFn('Name:', ma.name); rwFn('Vorname:', ma.vorname);
-    rwFn('Personal-Nr.:', ma.personalNr); rwFn('Eintrittsdatum:', ma.eintritt);
-    rwFn('Abteilung:', ma.abteilung); rwFn('Vorgesetzte/r:', ma.vorgesetzter);
-    y += 2;
-
-    // URLAUBSUEBERSICHT
-    secFn('URLAUBSUEBERSICHT');
-    rwFn('Jahresurlaub:', '30 Tage');
-    rwFn('Resturlaub:', String(resturlaub) + ' Tage');
-    y += 2;
-
-    // URLAUBSZEITRAEUME
+    rwFn('Name:',ma.name);rwFn('Vorname:',ma.vorname);rwFn('Personal-Nr.:',ma.personalNr);rwFn('Eintrittsdatum:',ma.eintritt);rwFn('Abteilung:',ma.abteilung);rwFn('Vorgesetzte/r:',ma.vorgesetzter);y+=2;
+    secFn('URLAUBSUEBERSICHT');rwFn('Jahresurlaub:','30 Tage');rwFn('Resturlaub:',resturlaub+' Tage');y+=2;
     secFn('URLAUBSZEITRAEUME');
-    doc.setFillColor(55,55,55); doc.rect(L, y-3, CW, 6, 'F');
-    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255);
-    doc.text('Von', L+3, y+0.5); doc.text('Bis', L+38, y+0.5);
-    doc.text('Anz. Tage', L+78, y+0.5); doc.text('Urlaubsart', L+110, y+0.5);
-    doc.setTextColor(0); y += 6;
-
-    doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.text(vonStr, L+3, y); doc.text(bisStr, L+38, y);
-    doc.text(String(tage), L+78, y); doc.text(String(art), L+110, y);
-    doc.setDrawColor(180); doc.rect(L, y-3, CW, 6); y += 6;
-
-    doc.setFont('helvetica','bold');
-    doc.text('Gesamt:', L+62, y); doc.text(String(tage), L+78, y);
-    doc.rect(L, y-3, CW, 6); y += 8;
-
-    // BEMERKUNGEN
-    if (bemerkung) {
-      secFn('BEMERKUNGEN');
-      doc.setFontSize(8); doc.setFont('helvetica','normal');
-      var bl = doc.splitTextToSize(String(bemerkung), CW - 6);
-      doc.text(bl, L+2, y); y += bl.length * 3.5 + 3;
-    }
-
-    // SIGNATURE
-    var sigY = Math.max(y + 18, 240);
-    if (sigY > 268) sigY = 268;
-    doc.setDrawColor(80); doc.setLineWidth(0.3);
-
-    if (savedSignatureData) {
-      try { doc.addImage(savedSignatureData, 'PNG', L+5, sigY-20, 50, 16); } catch(e) {}
-    }
-    doc.line(L, sigY, L+72, sigY);
-    doc.setFontSize(7); doc.setFont('helvetica','normal');
-    doc.text('Arbeitnehmer/in  -  ' + heuteStr, L+36, sigY+4, {align:'center'});
-    doc.line(R-72, sigY, R, sigY);
-    doc.text('Vorgesetzte/r  -  Datum', R-36, sigY+4, {align:'center'});
-
-    // SAVE DATA FIRST (before PDF download and mail)
-    saveData();
-    render();
-
-    // DOWNLOAD PDF (no print dialog, no window.open)
-    var fileName = 'Urlaubsantrag_' + vonStr.replace(/\./g, '-') + '.pdf';
-    doc.save(fileName);
-
+    doc.setFillColor(55,55,55);doc.rect(L,y-3,CW,6,'F');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(255);
+    doc.text('Von',L+3,y+0.5);doc.text('Bis',L+38,y+0.5);doc.text('Anz. Tage',L+78,y+0.5);doc.text('Urlaubsart',L+110,y+0.5);doc.setTextColor(0);y+=6;
+    doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text(vonStr,L+3,y);doc.text(bisStr,L+38,y);doc.text(String(tage),L+78,y);doc.text(String(art),L+110,y);doc.setDrawColor(180);doc.rect(L,y-3,CW,6);y+=6;
+    doc.setFont('helvetica','bold');doc.text('Gesamt:',L+62,y);doc.text(String(tage),L+78,y);doc.rect(L,y-3,CW,6);y+=8;
+    if(bemerkung){secFn('BEMERKUNGEN');doc.setFontSize(8);doc.setFont('helvetica','normal');const bl=doc.splitTextToSize(String(bemerkung),CW-6);doc.text(bl,L+2,y);y+=bl.length*3.5+3;}
+    const sigY=Math.max(y+18,240); const finalSigY=sigY>268?268:sigY;
+    doc.setDrawColor(80);doc.setLineWidth(0.3);
+    if(savedSignatureData){try{doc.addImage(savedSignatureData,'PNG',L+5,finalSigY-20,50,16);}catch(e){}}
+    doc.line(L,finalSigY,L+72,finalSigY);doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.text('Arbeitnehmer/in  -  '+heuteStr,L+36,finalSigY+4,{align:'center'});
+    doc.line(R-72,finalSigY,R,finalSigY);doc.text('Vorgesetzte/r  -  Datum',R-36,finalSigY+4,{align:'center'});
+    saveData(); render();
+    doc.save('Urlaubsantrag_'+vonStr.replace(/\./g,'-')+'.pdf');
     closeUrlaubModal();
-
-    // OPEN MAIL after short delay (window.open keeps page alive, no fetch abort)
-    setTimeout(function() {
-      var subject = 'Urlaubsantrag - ' + (ma.vorname||'') + ' ' + (ma.name||'') + ' - ' + vonStr + ' bis ' + bisStr;
-      var mailBody = 'Sehr geehrte Damen und Herren,\n\nhiermit beantrage ich Urlaub vom ' + vonStr + ' bis ' + bisStr + ' (' + tage + ' Arbeitstage).\n\nDen unterschriebenen Urlaubsantrag finden Sie im Anhang als PDF.\n\nMit freundlichen Grüßen\n' + (ma.vorname||'') + ' ' + (ma.name||'');
-      window.open('mailto:' + mailTo + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(mailBody), '_self');
-    }, 1500);
-
-  } catch(err) {
-    console.error('PDF Error:', err);
-    alert('PDF-Fehler: ' + err.message);
-  }
+    setTimeout(()=>{
+      const subject='Urlaubsantrag - '+(ma.vorname||'')+' '+(ma.name||'')+' - '+vonStr+' bis '+bisStr;
+      const mailBody='Sehr geehrte Damen und Herren,\n\nhiermit beantrage ich Urlaub vom '+vonStr+' bis '+bisStr+' ('+tage+' Arbeitstage).\n\nDen unterschriebenen Urlaubsantrag finden Sie im Anhang als PDF.\n\nMit freundlichen Grüßen\n'+(ma.vorname||'')+' '+(ma.name||'');
+      window.open('mailto:'+mailTo+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(mailBody),'_self');
+    },1500);
+  } catch(err){console.error('PDF Error:',err);alert('PDF-Fehler: '+err.message);}
 }
-let scannedEntries = [];
-function openPhotoScan() { document.getElementById('photoModal').classList.add('open'); document.getElementById('photoPreviewArea').style.display = 'none'; document.getElementById('scanResult').style.display = 'none'; document.getElementById('scanLoading').style.display = 'none'; scannedEntries = []; }
-function closePhotoModal() { document.getElementById('photoModal').classList.remove('open'); }
-function closeDatenModal() { document.getElementById('datenModal').classList.remove('open'); }
 
-async function onPhotoSelected(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    document.getElementById('photoPreview').src = e.target.result;
-    document.getElementById('photoPreviewArea').style.display = 'block';
-    document.getElementById('scanResult').style.display = 'none';
-    document.getElementById('scanLoading').style.display = 'block';
-    const base64 = e.target.result.split(',')[1];
-    const mediaType = file.type || 'image/jpeg';
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500,
-          messages: [{role:'user', content:[
-            {type:'image', source:{type:'base64', media_type:mediaType, data:base64}},
-            {type:'text', text:`Dies ist eine Arbeitszeiterfassung. Gib nur ein JSON-Array zurück, nichts anderes:
-[{"date":"YYYY-MM-DD","status":"Arbeiten","start":"HH:MM","pause":"HH:MM","end":"HH:MM","hours":"HH:MM"}]
-Status: Arbeiten/Urlaub/Krank/Feiertag/Notdienst/Frei.`}
+// ===== PHOTO SCAN =====
+let scannedEntries=[];
+function openPhotoScan(){
+  document.getElementById('photoModal').classList.add('open');
+  document.getElementById('photoPreviewArea').style.display='none';
+  document.getElementById('scanResult').style.display='none';
+  document.getElementById('scanLoading').style.display='none';
+  scannedEntries=[];
+}
+function closePhotoModal(){document.getElementById('photoModal').classList.remove('open');}
+
+async function onPhotoSelected(event){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    document.getElementById('photoPreview').src=e.target.result;
+    document.getElementById('photoPreviewArea').style.display='block';
+    document.getElementById('scanResult').style.display='none';
+    document.getElementById('scanLoading').style.display='block';
+    const base64=e.target.result.split(',')[1];
+    try{
+      const response=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:base64}},
+            {type:'text',text:'Dies ist eine Arbeitszeiterfassung. Gib nur ein JSON-Array zurück:\n[{"date":"YYYY-MM-DD","status":"Arbeiten","start":"HH:MM","pause":"HH:MM","end":"HH:MM","hours":"HH:MM"}]\nStatus: Arbeiten/Urlaub/Krank/Feiertag/Notdienst/Frei.'}
           ]}]
         })
       });
-      const data = await response.json();
-      const text = data.content?.map(i=>i.text||'').join('') || '';
-      document.getElementById('scanLoading').style.display = 'none';
-      try {
-        scannedEntries = JSON.parse(text.replace(/```json|```/g,'').trim());
-        document.getElementById('scanResultText').textContent = scannedEntries.map(e=>`${e.date}  ${e.status}${e.start?`  ${e.start}→${e.end}`:''}`).join('\n');
-        document.getElementById('applyBtn').style.display = scannedEntries.length>0?'block':'none';
-      } catch { document.getElementById('scanResultText').textContent = text || 'Fehler.'; document.getElementById('applyBtn').style.display = 'none'; }
-      document.getElementById('scanResult').style.display = 'block';
-    } catch(err) {
-      document.getElementById('scanLoading').style.display = 'none';
-      document.getElementById('scanResultText').textContent = 'Fehler: '+err.message;
-      document.getElementById('applyBtn').style.display = 'none';
-      document.getElementById('scanResult').style.display = 'block';
+      const data=await response.json();
+      const text=data.content?.map(i=>i.text||'').join('')||'';
+      document.getElementById('scanLoading').style.display='none';
+      try{
+        scannedEntries=JSON.parse(text.replace(/```json|```/g,'').trim());
+        document.getElementById('scanResultText').textContent=scannedEntries.map(e=>`${e.date}  ${e.status}${e.start?`  ${e.start}→${e.end}`:''}`).join('\n');
+        document.getElementById('applyBtn').style.display=scannedEntries.length>0?'block':'none';
+      } catch{document.getElementById('scanResultText').textContent=text||'Fehler.';document.getElementById('applyBtn').style.display='none';}
+      document.getElementById('scanResult').style.display='block';
+    } catch(err){
+      document.getElementById('scanLoading').style.display='none';
+      document.getElementById('scanResultText').textContent='Fehler: '+err.message;
+      document.getElementById('applyBtn').style.display='none';
+      document.getElementById('scanResult').style.display='block';
     }
   };
   reader.readAsDataURL(file);
 }
-function applyScanResult() {
-  let count = 0;
-  scannedEntries.forEach(e => { if (!e.date) return; userData[e.date] = e.status; if (e.status !== 'Frei' && e.start) userTimes[e.date] = {start:e.start, pause:e.pause||'01:00', end:e.end, hours:e.hours}; count++; });
-  saveData(); closePhotoModal(); render();
-  setTimeout(()=>alert(`✅ ${count} Tage übertragen!`), 200);
+function applyScanResult(){
+  let count=0;
+  scannedEntries.forEach(e=>{if(!e.date)return;userData[e.date]=e.status;if(e.status!=='Frei'&&e.start)userTimes[e.date]={start:e.start,pause:e.pause||'01:00',end:e.end,hours:e.hours};count++;});
+  saveData();closePhotoModal();render();
+  setTimeout(()=>alert(`✅ ${count} Tage übertragen!`),200);
 }
 
-function exportAndSave() { saveData(); alert('💾 Daten gespeichert ✓'); }
-
-function exportData() {
-  const data = { userData, userTimes, userNotes, userNotdienst, exportDate: new Date().toISOString() };
-  const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url;
-  a.download = `arbeitszeit_backup_${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(url);
+// ===== IMPORT / EXPORT =====
+function exportData(){
+  const data={userData,userTimes,userNotes,userNotdienst,exportDate:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`arbeitszeit_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
 }
-
-function importData(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.userData) userData = data.userData;
-      if (data.userTimes) userTimes = data.userTimes;
-      if (data.userNotes) userNotes = data.userNotes;
-      if (data.userNotdienst) userNotdienst = data.userNotdienst;
-      saveData(); render(); alert('✅ Daten erfolgreich geladen!');
-    } catch { alert('❌ Datei konnte nicht gelesen werden!'); }
-    event.target.value = '';
+function importData(event){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.userData) userData=data.userData;
+      if(data.userTimes) userTimes=data.userTimes;
+      if(data.userNotes) userNotes=data.userNotes;
+      if(data.userNotdienst) userNotdienst=data.userNotdienst;
+      saveData();render();alert('✅ Daten erfolgreich geladen!');
+    } catch{alert('❌ Datei konnte nicht gelesen werden!');}
+    event.target.value='';
   };
   reader.readAsText(file);
 }
 
-function initApp() {
-  document.getElementById('datenModal').addEventListener('click', function(e){if(e.target===this)closeDatenModal();});
-  document.getElementById('berichtModal').addEventListener('click', function(e){if(e.target===this)closeBericht();});
-  document.getElementById('urlaubModal').addEventListener('click', function(e){if(e.target===this)closeUrlaubModal();});
-  document.getElementById('photoModal').addEventListener('click', function(e){if(e.target===this)closePhotoModal();});
-  document.getElementById('entryModal').addEventListener('click', function(e){if(e.target===this)closeModal();});
-  document.getElementById('ndStart').addEventListener('change', updateNdCalc);
-  document.getElementById('ndEnd').addEventListener('change', updateNdCalc);
-  document.getElementById('notdienstModal').addEventListener('click', function(e){if(e.target===this)closeNotdienst();});
-  document.getElementById('entryStart').addEventListener('change', updateCalc);
-  document.getElementById('entryPause').addEventListener('change', updateCalc);
-  document.getElementById('entryEnd').addEventListener('change', updateCalc);
+// ===== INIT =====
+function initApp(){
+  // Modal dışına tıklamada kapat
+  ['datenModal','berichtModal','urlaubModal','photoModal','entryModal','notdienstModal'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('click',function(e){if(e.target===this) this.classList.remove('open');});
+  });
+  document.getElementById('ndStart').addEventListener('change',updateNdCalc);
+  document.getElementById('ndEnd').addEventListener('change',updateNdCalc);
+  document.getElementById('entryStart').addEventListener('change',updateCalc);
+  document.getElementById('entryPause').addEventListener('change',updateCalc);
+  document.getElementById('entryEnd').addEventListener('change',updateCalc);
   initSignatureCanvas();
   render();
-  if (CURRENT_USER !== 'default') {
-    document.getElementById('logoText').textContent = '🔒 ' + CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
-  }
-  // Cloud sync — merge strategy (local changes preserved when offline)
-  (async () => {
-    try {
-      var hasPending = localStorage.getItem(LS_PREFIX + 'pendingSync');
-      if (hasPending) {
-        console.log('Pending sync found, pushing local data to cloud first...');
-        await sbSave({ userData, userTimes, userNotes, userNotdienst });
-      }
-      const cloud = await sbLoad();
-      if (cloud && (cloud.userData || cloud.userTimes)) {
-        console.log('Cloud data found, merging...');
-        const mergedData = Object.assign({}, cloud.userData || {}, userData);
-        const mergedTimes = Object.assign({}, cloud.userTimes || {}, userTimes);
-        const mergedNotes = Object.assign({}, cloud.userNotes || {}, userNotes);
-        const mergedNd = Object.assign({}, cloud.userNotdienst || {}, userNotdienst);
-        userData = mergedData;
-        userTimes = mergedTimes;
-        userNotes = mergedNotes;
-        userNotdienst = mergedNd;
-        localStorage.setItem(LS_PREFIX + 'data', JSON.stringify(userData));
-        localStorage.setItem(LS_PREFIX + 'times', JSON.stringify(userTimes));
-        localStorage.setItem(LS_PREFIX + 'notes', JSON.stringify(userNotes));
-        localStorage.setItem(LS_PREFIX + 'notdienst', JSON.stringify(userNotdienst));
-        sbSave({ userData, userTimes, userNotes, userNotdienst });
+  if(CURRENT_USER!=='default') document.getElementById('logoText').textContent='🔒 '+CURRENT_USER.charAt(0).toUpperCase()+CURRENT_USER.slice(1);
+
+  // Cloud sync
+  (async()=>{
+    try{
+      const hasPending=localStorage.getItem(LS_PREFIX+'pendingSync');
+      if(hasPending) await sbSave({userData,userTimes,userNotes,userNotdienst});
+      const cloud=await sbLoad();
+      if(cloud&&(cloud.userData||cloud.userTimes)){
+        userData=Object.assign({},cloud.userData||{},userData);
+        userTimes=Object.assign({},cloud.userTimes||{},userTimes);
+        userNotes=Object.assign({},cloud.userNotes||{},userNotes);
+        userNotdienst=Object.assign({},cloud.userNotdienst||{},userNotdienst);
+        localStorage.setItem(LS_PREFIX+'data',JSON.stringify(userData));
+        localStorage.setItem(LS_PREFIX+'times',JSON.stringify(userTimes));
+        localStorage.setItem(LS_PREFIX+'notes',JSON.stringify(userNotes));
+        localStorage.setItem(LS_PREFIX+'notdienst',JSON.stringify(userNotdienst));
+        sbSave({userData,userTimes,userNotes,userNotdienst});
         render();
-        showSync('synced', '☁️ Synchronisiert ✓');
+        showSync('synced','☁️ Synchronisiert ✓');
       } else {
-        const hasLocal = Object.keys(userData).length > 0 || Object.keys(userTimes).length > 0;
-        if (hasLocal) sbSave({ userData, userTimes, userNotes, userNotdienst });
-        showSync('synced', '☁️ Verbunden ✓');
+        if(Object.keys(userData).length>0||Object.keys(userTimes).length>0) sbSave({userData,userTimes,userNotes,userNotdienst});
+        showSync('synced','☁️ Verbunden ✓');
       }
-    } catch(e) { console.error('Sync error:', e); showSync('error', '⚠️ Offline'); }
+    } catch(e){showSync('error','⚠️ Offline');}
   })();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  checkAuth();
-});
+document.addEventListener('DOMContentLoaded',function(){checkAuth();});
 </script>
 </body>
 </html>
