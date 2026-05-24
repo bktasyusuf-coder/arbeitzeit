@@ -1165,7 +1165,13 @@ function minsToTime(m) {
 }
 function calcWorkHours(start,pause,end) {
   if(!start||!end) return '';
-  const mins=timeToMins(end)-timeToMins(start)-timeToMins(pause||'00:00');
+  const startMin=timeToMins(start);
+  const endMin=timeToMins(end);
+  const pauseMin=timeToMins(pause||'00:00');
+  // Overnight: wenn Ende vor Anfang liegt (z.B. 22:00→06:00), +24h
+  let mins = endMin < startMin
+    ? (endMin + 24*60) - startMin - pauseMin
+    : endMin - startMin - pauseMin;
   return mins<0?'':minsToTime(mins);
 }
 function getMitarbeiterName() {
@@ -1272,13 +1278,21 @@ function calcSV(monthBrutto, hatKinder) {
   return { rv, av, kv, pv, total: rv+av+kv+pv };
 }
 
+// Vorsorgepauschale (jährlich) — RV 100% AN-Anteil + KV/PV-Anteile
+function calcVorsorgePauschale(monthBrutto, hatKinder) {
+  const BBG_KV = 5175, BBG_RV = 7550;
+  const vRv = Math.min(monthBrutto, BBG_RV) * 0.093 * 12;
+  const vKv = Math.min(monthBrutto, BBG_KV) * (0.073 + 0.0085) * 12;
+  const vPv = Math.min(monthBrutto, BBG_KV) * (hatKinder ? 0.017 : 0.0235) * 12;
+  return vRv + vKv + vPv;
+}
+
 function calcLohnsteuerMonat(monthBrutto, stk, hatKinder) {
   if(monthBrutto <= 0) return 0;
   const annual = monthBrutto * 12;
   const arbeitnehmerPB = 1230;
   const sonderPB = 36;
-  const sv = calcSV(monthBrutto, hatKinder).total * 12;
-  const vorsorge = Math.min(sv, annual * 0.12);
+  const vorsorge = calcVorsorgePauschale(monthBrutto, hatKinder);
   let st = 0;
   switch(stk) {
     case 'I':
@@ -1296,11 +1310,12 @@ function calcLohnsteuerMonat(monthBrutto, stk, hatKinder) {
     }
     case 'V': {
       const zvE = Math.max(0, annual - arbeitnehmerPB - sonderPB - vorsorge);
-      st = estGrundtabelle(zvE + 11604) * 1.05; break;
+      st = estGrundtabelle(zvE + 11604) * 1.20; break;
     }
     case 'VI': {
-      const zvE = Math.max(0, annual);
-      st = estGrundtabelle(zvE + 11604) * 1.1; break;
+      // Klasse VI: kein Werbungskostenpauschbetrag, aber Vorsorge zählt
+      const zvE = Math.max(0, annual - vorsorge);
+      st = estGrundtabelle(zvE + 11604) * 1.15; break;
     }
   }
   return Math.max(0, st / 12);
