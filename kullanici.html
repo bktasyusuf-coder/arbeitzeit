@@ -307,6 +307,136 @@
   .lohn-row .bar-fill { height:100%; background:linear-gradient(90deg, var(--green), var(--accent)); transition:width 0.4s; }
   .lohn-row .base { text-align:right; color:var(--text); }
   .lohn-row .total { text-align:right; color:var(--green); font-weight:500; }
+
+  /* ===== LOHN TAB — Professional Layout ===== */
+  .lohn-tab { padding:14px 16px 110px; }
+  .lohn-hero {
+    background:linear-gradient(135deg, rgba(52,211,153,0.18) 0%, rgba(124,106,247,0.10) 100%);
+    border:1px solid var(--green);
+    border-radius:18px; padding:22px 18px; margin-bottom:14px;
+    position:relative; overflow:hidden;
+  }
+  .lohn-hero::after {
+    content:''; position:absolute; top:-40px; right:-40px; width:140px; height:140px;
+    background:radial-gradient(circle, rgba(52,211,153,0.18), transparent 70%); pointer-events:none;
+  }
+  .lohn-hero-period {
+    font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;
+    letter-spacing:0.1em; margin-bottom:4px;
+  }
+  .lohn-hero-month {
+    font-size:18px; font-weight:800; color:var(--text); margin-bottom:14px;
+  }
+  .lohn-hero-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .lohn-hero-cell .lbl {
+    font-size:9px; color:var(--muted); font-weight:700; text-transform:uppercase;
+    letter-spacing:0.08em; margin-bottom:3px;
+  }
+  .lohn-hero-cell .val {
+    font-family:'DM Mono',monospace; font-weight:500;
+  }
+  .lohn-hero-cell.brutto .val { font-size:17px; color:var(--text); opacity:0.85; }
+  .lohn-hero-cell.netto .val { font-size:26px; color:var(--green); }
+  .lohn-hero-divider {
+    height:1px; background:linear-gradient(90deg, transparent, var(--border), transparent);
+    margin:14px 0 10px;
+  }
+  .lohn-hero-foot {
+    display:flex; justify-content:space-between; font-size:10px; color:var(--muted);
+    font-family:'DM Mono',monospace;
+  }
+
+  .lohn-section {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:14px; margin-bottom:12px;
+  }
+  .lohn-section-title {
+    font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;
+    letter-spacing:0.1em; margin-bottom:12px; display:flex; align-items:center;
+    justify-content:space-between;
+  }
+  .lohn-line {
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:7px 0; font-family:'DM Mono',monospace; font-size:13px;
+    border-bottom:1px solid rgba(46,46,61,0.4);
+  }
+  .lohn-line:last-child { border-bottom:none; }
+  .lohn-line .lbl-wrap { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+  .lohn-line .lbl { color:var(--text); font-weight:500; }
+  .lohn-line .sub { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .lohn-line .amount { color:var(--text); font-weight:500; flex-shrink:0; margin-left:10px; }
+  .lohn-line.indent { padding-left:14px; }
+  .lohn-line.indent .lbl { font-size:11px; color:var(--muted); font-weight:400; }
+  .lohn-line.indent .amount { font-size:11px; color:var(--muted); font-weight:400; }
+  .lohn-line.subtotal { border-top:1px solid var(--border); border-bottom:none;
+    padding-top:10px; margin-top:4px; font-weight:700; }
+  .lohn-line.subtotal .lbl { font-weight:700; }
+  .lohn-line.positive .amount { color:var(--green); }
+  .lohn-line.negative .amount { color:var(--red); }
+  .lohn-line.notdienst .amount { color:var(--orange); }
+
+  .lohn-tax-badge {
+    background:var(--surface2); border:1px solid var(--border);
+    padding:3px 8px; border-radius:6px; font-size:10px;
+    color:var(--accent2); font-family:'DM Mono',monospace; cursor:pointer;
+  }
+
+  .lohn-year-bar {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:8px 12px; margin-bottom:6px; cursor:pointer;
+    transition:all 0.15s;
+  }
+  .lohn-year-bar:active { transform:scale(0.99); }
+  .lohn-year-bar.current { background:var(--surface2); border-color:var(--accent); }
+  .lohn-year-bar-top {
+    display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;
+  }
+  .lohn-year-bar-month { font-size:12px; font-weight:700; }
+  .lohn-year-bar-netto { font-family:'DM Mono',monospace; font-size:13px; color:var(--green); font-weight:500; }
+  .lohn-year-bar-bg { background:var(--surface2); border-radius:3px; height:5px; overflow:hidden; }
+  .lohn-year-bar-fill { height:100%; background:linear-gradient(90deg,var(--green),var(--accent2)); }
+  .lohn-year-bar-foot {
+    display:flex; justify-content:space-between; margin-top:4px;
+    font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
+  }
+
+  /* Steuerklasse seçim butonları */
+  .stk-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; }
+  .stk-btn {
+    background:var(--surface2); border:1px solid var(--border); color:var(--muted);
+    padding:10px 6px; border-radius:8px; font-family:'Syne',sans-serif;
+    font-weight:700; cursor:pointer; transition:all 0.15s;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  .stk-btn .rom { font-size:14px; }
+  .stk-btn .desc { font-size:9px; font-weight:500; text-align:center; line-height:1.2; }
+  .stk-btn.active {
+    background:rgba(124,106,247,0.15); border-color:var(--accent); color:var(--accent2);
+  }
+
+  /* Tax mode toggle */
+  .tax-mode-toggle { display:flex; gap:6px; margin-bottom:14px; }
+  .tax-mode-btn {
+    flex:1; padding:9px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface2); color:var(--muted); font-family:'Syne',sans-serif;
+    font-size:11px; font-weight:700; cursor:pointer;
+  }
+  .tax-mode-btn.active { background:var(--accent); border-color:var(--accent); color:white; }
+
+  /* Bottom nav 6 buttons - daha kompakt */
+  .bottom-nav .bnav-btn { padding:8px 2px; font-size:9px; }
+  .bottom-nav .bnav-btn .bnav-icon { font-size:15px; }
+
+  /* Yıllık haftalık Notdienst */
+  .nd-year-week-row {
+    display:grid; grid-template-columns:36px 50px 1fr 80px 70px; gap:6px;
+    align-items:center; padding:6px 0;
+    border-bottom:1px solid rgba(46,46,61,0.4);
+    font-family:'DM Mono',monospace; font-size:11px;
+  }
+  .nd-year-week-row:last-child { border-bottom:none; }
+  .nd-year-week-row .mo { color:var(--muted); font-weight:500; font-size:10px; }
+  .nd-year-week-row .kw { color:var(--text); font-weight:500; }
 </style>
 <script src="https://bktasyusuf-coder.github.io/arbeitzeit/jspdf.min.js"></script>
 </head>
@@ -366,10 +496,13 @@
 </div>
 
 <div id="mainView" style="display:none">
-  <div class="summary" id="summaryCards"></div>
-  <div id="ndWeeklySection"></div>
+  <div id="summaryWrap">
+    <div class="summary" id="summaryCards"></div>
+    <div id="ndWeeklySection"></div>
+  </div>
   <div id="daysTab" class="day-list"></div>
   <div id="jahresTab" class="year-summary-view" style="display:none"></div>
+  <div id="lohnTab" class="lohn-tab" style="display:none"></div>
 </div>
 
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none;position:fixed;bottom:80px;right:16px;z-index:150;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;color:white;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:opacity 0.3s">↑</button>
@@ -377,7 +510,8 @@
 <div class="bottom-nav" id="bottomNav" style="display:none">
   <button class="bnav-btn active" id="bnav-tage" onclick="showTage()"><span class="bnav-icon">📅</span>Tage</button>
   <button class="bnav-btn" id="bnav-jahres" onclick="showJahres()"><span class="bnav-icon">📊</span>Jahr</button>
-  <button class="bnav-btn" onclick="openPhotoScan()"><span class="bnav-icon">📷</span>Scannen</button>
+  <button class="bnav-btn" id="bnav-lohn" onclick="showLohn()"><span class="bnav-icon">💰</span>Lohn</button>
+  <button class="bnav-btn" onclick="openPhotoScan()"><span class="bnav-icon">📷</span>Scan</button>
   <button class="bnav-btn" onclick="openUrlaubModal()"><span class="bnav-icon">🏖</span>Urlaub</button>
   <button class="bnav-btn" onclick="document.getElementById('importInput').click()">
     <span class="bnav-icon">📥</span>Import
@@ -593,41 +727,92 @@
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title" style="color:var(--green)">💰 Lohn-Einstellungen</div>
-      <div class="form-group">
-        <label class="form-label">Stundenlohn (normal)</label>
-        <div class="input-with-unit">
-          <input type="number" step="0.01" min="0" class="form-input" id="setStundenlohn" placeholder="18.00" oninput="onStundenlohnChange()">
-          <span class="unit">€/Std</span>
+      <div class="settings-section-title" style="color:var(--green)">💰 Stundenlohn</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Normal</label>
+          <div class="input-with-unit">
+            <input type="number" step="0.01" min="0" class="form-input" id="setStundenlohn" placeholder="18.00" oninput="onStundenlohnChange()">
+            <span class="unit">€</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notdienst</label>
+          <div class="input-with-unit">
+            <input type="number" step="0.01" min="0" class="form-input" id="setNdStundenlohn" placeholder="22.50">
+            <span class="unit">€</span>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Stundenlohn Notdienst</label>
-        <div class="input-with-unit">
-          <input type="number" step="0.01" min="0" class="form-input" id="setNdStundenlohn" placeholder="22.50">
-          <span class="unit">€/Std</span>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Notdienst-Pauschale</label>
+          <div class="input-with-unit">
+            <input type="number" step="0.01" min="0" class="form-input" id="setNdPauschale" placeholder="0.00">
+            <span class="unit">€</span>
+          </div>
         </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">Inkl. Zuschlag für Notdienst-Stunden</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notdienst-Pauschale je Einsatz</label>
-        <div class="input-with-unit">
-          <input type="number" step="0.01" min="0" class="form-input" id="setNdPauschale" placeholder="0.00">
-          <span class="unit">€</span>
+        <div class="form-group">
+          <label class="form-label">Soll-Std/Monat</label>
+          <div class="input-with-unit">
+            <input type="number" step="1" min="1" class="form-input" id="setSollStd" placeholder="174">
+            <span class="unit">Std</span>
+          </div>
         </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">Optional, falls pro Notdienst eine Pauschale gezahlt wird</div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Soll-Stunden pro Monat</label>
-        <div class="input-with-unit">
-          <input type="number" step="1" min="1" class="form-input" id="setSollStd" placeholder="174">
-          <span class="unit">Std</span>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title" style="color:var(--accent2)">📊 Steuer & Sozialversicherung</div>
+
+      <div class="tax-mode-toggle">
+        <button type="button" class="tax-mode-btn" id="taxModeAuto" onclick="setTaxMode('auto')">🇩🇪 Steuerklasse</button>
+        <button type="button" class="tax-mode-btn" id="taxModeManual" onclick="setTaxMode('manual')">✏️ Manuell %</button>
+      </div>
+
+      <div id="taxAutoArea">
+        <label class="form-label">Steuerklasse</label>
+        <div class="stk-grid" style="margin-bottom:14px">
+          <button type="button" class="stk-btn" data-stk="I" onclick="selectStk('I')"><span class="rom">I</span><span class="desc">Ledig</span></button>
+          <button type="button" class="stk-btn" data-stk="II" onclick="selectStk('II')"><span class="rom">II</span><span class="desc">Allein-erziehend</span></button>
+          <button type="button" class="stk-btn" data-stk="III" onclick="selectStk('III')"><span class="rom">III</span><span class="desc">Verh. höher</span></button>
+          <button type="button" class="stk-btn" data-stk="IV" onclick="selectStk('IV')"><span class="rom">IV</span><span class="desc">Verh. gleich</span></button>
+          <button type="button" class="stk-btn" data-stk="V" onclick="selectStk('V')"><span class="rom">V</span><span class="desc">Verh. niedriger</span></button>
+          <button type="button" class="stk-btn" data-stk="VI" onclick="selectStk('VI')"><span class="rom">VI</span><span class="desc">2. Job</span></button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kirchensteuer</label>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="stk-btn" data-ks="0" onclick="selectKs(0)" style="flex:1;flex-direction:row;justify-content:center"><span style="font-size:11px">Keine</span></button>
+            <button type="button" class="stk-btn" data-ks="0.08" onclick="selectKs(0.08)" style="flex:1;flex-direction:row;justify-content:center"><span style="font-size:11px">8% (BW, BY)</span></button>
+            <button type="button" class="stk-btn" data-ks="0.09" onclick="selectKs(0.09)" style="flex:1;flex-direction:row;justify-content:center"><span style="font-size:11px">9% (übrige)</span></button>
+          </div>
+        </div>
+
+        <div class="form-group" style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:0">
+          <input type="checkbox" id="setHatKinder" style="width:18px;height:18px;cursor:pointer;accent-color:var(--accent)">
+          <label for="setHatKinder" style="font-size:12px;cursor:pointer;flex:1">
+            <b>Kind(er) im Haushalt</b>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">Reduziert Pflegeversicherungsbeitrag</div>
+          </label>
+        </div>
+      </div>
+
+      <div id="taxManualArea" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Gesamt-Abzug</label>
+          <div class="input-with-unit">
+            <input type="number" step="0.5" min="0" max="60" class="form-input" id="setManuellAbzug" placeholder="28">
+            <span class="unit">%</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Fester Prozentsatz vom Brutto (z.B. von letzter Lohnabrechnung)</div>
         </div>
       </div>
     </div>
 
     <div style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--blue);line-height:1.5">
-      💡 <b>Tipp:</b> Der Notdienst-Stundenlohn ist meist 20–30% höher als der normale Lohn. Die Brutto-Lohnberechnung ist eine Schätzung und ersetzt nicht die offizielle Gehaltsabrechnung.
+      💡 <b>Hinweis:</b> Netto-Berechnung nach EStG §32a (vereinfacht). SV-Sätze 2024. Geschätzte Werte — keine Rechtsverbindlichkeit.
     </div>
 
     <button class="save-btn" onclick="saveSettings()">💾 Speichern</button>
@@ -921,7 +1106,11 @@ let userData    = JSON.parse(localStorage.getItem(LS_PREFIX+'data')||'{}');
 let userTimes   = JSON.parse(localStorage.getItem(LS_PREFIX+'times')||'{}');
 let userNotes   = JSON.parse(localStorage.getItem(LS_PREFIX+'notes')||'{}');
 let userNotdienst = JSON.parse(localStorage.getItem(LS_PREFIX+'notdienst')||'{}');
-const DEFAULT_SALARY = { stundenlohn:18.00, ndStundenlohn:22.50, ndPauschale:0, sollStd:174 };
+const DEFAULT_SALARY = {
+  stundenlohn:18.00, ndStundenlohn:22.50, ndPauschale:0, sollStd:174,
+  taxMode:'auto', steuerklasse:'I', kirchensteuer:0, hatKinder:false,
+  manuellAbzug:28
+};
 let userSalary  = Object.assign({}, DEFAULT_SALARY, JSON.parse(localStorage.getItem(LS_PREFIX+'salary')||'{}'));
 let ndWeeklyCollapsed = localStorage.getItem(LS_PREFIX+'ndCollapsed')==='1';
 
@@ -1030,15 +1219,123 @@ function calcMonthStats(year, month) {
   return {workedMins,diffMins:workedMins-sollMinsCustom,urlaub,krank,feiertage,notdienst,arbeitstage,standardMins:sollMinsCustom};
 }
 
-// ===== Salary calculation =====
+// ===== Salary / Tax / SV (Deutschland, vereinfacht) =====
+const STK_LABEL = {
+  'I':'Klasse I (Ledig)','II':'Klasse II (Alleinerz.)',
+  'III':'Klasse III (Verh., höher)','IV':'Klasse IV (Verh., gleich)',
+  'V':'Klasse V (Verh., niedriger)','VI':'Klasse VI (Nebenjob)'
+};
+
 function calcMonthSalary(year, month) {
   const stats = calcMonthStats(year, month);
   const ndMins = calcNotdienstMins(year, month);
   const baseHours = stats.workedMins / 60;
   const ndHours = ndMins / 60;
   const baseLohn = baseHours * (userSalary.stundenlohn||0);
-  const ndLohn = ndHours * (userSalary.ndStundenlohn||0) + stats.notdienst * (userSalary.ndPauschale||0);
-  return {baseHours, ndHours, baseLohn, ndLohn, gesamt: baseLohn + ndLohn, ndCount: stats.notdienst};
+  const ndLohnZeit = ndHours * (userSalary.ndStundenlohn||0);
+  const ndPauschaleTotal = stats.notdienst * (userSalary.ndPauschale||0);
+  const ndLohn = ndLohnZeit + ndPauschaleTotal;
+  const brutto = baseLohn + ndLohn;
+  const netto = calcNettoFromBrutto(brutto);
+  return {
+    baseHours, ndHours, baseLohn, ndLohn, ndLohnZeit, ndPauschaleTotal,
+    gesamt: brutto, brutto, netto: netto.netto, abzuege: netto.abzuege,
+    ndCount: stats.notdienst
+  };
+}
+
+// 2024 EStG §32a Grundtabelle (Jahres-ESt)
+function estGrundtabelle(zvE) {
+  if(zvE <= 11604) return 0;
+  if(zvE <= 17005) {
+    const y = (zvE - 11604) / 10000;
+    return Math.round((922.98 * y + 1400) * y);
+  }
+  if(zvE <= 66760) {
+    const y = (zvE - 17005) / 10000;
+    return Math.round((181.19 * y + 2397) * y + 1025.38);
+  }
+  if(zvE <= 277825) return Math.round(0.42 * zvE - 10602.13);
+  return Math.round(0.45 * zvE - 18936.88);
+}
+
+// SV-Beiträge (Arbeitnehmer-Anteil, 2024)
+function calcSV(monthBrutto, hatKinder) {
+  const BBG_KV = 5175;  // monatlich (West)
+  const BBG_RV = 7550;
+  const kvBase = Math.min(monthBrutto, BBG_KV);
+  const rvBase = Math.min(monthBrutto, BBG_RV);
+  const rv = rvBase * 0.093;            // 9,3%
+  const av = rvBase * 0.013;            // 1,3%
+  const kv = kvBase * (0.073 + 0.0085); // 7,3% + Ø Zusatz/2
+  const pv = kvBase * (hatKinder ? 0.017 : 0.0235); // mit/ohne Kind
+  return { rv, av, kv, pv, total: rv+av+kv+pv };
+}
+
+function calcLohnsteuerMonat(monthBrutto, stk, hatKinder) {
+  if(monthBrutto <= 0) return 0;
+  const annual = monthBrutto * 12;
+  const arbeitnehmerPB = 1230;
+  const sonderPB = 36;
+  const sv = calcSV(monthBrutto, hatKinder).total * 12;
+  const vorsorge = Math.min(sv, annual * 0.12);
+  let st = 0;
+  switch(stk) {
+    case 'I':
+    case 'IV': {
+      const zvE = Math.max(0, annual - arbeitnehmerPB - sonderPB - vorsorge);
+      st = estGrundtabelle(zvE); break;
+    }
+    case 'II': {
+      const zvE = Math.max(0, annual - arbeitnehmerPB - sonderPB - vorsorge - 4260);
+      st = estGrundtabelle(zvE); break;
+    }
+    case 'III': {
+      const zvE = Math.max(0, annual - arbeitnehmerPB - sonderPB - vorsorge);
+      st = estGrundtabelle(zvE/2) * 2; break;
+    }
+    case 'V': {
+      const zvE = Math.max(0, annual - arbeitnehmerPB - sonderPB - vorsorge);
+      st = estGrundtabelle(zvE + 11604) * 1.05; break;
+    }
+    case 'VI': {
+      const zvE = Math.max(0, annual);
+      st = estGrundtabelle(zvE + 11604) * 1.1; break;
+    }
+  }
+  return Math.max(0, st / 12);
+}
+
+function calcSoliMonat(lohnsteuerMonat, stk) {
+  const lstYear = lohnsteuerMonat * 12;
+  const grenze = (stk === 'III') ? 36260 : 18130;
+  if(lstYear <= grenze) return 0;
+  const max = lstYear * 0.055;
+  const milder = (lstYear - grenze) * 0.119;
+  return Math.min(milder, max) / 12;
+}
+
+function calcNettoFromBrutto(monthBrutto) {
+  if(monthBrutto <= 0) {
+    return { netto:0, abzuege:{ gesamt:0, lohnsteuer:0, soli:0, kirchensteuer:0, rv:0, av:0, kv:0, pv:0, sv:0 } };
+  }
+  if(userSalary.taxMode === 'manual') {
+    const pct = (userSalary.manuellAbzug || 0) / 100;
+    const abzug = monthBrutto * pct;
+    return { netto: monthBrutto - abzug, abzuege: { gesamt: abzug, manuellProzent: userSalary.manuellAbzug, manuell:true } };
+  }
+  const stk = userSalary.steuerklasse || 'I';
+  const hatKinder = !!userSalary.hatKinder;
+  const sv = calcSV(monthBrutto, hatKinder);
+  const lst = calcLohnsteuerMonat(monthBrutto, stk, hatKinder);
+  const soli = calcSoliMonat(lst, stk);
+  const ks = lst * (userSalary.kirchensteuer || 0);
+  const gesamt = sv.total + lst + soli + ks;
+  return {
+    netto: monthBrutto - gesamt,
+    abzuege: { gesamt, lohnsteuer:lst, soli, kirchensteuer:ks,
+      rv:sv.rv, av:sv.av, kv:sv.kv, pv:sv.pv, sv:sv.total }
+  };
 }
 
 function calcNotdienstMins(year, month) {
@@ -1107,14 +1404,12 @@ function render() {
   document.getElementById('monthTitle').textContent = MONTHS[currentMonth];
   const stats = calcMonthStats(currentYear, currentMonth);
   const notdienstMins = calcNotdienstMins(currentYear, currentMonth);
-  const salary = calcMonthSalary(currentYear, currentMonth);
 
   // Yıllık toplam urlaub
   let urlaubGenommen=0;
   for(let m=0;m<12;m++) urlaubGenommen+=calcMonthStats(currentYear,m).urlaub;
   const urlaubKalan=30-urlaubGenommen;
   const normalPos=stats.diffMins>=0;
-  const lohnConfigured = (userSalary.stundenlohn||0) > 0;
 
   document.getElementById('summaryCards').innerHTML = `
     <div class="card ${normalPos?'green':'red'}">
@@ -1142,17 +1437,6 @@ function render() {
       <div class="card-value" style="color:var(--orange)">${stats.notdienst}×</div>
       <div class="card-sub" style="color:var(--orange)">${minsToTime(notdienstMins)} Std</div>
     </div>
-    <div class="card salary-card" style="min-width:180px;border-top:3px solid var(--green);cursor:pointer" onclick="openSettings()">
-      <div class="card-label">💰 Lohn ${lohnConfigured?'':'<span style="color:var(--orange)">⚙️</span>'}</div>
-      ${lohnConfigured?`
-        <div class="card-value green">${formatEuro(salary.gesamt)}</div>
-        <div class="card-salary-row"><span class="lbl">Basis</span><span class="val">${formatEuro(salary.baseLohn)}</span></div>
-        <div class="card-salary-row"><span class="lbl" style="color:var(--orange)">+ Notdienst</span><span class="val" style="color:var(--orange)">${formatEuro(salary.ndLohn)}</span></div>
-      `:`
-        <div class="card-value" style="color:var(--muted);font-size:14px">Bitte einrichten</div>
-        <div class="card-sub">⚙️ Einstellungen öffnen</div>
-      `}
-    </div>
     <div class="card ${urlaubKalan<=5?'red':'green'}" style="min-width:180px">
       <div class="card-label">🏖 Urlaubskonto ${currentYear}</div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
@@ -1172,6 +1456,7 @@ function render() {
   renderNotdienstWeekly();
   renderDays();
   renderJahres();
+  renderLohn();
 }
 
 // ===== Yeni: Standalone Haftalık Notdienst =====
@@ -1320,7 +1605,6 @@ function renderDays() {
 function renderJahres() {
   let totalWorked=0,totalUrlaub=0,totalKrank=0,totalFeiertage=0,totalNotdienst=0,totalStandard=0,totalNotdienstMins=0,totalArbeitstage=0;
   const monthData=[];
-  const yearSalary={baseLohn:0,ndLohn:0,gesamt:0,baseHours:0,ndHours:0};
   for(let m=0;m<12;m++){
     const stats=calcMonthStats(currentYear,m);
     totalWorked+=stats.workedMins; totalUrlaub+=stats.urlaub; totalKrank+=stats.krank;
@@ -1328,10 +1612,7 @@ function renderJahres() {
     totalArbeitstage+=stats.arbeitstage;
     const ndMins=calcNotdienstMins(currentYear,m);
     totalNotdienstMins+=ndMins; totalStandard+=stats.standardMins;
-    const sal=calcMonthSalary(currentYear,m);
-    yearSalary.baseLohn+=sal.baseLohn; yearSalary.ndLohn+=sal.ndLohn;
-    yearSalary.gesamt+=sal.gesamt; yearSalary.baseHours+=sal.baseHours; yearSalary.ndHours+=sal.ndHours;
-    monthData.push({...stats,month:m,ndMins,salary:sal});
+    monthData.push({...stats,month:m,ndMins});
   }
   const totalDiff=totalWorked-totalStandard;
   const isPos=totalDiff>=0;
@@ -1351,8 +1632,6 @@ function renderJahres() {
   }
   const urlaubKalan=30-totalUrlaub;
   const maxAbs=Math.max(...monthData.map(s=>Math.abs(s.diffMins)),1);
-  const lohnConfigured = (userSalary.stundenlohn||0) > 0;
-  const maxMonthSalary = Math.max(...monthData.map(s=>s.salary.gesamt), 1);
 
   const barsHtml=monthData.map(s=>{
     const pct=Math.min(100,Math.abs(s.diffMins)/maxAbs*100);
@@ -1374,24 +1653,9 @@ function renderJahres() {
         </div>
       </div>
       <div class="bar-track"><div class="bar-fill ${pos?'bar-pos':'bar-neg'}" style="width:${pct}%"></div></div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace">${minsToTime(s.workedMins)} / ${minsToTime(s.standardMins)} Std · ${s.arbeitstage} Arbeitstage${lohnConfigured?` · 💰 ${formatEuro(s.salary.gesamt)}`:''}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace">${minsToTime(s.workedMins)} / ${minsToTime(s.standardMins)} Std · ${s.arbeitstage} Arbeitstage</div>
     </div>`;
   }).join('');
-
-  // Lohn breakdown table per month
-  let lohnRowsHtml = '';
-  if(lohnConfigured) {
-    monthData.forEach(s=>{
-      const pct = Math.round(s.salary.gesamt/maxMonthSalary*100);
-      const isCur = s.month===currentMonth;
-      lohnRowsHtml += `<div class="lohn-row" style="${isCur?'background:rgba(124,106,247,0.08);border-radius:6px;':''}">
-        <span class="month" style="${isCur?'color:var(--accent2);font-weight:700':''}">${MONTHS[s.month].substring(0,3)}</span>
-        <div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div></div>
-        <span class="base">${formatEuro(s.salary.baseLohn)}</span>
-        <span class="total">${formatEuro(s.salary.gesamt)}</span>
-      </div>`;
-    });
-  }
 
   document.getElementById('jahresTab').innerHTML=`
     <div class="ys-header">📊 Jahresübersicht ${currentYear}</div>
@@ -1414,46 +1678,16 @@ function renderJahres() {
       </div>
     </div>
 
-    ${lohnConfigured?`
-    <div style="background:linear-gradient(135deg,rgba(52,211,153,0.10),var(--surface) 70%);border:1px solid var(--green);border-radius:var(--radius);padding:14px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">💰 Jahres-Bruttolohn ${currentYear}</div>
-        <button onclick="openSettings()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer">⚙️ ${formatEuro(userSalary.stundenlohn)}/h</button>
-      </div>
-      <div style="text-align:center;margin-bottom:10px">
-        <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--green)">${formatEuro(yearSalary.gesamt)}</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">geschätzter Brutto-Jahreslohn</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:'DM Mono',monospace">
-        <div style="background:var(--surface2);border-radius:8px;padding:8px 10px">
-          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:700">Basis</div>
-          <div style="font-size:14px;color:var(--text);font-weight:500;margin-top:2px">${formatEuro(yearSalary.baseLohn)}</div>
-          <div style="font-size:9px;color:var(--muted);margin-top:1px">${yearSalary.baseHours.toFixed(1)} Std</div>
-        </div>
-        <div style="background:rgba(251,146,60,0.08);border-radius:8px;padding:8px 10px;border:1px solid rgba(251,146,60,0.2)">
-          <div style="font-size:9px;color:var(--orange);text-transform:uppercase;font-weight:700">+ Notdienst</div>
-          <div style="font-size:14px;color:var(--orange);font-weight:500;margin-top:2px">${formatEuro(yearSalary.ndLohn)}</div>
-          <div style="font-size:9px;color:var(--muted);margin-top:1px">${yearSalary.ndHours.toFixed(1)} Std · ${totalNotdienst}×</div>
-        </div>
-      </div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(52,211,153,0.2);display:flex;justify-content:space-between;font-size:11px;font-family:'DM Mono',monospace">
-        <span style="color:var(--muted)">Ø Monatslohn:</span>
-        <span style="color:var(--green);font-weight:700">${formatEuro(yearSalary.gesamt/12)}</span>
-      </div>
-    </div>`:`
-    <div onclick="openSettings()" style="background:var(--surface);border:1px dashed var(--green);border-radius:var(--radius);padding:14px;margin-bottom:12px;cursor:pointer;text-align:center">
-      <div style="font-size:24px;margin-bottom:4px">💰</div>
-      <div style="font-size:13px;font-weight:700;color:var(--green)">Lohn-Einstellungen einrichten</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Stundenlohn eingeben für automatische Lohnberechnung</div>
-    </div>`}
-
     ${totalNotdienst>0?`
     <div style="background:var(--surface);border-left:3px solid var(--orange);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;margin-bottom:12px">
       <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">
         ${monthData.map(s=>s.notdienst===0?'':'<div style="background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.3);border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:4px"><span style="font-size:10px;font-weight:700;color:var(--orange)">'+MONTHS[s.month].substring(0,3)+'</span><span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text)">'+s.notdienst+'× '+minsToTime(s.ndMins)+'</span></div>').join('')}
         <div style="margin-left:auto;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">Ø ${(totalNotdienstMins/Math.max(totalNotdienst,1)/60).toFixed(1)}h</div>
       </div>
-    </div>`:''}
+    </div>
+
+    ${renderYearWeeklyNotdienstHtml()}
+    `:''}
 
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-family:'DM Mono',monospace;font-size:13px">
@@ -1491,56 +1725,343 @@ function renderJahres() {
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 4px">📅 Monatsübersicht — Zeile anklicken zum Springen 👇</div>
     <div class="month-bar-list">${barsHtml}</div>
 
-    ${lohnConfigured?`
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px">
-      <div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
-        <span>💰 Lohn pro Monat</span>
-        <span style="color:var(--muted);font-size:9px">Basis / Gesamt</span>
-      </div>
-      <div class="lohn-row" style="font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:4px">
-        <span>Monat</span><span></span>
-        <span class="base">Basis €</span>
-        <span class="total">Gesamt €</span>
-      </div>
-      ${lohnRowsHtml}
-      <div class="lohn-row" style="border-top:1px solid var(--border);border-bottom:none;padding-top:10px;margin-top:6px;font-weight:700">
-        <span class="month" style="color:var(--text)">Σ</span>
-        <span></span>
-        <span class="base" style="color:var(--text)">${formatEuro(yearSalary.baseLohn)}</span>
-        <span class="total" style="color:var(--green);font-size:12px">${formatEuro(yearSalary.gesamt)}</span>
-      </div>
-    </div>`:''}
-
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px">
       <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">ℹ️ Erklärung</div>
       <div style="font-size:11px;color:var(--muted);line-height:1.6">
         <b style="color:${isPos?'var(--green)':'var(--red)'}">Differenz</b> = Gearbeitet − Soll (${userSalary.sollStd||174}h/Mon) &nbsp;|&nbsp;
         <b style="color:var(--orange)">Notdienst</b> = Extra-Stunden &nbsp;|&nbsp;
-        <b>Gesamt</b> = Diff + Nd &nbsp;|&nbsp;
-        <b style="color:var(--green)">Lohn</b> = Std × Stundenlohn
+        <b>Gesamt</b> = Diff + Nd
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">
+        💰 <b style="color:var(--green)">Lohn-Details</b> → siehe Lohn-Tab
       </div>
     </div>
   `;
 }
 
+// ===== Yıllık Haftalık Notdienst HTML =====
+function renderYearWeeklyNotdienstHtml() {
+  const allWeeks = {};
+  for(let m=0; m<12; m++) {
+    const monthWeeks = calcWeeklyNotdienst(currentYear, m);
+    monthWeeks.forEach(w => {
+      if(w.ndCount === 0) return;
+      if(!allWeeks[w.kw]) allWeeks[w.kw] = {kw:w.kw, ndCount:0, ndMins:0, workedMins:0, sollMins:0, months:new Set()};
+      allWeeks[w.kw].ndCount += w.ndCount;
+      allWeeks[w.kw].ndMins += w.ndMins;
+      allWeeks[w.kw].workedMins += w.workedMins;
+      allWeeks[w.kw].sollMins += w.sollMins;
+      allWeeks[w.kw].months.add(m);
+    });
+  }
+  const weeks = Object.values(allWeeks).sort((a,b)=>a.kw-b.kw);
+  if(weeks.length === 0) return '';
+  const maxNd = Math.max(...weeks.map(w=>w.ndMins), 1);
+  const totalNd = weeks.reduce((s,w)=>s+w.ndMins, 0);
+  const totalCount = weeks.reduce((s,w)=>s+w.ndCount, 0);
+  const totalUe = weeks.reduce((s,w)=>s+(w.workedMins-w.sollMins+w.ndMins), 0);
+  const totalUePos = totalUe >= 0;
+
+  let rowsHtml = '';
+  weeks.forEach(w => {
+    const ue = w.workedMins - w.sollMins + w.ndMins;
+    const uePos = ue >= 0;
+    const pct = Math.round(w.ndMins/maxNd*100);
+    const monthLabels = Array.from(w.months).sort().map(m=>MONTHS[m].substring(0,3)).join('/');
+    rowsHtml += `<div class="nd-year-week-row" onclick="goToMonthJahres(${[...w.months][0]})" style="cursor:pointer">
+      <span class="mo">${monthLabels}</span>
+      <span class="kw">KW ${w.kw}</span>
+      <div class="nd-week-bar"><div class="nd-week-bar-bg"><div class="nd-week-bar-fill" style="width:${pct}%"></div></div></div>
+      <span style="text-align:right;color:var(--orange)">${w.ndCount}× ${minsToTime(w.ndMins)}</span>
+      <span style="text-align:right;color:${uePos?'var(--green)':'var(--red)'}">${uePos?'+':''}${minsToTime(ue)}</span>
+    </div>`;
+  });
+
+  return `<div class="nd-weekly-card" style="margin:0 0 12px 0">
+    <div class="nd-weekly-head" style="cursor:default">
+      <div class="nd-weekly-title">🚨 Notdienst — Alle Wochen ${currentYear}</div>
+      <div class="nd-weekly-mini">
+        <span><b style="color:var(--orange)">${totalCount}×</b></span>
+        <span style="color:var(--orange)">${minsToTime(totalNd)}</span>
+        <span style="color:${totalUePos?'var(--green)':'var(--red)'}">${totalUePos?'+':''}${minsToTime(totalUe)}</span>
+      </div>
+    </div>
+    <div class="nd-weekly-body">
+      <div class="nd-year-week-row" style="border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:2px">
+        <span style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase">Monat</span>
+        <span style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase">KW</span>
+        <span></span>
+        <span style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;text-align:right">Nd</span>
+        <span style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;text-align:right">Überstd</span>
+      </div>
+      ${rowsHtml}
+    </div>
+  </div>`;
+}
+
 function goToMonthJahres(m){currentMonth=m;render();showTage();}
 
 // ===== VIEW SWITCHING =====
+function setNavActive(id) {
+  ['bnav-tage','bnav-jahres','bnav-lohn'].forEach(x=>{
+    const el = document.getElementById(x);
+    if(el) el.classList.toggle('active', x===id);
+  });
+}
 function showTage(){
+  document.getElementById('summaryWrap').style.display='block';
   document.getElementById('daysTab').style.display='block';
   document.getElementById('jahresTab').style.display='none';
-  document.getElementById('bnav-tage').classList.add('active');
-  document.getElementById('bnav-jahres').classList.remove('active');
+  document.getElementById('lohnTab').style.display='none';
+  setNavActive('bnav-tage');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function showJahres(){
+  document.getElementById('summaryWrap').style.display='none';
   document.getElementById('daysTab').style.display='none';
   document.getElementById('jahresTab').style.display='block';
-  document.getElementById('bnav-tage').classList.remove('active');
-  document.getElementById('bnav-jahres').classList.add('active');
+  document.getElementById('lohnTab').style.display='none';
+  setNavActive('bnav-jahres');
   renderJahres();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+function showLohn(){
+  document.getElementById('summaryWrap').style.display='none';
+  document.getElementById('daysTab').style.display='none';
+  document.getElementById('jahresTab').style.display='none';
+  document.getElementById('lohnTab').style.display='block';
+  setNavActive('bnav-lohn');
+  renderLohn();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== Lohn Tab Render =====
+function renderLohn() {
+  const tab = document.getElementById('lohnTab');
+  if(!tab) return;
+  const lohnConfigured = (userSalary.stundenlohn||0) > 0;
+
+  if(!lohnConfigured) {
+    tab.innerHTML = `
+      <div style="text-align:center;padding:60px 20px">
+        <div style="font-size:56px;margin-bottom:12px">💰</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:8px">Lohn-Rechner einrichten</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5">
+          Stundenlohn und Steuerklasse eingeben<br>für automatische Brutto-/Netto-Berechnung
+        </div>
+        <button onclick="openSettings()" style="padding:14px 28px;background:var(--green);border:none;border-radius:12px;color:white;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer">⚙️ Einstellungen öffnen</button>
+      </div>`;
+    return;
+  }
+
+  // Mevcut ay
+  const cur = calcMonthSalary(currentYear, currentMonth);
+  const stk = userSalary.steuerklasse || 'I';
+  const stkLabel = userSalary.taxMode === 'manual'
+    ? `Manuell ${userSalary.manuellAbzug}%`
+    : `${stk}${userSalary.hatKinder?' • Kind':''}${userSalary.kirchensteuer>0?' • '+Math.round(userSalary.kirchensteuer*100)+'% KiSt':''}`;
+  const az = cur.abzuege;
+  const isManual = !!az.manuell;
+
+  // Yıl toplamı
+  const year = { brutto:0, netto:0, baseLohn:0, ndLohn:0, baseHours:0, ndHours:0, ndCount:0,
+    lst:0, soli:0, ks:0, rv:0, av:0, kv:0, pv:0, sv:0, gesamtAbzug:0 };
+  const monthlies = [];
+  for(let m=0; m<12; m++) {
+    const s = calcMonthSalary(currentYear, m);
+    year.brutto += s.brutto; year.netto += s.netto;
+    year.baseLohn += s.baseLohn; year.ndLohn += s.ndLohn;
+    year.baseHours += s.baseHours; year.ndHours += s.ndHours;
+    year.ndCount += s.ndCount;
+    if(!s.abzuege.manuell) {
+      year.lst += s.abzuege.lohnsteuer||0; year.soli += s.abzuege.soli||0;
+      year.ks += s.abzuege.kirchensteuer||0; year.rv += s.abzuege.rv||0;
+      year.av += s.abzuege.av||0; year.kv += s.abzuege.kv||0;
+      year.pv += s.abzuege.pv||0; year.sv += s.abzuege.sv||0;
+    }
+    year.gesamtAbzug += s.abzuege.gesamt||0;
+    monthlies.push({month:m, ...s});
+  }
+  const maxNetto = Math.max(...monthlies.map(m=>m.netto), 1);
+
+  const eur = formatEuro;
+  const sld = userSalary.stundenlohn||0, sln = userSalary.ndStundenlohn||0;
+
+  tab.innerHTML = `
+    <!-- HERO: Brutto → Netto -->
+    <div class="lohn-hero">
+      <div class="lohn-hero-period">${MONTHS[currentMonth]} ${currentYear}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="lohn-hero-month">Monatslohn</div>
+        <span class="lohn-tax-badge" onclick="openSettings()">${stkLabel} ⚙️</span>
+      </div>
+      <div class="lohn-hero-grid">
+        <div class="lohn-hero-cell brutto">
+          <div class="lbl">Brutto</div>
+          <div class="val">${eur(cur.brutto)}</div>
+        </div>
+        <div class="lohn-hero-cell netto">
+          <div class="lbl">Netto (geschätzt)</div>
+          <div class="val">${eur(cur.netto)}</div>
+        </div>
+      </div>
+      <div class="lohn-hero-divider"></div>
+      <div class="lohn-hero-foot">
+        <span>− ${eur(az.gesamt)} Abzüge</span>
+        <span>${cur.brutto>0?Math.round(az.gesamt/cur.brutto*100):0}%</span>
+      </div>
+    </div>
+
+    <!-- VERDIENST -->
+    <div class="lohn-section">
+      <div class="lohn-section-title"><span>📊 Verdienst</span><span style="color:var(--green);font-weight:700">${eur(cur.brutto)}</span></div>
+      <div class="lohn-line">
+        <div class="lbl-wrap">
+          <span class="lbl">Basis-Lohn</span>
+          <span class="sub">${cur.baseHours.toFixed(1)} Std × ${eur(sld)}</span>
+        </div>
+        <span class="amount">${eur(cur.baseLohn)}</span>
+      </div>
+      ${cur.ndLohnZeit>0?`<div class="lohn-line notdienst">
+        <div class="lbl-wrap">
+          <span class="lbl">Notdienst-Stunden</span>
+          <span class="sub">${cur.ndHours.toFixed(1)} Std × ${eur(sln)}</span>
+        </div>
+        <span class="amount">${eur(cur.ndLohnZeit)}</span>
+      </div>`:''}
+      ${cur.ndPauschaleTotal>0?`<div class="lohn-line notdienst">
+        <div class="lbl-wrap">
+          <span class="lbl">Notdienst-Pauschale</span>
+          <span class="sub">${cur.ndCount}× ${eur(userSalary.ndPauschale)}</span>
+        </div>
+        <span class="amount">${eur(cur.ndPauschaleTotal)}</span>
+      </div>`:''}
+      <div class="lohn-line subtotal positive">
+        <span class="lbl">Σ Brutto</span>
+        <span class="amount">${eur(cur.brutto)}</span>
+      </div>
+    </div>
+
+    <!-- ABZÜGE -->
+    <div class="lohn-section">
+      <div class="lohn-section-title"><span>📉 Abzüge</span><span style="color:var(--red);font-weight:700">− ${eur(az.gesamt)}</span></div>
+      ${isManual?`
+        <div class="lohn-line negative">
+          <div class="lbl-wrap">
+            <span class="lbl">Manuelle Pauschale</span>
+            <span class="sub">${az.manuellProzent}% vom Brutto</span>
+          </div>
+          <span class="amount">− ${eur(az.gesamt)}</span>
+        </div>
+      `:`
+        <div class="lohn-line negative">
+          <span class="lbl">Lohnsteuer</span>
+          <span class="amount">− ${eur(az.lohnsteuer)}</span>
+        </div>
+        ${az.soli>0?`<div class="lohn-line negative">
+          <span class="lbl">Solidaritätszuschlag</span>
+          <span class="amount">− ${eur(az.soli)}</span>
+        </div>`:''}
+        ${az.kirchensteuer>0?`<div class="lohn-line negative">
+          <span class="lbl">Kirchensteuer</span>
+          <span class="amount">− ${eur(az.kirchensteuer)}</span>
+        </div>`:''}
+        <div class="lohn-line negative">
+          <div class="lbl-wrap">
+            <span class="lbl">Sozialversicherung</span>
+            <span class="sub">Σ ${eur(az.sv)}</span>
+          </div>
+          <span class="amount">− ${eur(az.sv)}</span>
+        </div>
+        <div class="lohn-line indent">
+          <span class="lbl">Rentenversicherung</span>
+          <span class="amount">${eur(az.rv)}</span>
+        </div>
+        <div class="lohn-line indent">
+          <span class="lbl">Arbeitslosenvers.</span>
+          <span class="amount">${eur(az.av)}</span>
+        </div>
+        <div class="lohn-line indent">
+          <span class="lbl">Krankenversicherung</span>
+          <span class="amount">${eur(az.kv)}</span>
+        </div>
+        <div class="lohn-line indent">
+          <span class="lbl">Pflegeversicherung${userSalary.hatKinder?'':' (kinderlos)'}</span>
+          <span class="amount">${eur(az.pv)}</span>
+        </div>
+      `}
+      <div class="lohn-line subtotal negative">
+        <span class="lbl">Σ Abzüge</span>
+        <span class="amount">− ${eur(az.gesamt)}</span>
+      </div>
+    </div>
+
+    <!-- ERGEBNIS -->
+    <div class="lohn-section" style="background:linear-gradient(135deg,rgba(52,211,153,0.10),var(--surface) 70%);border-color:var(--green)">
+      <div class="lohn-line subtotal positive" style="border-top:none;padding-top:0;font-size:16px">
+        <span class="lbl" style="color:var(--green)">💵 Netto-Auszahlung</span>
+        <span class="amount" style="font-size:18px">${eur(cur.netto)}</span>
+      </div>
+    </div>
+
+    <!-- JAHRES-ÜBERSICHT -->
+    <div class="lohn-section" style="border-color:var(--accent)">
+      <div class="lohn-section-title"><span>📅 Jahr ${currentYear}</span><span style="color:var(--accent2);font-weight:700">${eur(year.netto)}</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-family:'DM Mono',monospace">
+        <div style="background:var(--surface2);border-radius:8px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:700">Brutto</div>
+          <div style="font-size:15px;color:var(--text);font-weight:500;margin-top:3px">${eur(year.brutto)}</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px">Ø ${eur(year.brutto/12)}/Mon</div>
+        </div>
+        <div style="background:rgba(52,211,153,0.10);border-radius:8px;padding:10px;border:1px solid rgba(52,211,153,0.3)">
+          <div style="font-size:9px;color:var(--green);text-transform:uppercase;font-weight:700">Netto</div>
+          <div style="font-size:15px;color:var(--green);font-weight:500;margin-top:3px">${eur(year.netto)}</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px">Ø ${eur(year.netto/12)}/Mon</div>
+        </div>
+      </div>
+      <div class="lohn-line" style="border-bottom:1px dashed var(--border)">
+        <span class="lbl">Basis-Stunden gesamt</span>
+        <span class="amount">${year.baseHours.toFixed(0)} Std · ${eur(year.baseLohn)}</span>
+      </div>
+      ${year.ndLohn>0?`<div class="lohn-line notdienst" style="border-bottom:1px dashed var(--border)">
+        <div class="lbl-wrap">
+          <span class="lbl">Notdienst gesamt</span>
+          <span class="sub">${year.ndCount}× · ${year.ndHours.toFixed(1)} Std</span>
+        </div>
+        <span class="amount">${eur(year.ndLohn)}</span>
+      </div>`:''}
+      <div class="lohn-line negative">
+        <span class="lbl">Σ Abzüge gesamt</span>
+        <span class="amount">− ${eur(year.gesamtAbzug)}</span>
+      </div>
+    </div>
+
+    <!-- MONATSLISTE -->
+    <div class="lohn-section">
+      <div class="lohn-section-title"><span>📊 Monatsübersicht</span><span style="color:var(--muted);font-size:9px">Brutto / Netto</span></div>
+      ${monthlies.map(m=>{
+        const pct = m.netto>0 ? Math.round(m.netto/maxNetto*100) : 0;
+        const isCur = m.month===currentMonth;
+        return `<div class="lohn-year-bar ${isCur?'current':''}" onclick="goToMonthFromLohn(${m.month})">
+          <div class="lohn-year-bar-top">
+            <span class="lohn-year-bar-month" style="${isCur?'color:var(--accent2)':''}">${MONTHS[m.month]}</span>
+            <span class="lohn-year-bar-netto">${eur(m.netto)}</span>
+          </div>
+          <div class="lohn-year-bar-bg"><div class="lohn-year-bar-fill" style="width:${pct}%"></div></div>
+          <div class="lohn-year-bar-foot">
+            <span>Brutto ${eur(m.brutto)}${m.ndLohn>0?` · 🚨 ${m.ndCount}×`:''}</span>
+            <span>${m.baseHours.toFixed(0)}h${m.ndHours>0?` + ${m.ndHours.toFixed(1)}h`:''}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.2);border-radius:10px;padding:10px 12px;font-size:10px;color:var(--muted);line-height:1.5">
+      💡 Netto-Werte sind nach EStG §32a (Grundtabelle) vereinfacht berechnet. SV-Beiträge 2024. Tatsächliche Werte können abweichen — siehe offizielle Lohnabrechnung.
+    </div>
+  `;
+}
+function goToMonthFromLohn(m){currentMonth=m;render();renderLohn();}
 window.addEventListener('scroll',function(){
   const btn=document.getElementById('scrollTopBtn');
   if(btn) btn.style.display=window.scrollY>400?'block':'none';
@@ -1690,26 +2211,63 @@ function openSettings() {
   document.getElementById('setNdStundenlohn').value = userSalary.ndStundenlohn || '';
   document.getElementById('setNdPauschale').value = userSalary.ndPauschale || '';
   document.getElementById('setSollStd').value = userSalary.sollStd || 174;
+  document.getElementById('setManuellAbzug').value = userSalary.manuellAbzug || 28;
+  document.getElementById('setHatKinder').checked = !!userSalary.hatKinder;
+  setTaxMode(userSalary.taxMode || 'auto', true);
+  selectStk(userSalary.steuerklasse || 'I', true);
+  selectKs(userSalary.kirchensteuer || 0, true);
   document.getElementById('settingsModal').classList.add('open');
 }
 function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
 function onStundenlohnChange() {
-  // Auto-suggest Notdienst rate (+25%) if Notdienst field empty
   const sl = parseFloat(document.getElementById('setStundenlohn').value);
   const ndField = document.getElementById('setNdStundenlohn');
   if(sl > 0 && !ndField.value) ndField.value = (sl * 1.25).toFixed(2);
+}
+function setTaxMode(mode, silent) {
+  document.getElementById('taxModeAuto').classList.toggle('active', mode==='auto');
+  document.getElementById('taxModeManual').classList.toggle('active', mode==='manual');
+  document.getElementById('taxAutoArea').style.display = mode==='auto'?'block':'none';
+  document.getElementById('taxManualArea').style.display = mode==='manual'?'block':'none';
+  if(!silent) userSalary.taxMode = mode;
+}
+function selectStk(stk, silent) {
+  document.querySelectorAll('.stk-btn[data-stk]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.stk===stk);
+  });
+  if(!silent) userSalary.steuerklasse = stk;
+}
+function selectKs(rate, silent) {
+  document.querySelectorAll('.stk-btn[data-ks]').forEach(b=>{
+    b.classList.toggle('active', parseFloat(b.dataset.ks)===rate);
+  });
+  if(!silent) userSalary.kirchensteuer = rate;
 }
 function saveSettings() {
   const sl = parseFloat(document.getElementById('setStundenlohn').value) || 0;
   const ndSl = parseFloat(document.getElementById('setNdStundenlohn').value) || 0;
   const ndP = parseFloat(document.getElementById('setNdPauschale').value) || 0;
   const soll = parseInt(document.getElementById('setSollStd').value) || 174;
+  const manAbzug = parseFloat(document.getElementById('setManuellAbzug').value) || 0;
+  const hatKinder = document.getElementById('setHatKinder').checked;
   if(sl < 0 || ndSl < 0 || ndP < 0) { alert('Werte müssen ≥ 0 sein'); return; }
   if(soll < 1 || soll > 300) { alert('Soll-Stunden müssen zwischen 1 und 300 liegen'); return; }
-  userSalary = { stundenlohn: sl, ndStundenlohn: ndSl, ndPauschale: ndP, sollStd: soll };
+  if(manAbzug < 0 || manAbzug > 60) { alert('Manueller Abzug muss zwischen 0 und 60% liegen'); return; }
+  // taxMode/steuerklasse/kirchensteuer/hatKinder werden über Buttons direkt gesetzt
+  const taxMode = document.getElementById('taxModeAuto').classList.contains('active') ? 'auto' : 'manual';
+  const stkActiveBtn = document.querySelector('.stk-btn[data-stk].active');
+  const ksActiveBtn = document.querySelector('.stk-btn[data-ks].active');
+  userSalary = {
+    stundenlohn: sl, ndStundenlohn: ndSl, ndPauschale: ndP, sollStd: soll,
+    taxMode,
+    steuerklasse: stkActiveBtn ? stkActiveBtn.dataset.stk : 'I',
+    kirchensteuer: ksActiveBtn ? parseFloat(ksActiveBtn.dataset.ks) : 0,
+    hatKinder, manuellAbzug: manAbzug
+  };
   saveData();
   closeSettings();
   render();
+  if(document.getElementById('lohnTab').style.display==='block') renderLohn();
   const btn = document.querySelector('#settingsModal .save-btn');
   if(btn){const orig=btn.textContent;btn.textContent='✅ Gespeichert!';setTimeout(()=>{btn.textContent=orig;},1200);}
 }
