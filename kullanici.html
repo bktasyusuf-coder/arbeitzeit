@@ -1200,7 +1200,7 @@ function getDayStdMins(dow) {
 function calcMonthStats(year, month) {
   const mk=`${year}-${String(month+1).padStart(2,'0')}`;
   const total=getDaysInMonth(year,month);
-  let workedMins=0, urlaub=0, krank=0, feiertage=0, notdienst=0, arbeitstage=0;
+  let workedMins=0, urlaub=0, krank=0, feiertage=0, notdienst=0, ndPaid=0, arbeitstage=0;
   for(let d=1;d<=total;d++){
     const ds=`${mk}-${String(d).padStart(2,'0')}`;
     const dow=getDayOfWeek(year,month,d);
@@ -1211,6 +1211,7 @@ function calcMonthStats(year, month) {
       if(userNotdienst[ds]){
         const arr=Array.isArray(userNotdienst[ds])?userNotdienst[ds]:[userNotdienst[ds]];
         notdienst+=arr.length;
+        arr.forEach(nd=>{ if(nd && nd.erledigt) ndPaid++; });
       }
       continue;
     }
@@ -1226,10 +1227,11 @@ function calcMonthStats(year, month) {
     if(userNotdienst[ds]){
       const arr=Array.isArray(userNotdienst[ds])?userNotdienst[ds]:[userNotdienst[ds]];
       notdienst+=arr.length;
+      arr.forEach(nd=>{ if(nd && nd.erledigt) ndPaid++; });
     }
   }
   const sollMinsCustom = (userSalary.sollStd||174)*60;
-  return {workedMins,diffMins:workedMins-sollMinsCustom,urlaub,krank,feiertage,notdienst,arbeitstage,standardMins:sollMinsCustom};
+  return {workedMins,diffMins:workedMins-sollMinsCustom,urlaub,krank,feiertage,notdienst,ndPaid,arbeitstage,standardMins:sollMinsCustom};
 }
 
 // ===== Salary / Tax / SV (Deutschland, vereinfacht) =====
@@ -1464,6 +1466,10 @@ function render() {
       <div class="card-label">🚨 Notdienst</div>
       <div class="card-value" style="color:var(--orange)">${stats.notdienst}×</div>
       <div class="card-sub" style="color:var(--orange)">${minsToTime(notdienstMins)} Std</div>
+      ${stats.notdienst>0?`<div class="card-sub" style="margin-top:4px;display:flex;justify-content:space-between;gap:6px">
+        <span style="color:var(--green)">✅ ${stats.ndPaid}</span>
+        <span style="color:${stats.notdienst-stats.ndPaid>0?'var(--red)':'var(--muted)'}">❌ ${stats.notdienst-stats.ndPaid}</span>
+      </div>`:''}
     </div>
     <div class="card ${urlaubKalan<=5?'red':'green'}" style="min-width:180px">
       <div class="card-label">🏖 Urlaubskonto ${currentYear}</div>
@@ -1631,12 +1637,13 @@ function renderDays() {
 }
 
 function renderJahres() {
-  let totalWorked=0,totalUrlaub=0,totalKrank=0,totalFeiertage=0,totalNotdienst=0,totalStandard=0,totalNotdienstMins=0,totalArbeitstage=0;
+  let totalWorked=0,totalUrlaub=0,totalKrank=0,totalFeiertage=0,totalNotdienst=0,totalNdPaid=0,totalStandard=0,totalNotdienstMins=0,totalArbeitstage=0;
   const monthData=[];
   for(let m=0;m<12;m++){
     const stats=calcMonthStats(currentYear,m);
     totalWorked+=stats.workedMins; totalUrlaub+=stats.urlaub; totalKrank+=stats.krank;
     totalFeiertage+=stats.feiertage; totalNotdienst+=stats.notdienst;
+    totalNdPaid+=stats.ndPaid||0;
     totalArbeitstage+=stats.arbeitstage;
     const ndMins=calcNotdienstMins(currentYear,m);
     totalNotdienstMins+=ndMins; totalStandard+=stats.standardMins;
@@ -1703,6 +1710,10 @@ function renderJahres() {
           ≈ ${ndDays.toFixed(1)} Tage
         </div>
         <div style="font-size:9px;color:var(--muted);margin-top:2px">${totalNotdienst} Einsätze</div>
+        ${totalNotdienst>0?`<div style="display:flex;justify-content:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(251,146,60,0.2)">
+          <span style="color:var(--green)">✅ ${totalNdPaid}</span>
+          <span style="color:${totalNotdienst-totalNdPaid>0?'var(--red)':'var(--muted)'}">❌ ${totalNotdienst-totalNdPaid}</span>
+        </div>`:''}
       </div>
     </div>
 
