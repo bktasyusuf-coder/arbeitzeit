@@ -1165,7 +1165,13 @@ function minsToTime(m) {
 }
 function calcWorkHours(start,pause,end) {
   if(!start||!end) return '';
-  const mins=timeToMins(end)-timeToMins(start)-timeToMins(pause||'00:00');
+  const startMin=timeToMins(start);
+  const endMin=timeToMins(end);
+  const pauseMin=timeToMins(pause||'00:00');
+  // Overnight: wenn Ende vor Anfang liegt (z.B. 22:00→06:00), +24h
+  const mins = endMin < startMin
+    ? (endMin + 24*60) - startMin - pauseMin
+    : endMin - startMin - pauseMin;
   return mins<0?'':minsToTime(mins);
 }
 function getMitarbeiterName() {
@@ -1185,6 +1191,12 @@ function getWeekNumber(ds) {
 }
 
 // ===== STATS =====
+// Tagestandard in Minuten je Wochentag (Mo-Do 8:15 = 495, Fr 6:15 = 375)
+function getDayStdMins(dow) {
+  const std = STANDARD_TIMES[dow];
+  return std ? timeToMins(std.hours) : 8*60;
+}
+
 function calcMonthStats(year, month) {
   const mk=`${year}-${String(month+1).padStart(2,'0')}`;
   const total=getDaysInMonth(year,month);
@@ -1203,12 +1215,13 @@ function calcMonthStats(year, month) {
       continue;
     }
     arbeitstage++;
-    if(status==='Urlaub'){urlaub++;workedMins+=8*60;}
-    else if(status==='Krank'){krank++;workedMins+=8*60;}
-    else if(status==='Feiertag'){feiertage++;workedMins+=8*60;}
+    const dayStdMins = getDayStdMins(dow);
+    if(status==='Urlaub')       { urlaub++;    workedMins += dayStdMins; }
+    else if(status==='Krank')   { krank++;     workedMins += dayStdMins; }
+    else if(status==='Feiertag'){ feiertage++; workedMins += dayStdMins; }
     else if(status==='Arbeiten'){
-      if(times&&times.hours) workedMins+=timeToMins(times.hours);
-      else{const std=STANDARD_TIMES[dow];if(std) workedMins+=timeToMins(std.hours);}
+      if(times && times.hours) workedMins += timeToMins(times.hours);
+      else                     workedMins += dayStdMins;
     }
     if(userNotdienst[ds]){
       const arr=Array.isArray(userNotdienst[ds])?userNotdienst[ds]:[userNotdienst[ds]];
@@ -1361,7 +1374,7 @@ function calcNotdienstMins(year, month) {
   return t;
 }
 
-// ===== Haftalık Notdienst + Diff =====
+// ===== Wöchentliche Notdienst-Berechnung + Diff =====
 function calcWeeklyNotdienst(year, month) {
   const mk=`${year}-${String(month+1).padStart(2,'0')}`;
   const total=getDaysInMonth(year,month);
@@ -1374,12 +1387,12 @@ function calcWeeklyNotdienst(year, month) {
     if(!isWeekend(dow)){
       const status=getDayStatus(ds);
       const times=getDayTimes(ds);
-      const std=STANDARD_TIMES[dow];
-      if(std) weeks[kw].sollMins+=timeToMins(std.hours);
-      if(status==='Urlaub'||status==='Krank'||status==='Feiertag') weeks[kw].workedMins+=8*60;
-      else if(status==='Arbeiten'){
-        if(times&&times.hours) weeks[kw].workedMins+=timeToMins(times.hours);
-        else if(std) weeks[kw].workedMins+=timeToMins(std.hours);
+      const dayStdMins=getDayStdMins(dow);
+      weeks[kw].sollMins += dayStdMins;
+      if(status==='Urlaub'||status==='Krank'||status==='Feiertag') {
+        weeks[kw].workedMins += dayStdMins;
+      } else if(status==='Arbeiten'){
+        weeks[kw].workedMins += (times&&times.hours) ? timeToMins(times.hours) : dayStdMins;
       }
     }
     if(userNotdienst[ds]){
@@ -2139,9 +2152,14 @@ function saveEntry(){
   userData[ds]=selectedStatus;
   if(selectedStatus!=='Frei'){
     const locked=selectedStatus==='Urlaub'||selectedStatus==='Krank'||selectedStatus==='Feiertag';
-    userTimes[ds]=locked
-      ?{start:'08:00',pause:'01:00',end:'17:00',hours:'08:00'}
-      :{start:document.getElementById('entryStart').value,pause:document.getElementById('entryPause').value,end:document.getElementById('entryEnd').value,hours:document.getElementById('entryCalc').value};
+    if(locked) {
+      // Tages-Standardzeiten (Mo-Do 07:45–17:00 = 8:15, Fr 07:45–14:30 = 6:15)
+      const dow = new Date(ds).getDay();
+      const std = STANDARD_TIMES[dow] || {start:'08:00',pause:'01:00',end:'17:00',hours:'08:00'};
+      userTimes[ds] = {...std};
+    } else {
+      userTimes[ds]={start:document.getElementById('entryStart').value,pause:document.getElementById('entryPause').value,end:document.getElementById('entryEnd').value,hours:document.getElementById('entryCalc').value};
+    }
   } else { delete userTimes[ds]; }
   const note=document.getElementById('entryNote').value.trim();
   if(note) userNotes[ds]=note; else delete userNotes[ds];
@@ -2444,17 +2462,37 @@ function generateUrlaubPDF(){
   if(!von||!bis){alert('Bitte Von und Bis Datum eingeben!');return;}
   if(!window.jspdf||!window.jspdf.jsPDF){alert('PDF wird geladen... Bitte kurz warten.');return;}
   const vonDate=new Date(von), bisDate=new Date(bis);
+  // Werktage zählen — Feiertage nicht als Urlaubstage rechnen
   let tage=0, tmpD=new Date(vonDate);
-  while(tmpD<=bisDate){if(tmpD.getDay()>0&&tmpD.getDay()<6)tage++;tmpD.setDate(tmpD.getDate()+1);}
+  while(tmpD<=bisDate){
+    if(tmpD.getDay()>0 && tmpD.getDay()<6){
+      const dKey=fmt(tmpD);
+      const yd = YEAR_DATA[tmpD.getFullYear()];
+      const isFeiertag = yd && yd.feiertage && yd.feiertage[dKey];
+      if(!isFeiertag) tage++;
+    }
+    tmpD.setDate(tmpD.getDate()+1);
+  }
   const vonStr=von.split('-').reverse().join('.'), bisStr=bis.split('-').reverse().join('.');
+  // Tage markieren — Feiertage nicht überschreiben, Tages-Std verwenden
   const loopD=new Date(vonDate);
   while(loopD<=bisDate){
-    if(loopD.getDay()>0&&loopD.getDay()<6){const dKey=fmt(loopD);userData[dKey]='Urlaub';userTimes[dKey]={start:'08:00',pause:'01:00',end:'17:00',hours:'08:00'};}
+    if(loopD.getDay()>0 && loopD.getDay()<6){
+      const dKey=fmt(loopD);
+      const yd = YEAR_DATA[loopD.getFullYear()];
+      const isFeiertag = yd && yd.feiertage && yd.feiertage[dKey];
+      if(!isFeiertag) {
+        userData[dKey]='Urlaub';
+        const std = STANDARD_TIMES[loopD.getDay()] || {start:'08:00',pause:'01:00',end:'17:00',hours:'08:00'};
+        userTimes[dKey] = {...std};
+      }
+    }
     loopD.setDate(loopD.getDate()+1);
   }
   const urlaubYear=vonDate.getFullYear();
+  // Konsistent mit Monatsstatistik
   let urlaubGenommen=0;
-  Object.keys(userData).filter(k=>k.startsWith(String(urlaubYear)+'-')&&userData[k]==='Urlaub').forEach(()=>urlaubGenommen++);
+  for(let m=0;m<12;m++) urlaubGenommen += calcMonthStats(urlaubYear, m).urlaub;
   const resturlaub=30-urlaubGenommen;
   const heute=new Date();
   const heuteStr=String(heute.getDate()).padStart(2,'0')+'.'+String(heute.getMonth()+1).padStart(2,'0')+'.'+heute.getFullYear();
