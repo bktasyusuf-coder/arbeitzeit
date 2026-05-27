@@ -1435,10 +1435,16 @@ function render() {
   const normalPos=stats.diffMins>=0;
 
   document.getElementById('summaryCards').innerHTML = `
-    <div class="card ${normalPos?'green':'red'}">
+    <div class="card ${normalPos?'green':'red'}" style="min-width:170px">
       <div class="card-label">Differenz</div>
       <div class="card-value ${normalPos?'green':'red'}">${normalPos?'+':''}${minsToTime(stats.diffMins)}</div>
-      <div class="card-sub">ohne Notdienst</div>
+      ${notdienstMins>0?(()=>{
+        const gesamt=stats.diffMins+notdienstMins; const gPos=gesamt>=0;
+        return `<div class="card-sub" style="display:flex;justify-content:space-between;gap:4px;margin-top:4px">
+          <span style="color:var(--orange)">+${minsToTime(notdienstMins)} Nd</span>
+          <span style="color:${gPos?'var(--green)':'var(--red)'};font-weight:700">= ${gPos?'+':''}${minsToTime(gesamt)}</span>
+        </div>`;
+      })():`<div class="card-sub">ohne Notdienst</div>`}
     </div>
     <div class="card blue">
       <div class="card-label">Gearbeitet</div>
