@@ -492,7 +492,7 @@
     <span class="month-title" id="monthTitle">Januar</span>
     <button class="nav-btn" onclick="nextMonth()">›</button>
   </div>
-  <div id="syncStatus" class="sync-status" style="text-align:center;font-size:10px;color:var(--muted);margin-top:6px">Verbinde...</div>
+  <div id="syncStatus" class="sync-status" onclick="forceSync()" title="Tippen zum Aktualisieren" style="text-align:center;font-size:10px;color:var(--muted);margin-top:6px;cursor:pointer">Verbinde... 🔄</div>
 </div>
 
 <div id="mainView" style="display:none">
@@ -1120,12 +1120,14 @@ let selectedStatus = 'Arbeiten';
 let editingDate = null;
 
 function saveData() {
+  const now = Date.now();
   localStorage.setItem(LS_PREFIX+'data', JSON.stringify(userData));
   localStorage.setItem(LS_PREFIX+'times', JSON.stringify(userTimes));
   localStorage.setItem(LS_PREFIX+'notes', JSON.stringify(userNotes));
   localStorage.setItem(LS_PREFIX+'notdienst', JSON.stringify(userNotdienst));
   localStorage.setItem(LS_PREFIX+'salary', JSON.stringify(userSalary));
-  sbSave({userData,userTimes,userNotes,userNotdienst,userSalary});
+  localStorage.setItem(LS_PREFIX+'updatedAt', String(now));
+  sbSave({userData,userTimes,userNotes,userNotdienst,userSalary,_updatedAt:now});
 }
 
 // ===== HELPERS =====
@@ -2818,34 +2820,87 @@ function initApp(){
   render();
   if(CURRENT_USER!=='default') document.getElementById('logoText').textContent='🔒 '+CURRENT_USER.charAt(0).toUpperCase()+CURRENT_USER.slice(1);
 
-  // Cloud sync
+  // Cloud sync — Timestamp-basiert (neuestes Gerät gewinnt)
   (async()=>{
     try{
-      const hasPending=localStorage.getItem(LS_PREFIX+'pendingSync');
-      if(hasPending) await sbSave({userData,userTimes,userNotes,userNotdienst,userSalary});
       const cloud=await sbLoad();
-      if(cloud&&(cloud.userData||cloud.userTimes||cloud.userSalary)){
+      const localTs = parseInt(localStorage.getItem(LS_PREFIX+'updatedAt')||'0');
+      const cloudTs = (cloud && cloud._updatedAt) ? cloud._updatedAt : 0;
+      const hasPending = localStorage.getItem(LS_PREFIX+'pendingSync');
+      const cloudHasData = cloud && (cloud.userData||cloud.userTimes||cloud.userNotdienst||cloud.userSalary);
+
+      if(cloudHasData && cloudTs > localTs && !hasPending){
+        // Cloud ist NEUER → komplett übernehmen (z.B. am Handy geändert)
+        applyCloudData(cloud, cloudTs);
+        render();
+        showSync('synced','☁️ Aktualisiert ✓');
+      } else if(cloudHasData && hasPending){
+        // Lokale ungespeicherte Änderungen + Cloud → mergen (lokal gewinnt bei Konflikt)
         userData=Object.assign({},cloud.userData||{},userData);
         userTimes=Object.assign({},cloud.userTimes||{},userTimes);
         userNotes=Object.assign({},cloud.userNotes||{},userNotes);
         userNotdienst=Object.assign({},cloud.userNotdienst||{},userNotdienst);
-        // Salary: prefer local if user already configured, else use cloud
-        const localSalaryRaw=localStorage.getItem(LS_PREFIX+'salary');
-        if(!localSalaryRaw && cloud.userSalary) userSalary=Object.assign({},DEFAULT_SALARY,cloud.userSalary);
+        const now=Date.now();
         localStorage.setItem(LS_PREFIX+'data',JSON.stringify(userData));
         localStorage.setItem(LS_PREFIX+'times',JSON.stringify(userTimes));
         localStorage.setItem(LS_PREFIX+'notes',JSON.stringify(userNotes));
         localStorage.setItem(LS_PREFIX+'notdienst',JSON.stringify(userNotdienst));
-        localStorage.setItem(LS_PREFIX+'salary',JSON.stringify(userSalary));
-        sbSave({userData,userTimes,userNotes,userNotdienst,userSalary});
+        localStorage.setItem(LS_PREFIX+'updatedAt',String(now));
+        await sbSave({userData,userTimes,userNotes,userNotdienst,userSalary,_updatedAt:now});
         render();
         showSync('synced','☁️ Synchronisiert ✓');
       } else {
-        if(Object.keys(userData).length>0||Object.keys(userTimes).length>0) sbSave({userData,userTimes,userNotes,userNotdienst,userSalary});
+        // Lokal aktuell/gleich → mit Cloud mergen (kein Datenverlust), dann pushen
+        if(cloudHasData){
+          userData=Object.assign({},cloud.userData||{},userData);
+          userTimes=Object.assign({},cloud.userTimes||{},userTimes);
+          userNotes=Object.assign({},cloud.userNotes||{},userNotes);
+          userNotdienst=Object.assign({},cloud.userNotdienst||{},userNotdienst);
+          if(!localStorage.getItem(LS_PREFIX+'salary') && cloud.userSalary) userSalary=Object.assign({},DEFAULT_SALARY,cloud.userSalary);
+          localStorage.setItem(LS_PREFIX+'data',JSON.stringify(userData));
+          localStorage.setItem(LS_PREFIX+'times',JSON.stringify(userTimes));
+          localStorage.setItem(LS_PREFIX+'notes',JSON.stringify(userNotes));
+          localStorage.setItem(LS_PREFIX+'notdienst',JSON.stringify(userNotdienst));
+          localStorage.setItem(LS_PREFIX+'salary',JSON.stringify(userSalary));
+          render();
+        }
+        const ts = localTs || Date.now();
+        if(Object.keys(userData).length>0||Object.keys(userTimes).length>0||Object.keys(userNotdienst).length>0)
+          await sbSave({userData,userTimes,userNotes,userNotdienst,userSalary,_updatedAt:ts});
         showSync('synced','☁️ Verbunden ✓');
       }
     } catch(e){showSync('error','⚠️ Offline');}
   })();
+}
+
+// Cloud-Daten lokal übernehmen
+function applyCloudData(cloud, ts){
+  userData      = cloud.userData||{};
+  userTimes     = cloud.userTimes||{};
+  userNotes     = cloud.userNotes||{};
+  userNotdienst = cloud.userNotdienst||{};
+  if(cloud.userSalary) userSalary = Object.assign({},DEFAULT_SALARY,cloud.userSalary);
+  localStorage.setItem(LS_PREFIX+'data',JSON.stringify(userData));
+  localStorage.setItem(LS_PREFIX+'times',JSON.stringify(userTimes));
+  localStorage.setItem(LS_PREFIX+'notes',JSON.stringify(userNotes));
+  localStorage.setItem(LS_PREFIX+'notdienst',JSON.stringify(userNotdienst));
+  localStorage.setItem(LS_PREFIX+'salary',JSON.stringify(userSalary));
+  localStorage.setItem(LS_PREFIX+'updatedAt',String(ts||Date.now()));
+}
+
+// Manuelles Neuladen von der Cloud (Sync-Status anklicken)
+async function forceSync(){
+  showSync('','🔄 Lade von Cloud...');
+  try{
+    const cloud=await sbLoad();
+    if(cloud && (cloud.userData||cloud.userTimes||cloud.userNotdienst)){
+      applyCloudData(cloud, cloud._updatedAt||Date.now());
+      render();
+      showSync('synced','☁️ Aktualisiert ✓');
+    } else {
+      showSync('error','⚠️ Keine Cloud-Daten gefunden');
+    }
+  } catch(e){ showSync('error','⚠️ Fehler beim Laden'); }
 }
 
 document.addEventListener('DOMContentLoaded',function(){checkAuth();});
