@@ -1113,6 +1113,7 @@ const DEFAULT_SALARY = {
 };
 let userSalary  = Object.assign({}, DEFAULT_SALARY, JSON.parse(localStorage.getItem(LS_PREFIX+'salary')||'{}'));
 let ndWeeklyCollapsed = localStorage.getItem(LS_PREFIX+'ndCollapsed')==='1';
+let monatsCollapsed = localStorage.getItem(LS_PREFIX+'monatsCollapsed')==='1';
 
 let currentMonth = new Date().getMonth();
 let currentYear  = (new Date().getFullYear()>=2026&&new Date().getFullYear()<=2028)?new Date().getFullYear():2026;
@@ -1559,6 +1560,12 @@ function toggleNdWeekly() {
   const card = document.getElementById('ndWeeklyCard');
   if(card) card.classList.toggle('collapsed', ndWeeklyCollapsed);
 }
+function toggleMonatsList() {
+  monatsCollapsed = !monatsCollapsed;
+  localStorage.setItem(LS_PREFIX+'monatsCollapsed', monatsCollapsed?'1':'0');
+  const card = document.getElementById('monatsListCard');
+  if(card) card.classList.toggle('collapsed', monatsCollapsed);
+}
 
 function formatEuro(v) {
   if(typeof v !== 'number' || !isFinite(v)) return '0,00 €';
@@ -1763,8 +1770,19 @@ function renderJahres() {
         <div style="font-size:9px;color:var(--muted)">${totalFeiertage*8}h</div>
       </div>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 4px">📅 Monatsübersicht — Zeile anklicken zum Springen 👇</div>
-    <div class="month-bar-list">${barsHtml}</div>
+    <div class="nd-weekly-card ${monatsCollapsed?'collapsed':''}" id="monatsListCard" style="margin:0 0 12px 0;border-left:3px solid var(--accent)">
+      <div class="nd-weekly-head" onclick="toggleMonatsList()">
+        <div class="nd-weekly-title" style="color:var(--accent2)">📅 Monatsübersicht</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:10px;color:var(--muted)">12 Monate</span>
+          <span class="nd-weekly-toggle-icon">▼</span>
+        </div>
+      </div>
+      <div class="nd-weekly-body">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:8px">Zeile anklicken zum Springen 👇</div>
+        <div class="month-bar-list">${barsHtml}</div>
+      </div>
+    </div>
 
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px">
       <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">ℹ️ Erklärung</div>
