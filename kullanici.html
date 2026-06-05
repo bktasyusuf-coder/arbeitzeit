@@ -1449,15 +1449,20 @@ function render() {
       <div class="card-value blue">${minsToTime(stats.workedMins)}</div>
       <div class="card-sub">von ${minsToTime(stats.standardMins)} Std</div>
     </div>
-    <div class="card yellow">
-      <div class="card-label">Urlaub</div>
-      <div class="card-value yellow">${stats.urlaub} Tage</div>
-      <div class="card-sub">${stats.urlaub*8}:00 Std</div>
-    </div>
-    <div class="card red">
-      <div class="card-label">Krank</div>
-      <div class="card-value red">${stats.krank} Tage</div>
-      <div class="card-sub">${stats.krank*8}:00 Std</div>
+    <div class="card" style="min-width:170px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--yellow) 50%,var(--red) 50%)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div class="card-label" style="color:var(--yellow)">🏖 Urlaub</div>
+          <div class="card-value yellow">${stats.urlaub} T</div>
+          <div class="card-sub">${stats.urlaub*8}:00 Std</div>
+        </div>
+        <div style="border-left:1px solid var(--border);padding-left:10px">
+          <div class="card-label" style="color:var(--red)">🤒 Krank</div>
+          <div class="card-value red">${stats.krank} T</div>
+          <div class="card-sub">${stats.krank*8}:00 Std</div>
+        </div>
+      </div>
     </div>
     <div class="card" style="border-top:3px solid var(--orange)">
       <div class="card-label">🚨 Notdienst</div>
@@ -2902,4 +2907,3 @@ document.addEventListener('DOMContentLoaded',function(){checkAuth();});
 </script>
 </body>
 </html>
-
