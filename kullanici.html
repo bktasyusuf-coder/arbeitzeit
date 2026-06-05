@@ -1439,20 +1439,15 @@ function render() {
   const normalPos=stats.diffMins>=0;
 
   document.getElementById('summaryCards').innerHTML = `
-    <div class="card ${normalPos?'green':'red'}">
+    <div class="card ${(stats.diffMins+notdienstMins)>=0?'green':'red'}">
       <div class="card-label">Differenz</div>
-      <div class="card-value ${normalPos?'green':'red'}">${normalPos?'+':''}${minsToTime(stats.diffMins)}</div>
-      <div class="card-sub">ohne Notdienst</div>
+      <div class="card-value ${(stats.diffMins+notdienstMins)>=0?'green':'red'}">${(stats.diffMins+notdienstMins)>=0?'+':''}${minsToTime(stats.diffMins+notdienstMins)}</div>
+      <div class="card-sub">Überstunden</div>
     </div>
     <div class="card blue">
       <div class="card-label">Gearbeitet</div>
       <div class="card-value blue">${minsToTime(stats.workedMins)}</div>
       <div class="card-sub">von ${minsToTime(stats.standardMins)} Std</div>
-    </div>
-    <div class="card" style="border-top:3px solid var(--accent2)">
-      <div class="card-label">Gesamt mit Nd</div>
-      <div class="card-value" style="color:var(--accent2)">${minsToTime(stats.workedMins+notdienstMins)}</div>
-      <div class="card-sub">für Stundenzettel</div>
     </div>
     <div class="card yellow">
       <div class="card-label">Urlaub</div>
@@ -2907,3 +2902,4 @@ document.addEventListener('DOMContentLoaded',function(){checkAuth();});
 </script>
 </body>
 </html>
+
