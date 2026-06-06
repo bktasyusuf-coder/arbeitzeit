@@ -513,10 +513,57 @@
   <button class="bnav-btn" id="bnav-lohn" onclick="showLohn()"><span class="bnav-icon">💰</span>Lohn</button>
   <button class="bnav-btn" onclick="openPhotoScan()"><span class="bnav-icon">📷</span>Scan</button>
   <button class="bnav-btn" onclick="openUrlaubModal()"><span class="bnav-icon">🏖</span>Urlaub</button>
-  <button class="bnav-btn" onclick="document.getElementById('importInput').click()">
-    <span class="bnav-icon">📥</span>Import
-    <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
-  </button>
+  <button class="bnav-btn" onclick="openBackupModal()"><span class="bnav-icon">💾</span>Backup</button>
+  <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+
+<!-- Backup Modal: Export / Import / Stundly-Hinweis -->
+<div class="modal-overlay" id="backupModal" onclick="if(event.target===this) this.classList.remove('open')">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head">
+      <h2>💾 Backup & Stundly-Übergang</h2>
+      <button class="modal-close" onclick="document.getElementById('backupModal').classList.remove('open')">×</button>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:14px">
+
+      <!-- Export -->
+      <button onclick="exportData();document.getElementById('backupModal').classList.remove('open')" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface2);border:1px solid var(--green);border-radius:12px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-align:left">
+        <span style="font-size:24px">📤</span>
+        <span style="flex:1">
+          <span style="display:block;color:var(--green)">Daten exportieren</span>
+          <span style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px">JSON-Backup herunterladen (alle Tage, Notdienst, Notizen)</span>
+        </span>
+      </button>
+
+      <!-- Import -->
+      <button onclick="document.getElementById('importInput').click();document.getElementById('backupModal').classList.remove('open')" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface2);border:1px solid var(--accent);border-radius:12px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-align:left">
+        <span style="font-size:24px">📥</span>
+        <span style="flex:1">
+          <span style="display:block;color:var(--accent2)">Daten importieren</span>
+          <span style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px">Aus alter JSON-Sicherung wiederherstellen</span>
+        </span>
+      </button>
+
+      <!-- Stundly hint -->
+      <div style="background:linear-gradient(135deg, rgba(124,106,247,0.15), rgba(192,132,252,0.10));border:1px solid color-mix(in srgb, var(--accent2) 30%, transparent);border-radius:12px;padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:18px">🚀</span>
+          <span style="color:var(--accent2);font-weight:800;font-size:13px">Zur Cloud-App wechseln</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">
+          Mit <strong style="color:var(--text)">Stundly</strong> (stundly.de) deine Daten überall:
+          Web + Mobile App + automatische Lohnabrechnung mit Steuerklasse, Monatsbericht-PDF und mehr.
+        </p>
+        <p style="font-size:11px;color:var(--muted);line-height:1.6">
+          <strong style="color:var(--text)">So überträgst du:</strong> Hier "📤 Exportieren" → bei stundly.de anmelden → Einstellungen → "📥 Daten importieren" → JSON wählen.
+        </p>
+        <a href="https://stundly.de" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;padding:8px 14px;background:var(--accent);color:white;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700">
+          stundly.de öffnen →
+        </a>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <!-- Photo Scan Modal -->
@@ -2798,6 +2845,9 @@ function applyScanResult(){
 }
 
 // ===== IMPORT / EXPORT =====
+function openBackupModal(){
+  document.getElementById('backupModal').classList.add('open');
+}
 function exportData(){
   const data={userData,userTimes,userNotes,userNotdienst,exportDate:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -2825,7 +2875,7 @@ function importData(event){
 // ===== INIT =====
 function initApp(){
   // Modal dışına tıklamada kapat
-  ['datenModal','berichtModal','urlaubModal','photoModal','entryModal','notdienstModal','settingsModal'].forEach(id=>{
+  ['datenModal','berichtModal','urlaubModal','photoModal','entryModal','notdienstModal','settingsModal','backupModal'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.addEventListener('click',function(e){if(e.target===this) this.classList.remove('open');});
   });
