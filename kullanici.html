@@ -531,7 +531,7 @@
         <span style="font-size:24px">📤</span>
         <span style="flex:1">
           <span style="display:block;color:var(--green)">Daten exportieren</span>
-          <span style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px">JSON-Backup herunterladen (alle Tage, Notdienst, Notizen)</span>
+          <span style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px">Vollständiger JSON-Backup: alle Tage (Arbeiten/Urlaub/Krank/Feiertag), Notdienst (mit Kunde/Adresse), Notizen, Lohn-/Steuereinstellungen, Mitarbeiterdaten, Unterschrift</span>
         </span>
       </button>
 
@@ -2849,11 +2849,33 @@ function openBackupModal(){
   document.getElementById('backupModal').classList.add('open');
 }
 function exportData(){
-  const data={userData,userTimes,userNotes,userNotdienst,exportDate:new Date().toISOString()};
+  // VOLLSTÄNDIGER Backup — alle Benutzerdaten:
+  //   userData/userTimes/userNotes  → Arbeitszeiten + Status (Arbeiten/Urlaub/Krank/Feiertag/Frei)
+  //   userNotdienst                 → Notdienst-Einträge (Kunde, Adresse, Problem, Ergebnis, bezahlt)
+  //   userSalary                    → Lohn-/Steuereinstellungen (Stundenlohn, Steuerklasse, Soll, ...)
+  //   mitarbeiter                   → Persönliche Daten (Vorname, Name, Firma, Adresse, ...)
+  //   signature                     → Unterschrift (Base64-PNG)
+  const mitarbeiter = JSON.parse(localStorage.getItem(LS_PREFIX+'mitarbeiter')||'{}');
+  const signature   = localStorage.getItem('az_signature') || null;
+  const data = {
+    userData,
+    userTimes,
+    userNotes,
+    userNotdienst,
+    userSalary,
+    mitarbeiter,
+    signature,
+    exportDate: new Date().toISOString(),
+    version: 2,
+  };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`arbeitszeit_backup_${new Date().toISOString().slice(0,10)}.json`;
   a.click();URL.revokeObjectURL(url);
+  // Kurze Übersicht in der Konsole — debugging-friendly
+  const tg = Object.keys(userData||{}).length;
+  const nd = Object.values(userNotdienst||{}).reduce((s,v)=>s+(Array.isArray(v)?v.length:1),0);
+  console.log(`✅ Backup: ${tg} Tage, ${nd} Notdienst-Einträge, Lohn-Settings ${userSalary?'✓':'—'}, Mitarbeiter ${mitarbeiter.vorname?'✓':'—'}, Unterschrift ${signature?'✓':'—'}`);
 }
 function importData(event){
   const file=event.target.files[0]; if(!file) return;
@@ -2861,12 +2883,18 @@ function importData(event){
   reader.onload=(e)=>{
     try{
       const data=JSON.parse(e.target.result);
-      if(data.userData) userData=data.userData;
-      if(data.userTimes) userTimes=data.userTimes;
-      if(data.userNotes) userNotes=data.userNotes;
-      if(data.userNotdienst) userNotdienst=data.userNotdienst;
+      if(data.userData)      userData      = data.userData;
+      if(data.userTimes)     userTimes     = data.userTimes;
+      if(data.userNotes)     userNotes     = data.userNotes;
+      if(data.userNotdienst) userNotdienst = data.userNotdienst;
+      if(data.userSalary)    userSalary    = Object.assign({}, DEFAULT_SALARY, data.userSalary);
+      if(data.mitarbeiter)   localStorage.setItem(LS_PREFIX+'mitarbeiter', JSON.stringify(data.mitarbeiter));
+      if(data.signature){
+        savedSignatureData = data.signature;
+        localStorage.setItem('az_signature', data.signature);
+      }
       saveData();render();alert('✅ Daten erfolgreich geladen!');
-    } catch{alert('❌ Datei konnte nicht gelesen werden!');}
+    } catch(err){console.error(err);alert('❌ Datei konnte nicht gelesen werden!');}
     event.target.value='';
   };
   reader.readAsText(file);
